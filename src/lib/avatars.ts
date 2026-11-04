@@ -36,11 +36,21 @@ export function findAvatar(url: string | null | undefined): AvatarOption | null 
   return (url && BY_SRC.get(url)) || null;
 }
 
+/** File-name prefix for photos users upload themselves (see AvatarPicker). */
+export const PHOTO_PREFIX = "avatar-photo-";
+
+/** Whether a stored `avatar_url` is a photo the user uploaded. */
+export function isUploadedPhoto(url: string | null | undefined): url is string {
+  return !!url && url.includes(`/${PHOTO_PREFIX}`);
+}
+
 /**
- * Image to show for a profile. Legacy AI portraits are no longer shown: anyone
- * without a catalog avatar gets a stable one picked from their id or name.
+ * Image to show for a profile: an uploaded photo or catalog avatar. Legacy AI
+ * portraits are no longer shown, so anyone else gets a stable catalog avatar
+ * picked from their id or name.
  */
 export function avatarSrc(url: string | null | undefined, seed?: string | null): string {
+  if (isUploadedPhoto(url)) return url;
   const chosen = findAvatar(url);
   if (chosen) return chosen.src;
   const key = seed || "xpfly";
