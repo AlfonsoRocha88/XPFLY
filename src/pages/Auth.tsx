@@ -160,7 +160,7 @@ const Auth = () => {
       <div className={`flex min-h-screen items-center justify-center p-4 ${wallpaperAnimated ? "wp-animated" : ""}`} style={wallpaperStyle}>
         <Card className="w-full max-w-md border-2 border-primary/30">
           <CardHeader className="text-center">
-            <CardTitle className="font-pixel text-sm text-primary">Restablecer contraseña</CardTitle>
+            <CardTitle className="font-serif text-2xl font-medium">Restablecer contraseña</CardTitle>
             <CardDescription className="font-pixel text-xs">Ingresa tu email para recibir un enlace</CardDescription>
           </CardHeader>
           <CardContent>
@@ -185,10 +185,10 @@ const Auth = () => {
         <CardHeader className="text-center">
           <div className="mx-auto mb-2">
             <img src={pyroImg} alt="" className="mx-auto mb-2 h-16 w-16 object-contain" />
-            <h1 className="text-5xl font-black tracking-tight text-primary">XPFly</h1>
-            <p className="mt-1 text-sm font-bold text-muted-foreground">Sube de nivel en tu vida real</p>
+            <h1 className="font-serif text-5xl font-semibold tracking-tight text-primary">XPFly</h1>
+            <p className="mt-1 text-sm font-medium text-muted-foreground">Sube de nivel en tu vida real</p>
           </div>
-          <CardTitle className="mt-4 text-xl">
+          <CardTitle className="mt-4 font-serif text-2xl font-medium">
             {isLogin ? "Iniciar partida" : "Nuevo jugador"}
           </CardTitle>
           <CardDescription className="text-sm">
@@ -232,7 +232,7 @@ const Auth = () => {
             )}
             <Button
               type="submit"
-              className="h-12 w-full text-base font-extrabold"
+              className="h-12 w-full text-base font-semibold"
               disabled={loading || (!isLogin && password.length > 0 && password.length < 6)}
             >
               {loading ? "Cargando..." : isLogin ? "Ingresar" : "🛡️ Crear cuenta"}

@@ -14,7 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['"Nunito Variable"', 'Nunito', 'system-ui', 'sans-serif'],
+        sans: ['"Inter Variable"', 'Inter', 'system-ui', 'sans-serif'],
+        serif: ['"Fraunces Variable"', 'Fraunces', 'Georgia', 'serif'],
       },
       boxShadow: {
         soft: "0 1px 2px hsl(var(--shadow-color) / 0.04), 0 4px 16px hsl(var(--shadow-color) / 0.06)",

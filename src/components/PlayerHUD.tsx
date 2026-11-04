@@ -44,7 +44,7 @@ const PlayerHUD = ({ className, showStreak = false }: { className?: string; show
       >
         <CharacterPortrait url={profile?.avatar_url} size={48} className="!rounded-2xl !border-0" />
         {points > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-card bg-primary px-1 text-[10px] font-extrabold text-primary-foreground">
+          <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-card bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
             {points > 9 ? "9+" : points}
           </span>
         )}
@@ -52,14 +52,14 @@ const PlayerHUD = ({ className, showStreak = false }: { className?: string; show
 
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-2">
-          <p className="truncate text-[15px] font-extrabold">{profile?.display_name ?? "Jugador"}</p>
+          <p className="truncate text-[15px] font-semibold">{profile?.display_name ?? "Jugador"}</p>
           {showStreak && (
-            <span className={cn("flex shrink-0 items-center gap-0.5 text-sm font-extrabold", streak > 0 ? "text-warning" : "text-muted-foreground")}>
+            <span className={cn("flex shrink-0 items-center gap-0.5 text-sm font-semibold", streak > 0 ? "text-warning" : "text-muted-foreground")}>
               <Flame className="h-4 w-4" /> {streak}
             </span>
           )}
         </div>
-        <p className="truncate text-xs font-bold text-muted-foreground">
+        <p className="truncate text-xs font-medium text-muted-foreground">
           <span className="text-primary">Nivel {level}</span>
           {title && <> · {titleIcon} {title}</>}
         </p>
@@ -67,7 +67,7 @@ const PlayerHUD = ({ className, showStreak = false }: { className?: string; show
           <div className="xp-bar-bg flex-1">
             <div className="xp-bar-fill" style={{ width: `${progress}%` }} />
           </div>
-          <span className="shrink-0 text-[11px] font-bold tabular-nums text-muted-foreground">
+          <span className="shrink-0 text-[11px] font-medium tabular-nums text-muted-foreground">
             {intoLevel}/{levelSize} XP
           </span>
         </div>

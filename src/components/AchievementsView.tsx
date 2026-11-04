@@ -129,7 +129,7 @@ const AchievementsView = ({ tasks, view: tab }: Props) => {
           <div className="surface flex items-center justify-center gap-6 py-5">
             <div className="flex flex-col items-start">
               <span className="eyebrow">Racha actual</span>
-              <span className="text-6xl font-black leading-none text-foreground tabular-nums">
+              <span className="font-serif text-6xl font-medium leading-none text-foreground tabular-nums">
                 {streak}
               </span>
               <span className="mt-1 text-xs text-muted-foreground">
@@ -146,7 +146,7 @@ const AchievementsView = ({ tasks, view: tab }: Props) => {
           <div className="surface p-5">
             <p className="eyebrow">Promedio diario</p>
             <div className="mt-1 flex items-end gap-3">
-              <span className="text-5xl font-black leading-none tabular-nums text-foreground">
+              <span className="font-serif text-5xl font-medium leading-none tabular-nums text-foreground">
                 {avgLast.toFixed(1)}
               </span>
               <span
@@ -187,7 +187,7 @@ const AchievementsView = ({ tasks, view: tab }: Props) => {
                         "repeating-linear-gradient(to right, hsl(var(--primary)) 0 6px, transparent 6px 12px)",
                     }}
                   />
-                  <span className="ml-2 text-xs font-bold text-primary">prom.</span>
+                  <span className="ml-2 text-xs font-medium text-primary">prom.</span>
                 </div>
               )}
               <div className="flex h-full items-end gap-2">
@@ -1666,7 +1666,7 @@ function HexAchievement({
               <IconComp className="h-full w-full" />
             </div>
             {!locked && (
-              <span className="relative mt-0.5 text-xs font-black drop-shadow-[0_1px_0_rgba(255,255,255,0.35)]">
+              <span className="relative mt-0.5 text-xs font-semibold drop-shadow-[0_1px_0_rgba(255,255,255,0.35)]">
                 {ROMAN[ach.level]}
               </span>
             )}
@@ -1761,7 +1761,7 @@ function HexBack({ ach, hexW }: { ach: Achievement; hexW: number }) {
         }}
       >
       <p
-        className="font-bold leading-tight text-foreground"
+        className="font-medium leading-tight text-foreground"
         style={{ fontSize: "13px", fontWeight: 700, lineHeight: 1.2, wordBreak: "break-word", overflowWrap: "break-word" }}
       >
         {ach.name}
@@ -1780,7 +1780,7 @@ function HexBack({ ach, hexW }: { ach: Achievement; hexW: number }) {
       </p>
       {isMaxed ? (
         <p
-          className="font-bold text-[hsl(142,71%,45%)]"
+          className="font-medium text-[hsl(142,71%,45%)]"
           style={{ fontSize: "10px" }}
         >
           ✓ Completado
@@ -1809,7 +1809,7 @@ function HexBack({ ach, hexW }: { ach: Achievement; hexW: number }) {
             />
           </div>
           <span
-            className="font-bold tabular-nums text-foreground"
+            className="font-medium tabular-nums text-foreground"
             style={{ fontSize: "9px" }}
           >
             {ach.progress}

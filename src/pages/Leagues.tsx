@@ -206,9 +206,9 @@ const Leagues = () => {
       <div className="surface mb-4 flex items-center justify-between p-4">
         <div>
           <p className="eyebrow">Tu liga</p>
-          <p className="text-lg font-black">{leagueLabel(current)}</p>
+          <p className="font-serif text-xl font-medium">{leagueLabel(current)}</p>
         </div>
-        <span className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-sm font-extrabold text-primary">
+        <span className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-sm font-semibold text-primary">
           <Trophy className="h-4 w-4" /> {trophies}
         </span>
       </div>
@@ -287,7 +287,7 @@ const Leagues = () => {
         {/* Title block */}
         <div className="mb-4 text-center">
           <h2
-            className="font-display text-2xl font-bold tracking-wide md:text-3xl"
+            className="font-display text-2xl font-medium tracking-wide md:text-3xl"
             style={{ color: "hsl(var(--primary))", textShadow: "0 0 18px hsl(var(--primary) / 0.45)" }}
           >
             Liga {leagueLabel(current)}
@@ -421,7 +421,7 @@ const Leagues = () => {
           <TabsContent value="global">
             <div className="mb-4 text-center">
               <h2
-                className="font-display text-2xl font-bold tracking-wide md:text-3xl"
+                className="font-display text-2xl font-medium tracking-wide md:text-3xl"
                 style={{ color: "hsl(var(--primary))", textShadow: "0 0 18px hsl(var(--primary) / 0.45)" }}
               >
                 Ranking Global

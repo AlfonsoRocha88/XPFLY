@@ -20,8 +20,8 @@ const StatusWindow = ({ stats, pointsAvailable, level, title, displayName, onAll
     <div className={cn("status-window", className)}>
       {/* Header */}
       <div className="status-window-header">
-        <span className="text-base font-extrabold">Atributos</span>
-        <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-extrabold text-primary">Nivel {level}</span>
+        <span className="text-base font-semibold">Atributos</span>
+        <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-semibold text-primary">Nivel {level}</span>
       </div>
 
       {/* Player info */}
@@ -43,11 +43,11 @@ const StatusWindow = ({ stats, pointsAvailable, level, title, displayName, onAll
           return (
             <div key={key} className="space-y-1">
               <div className="flex items-center justify-between gap-2">
-                <span className="flex items-center gap-1.5 text-sm font-bold text-muted-foreground">
+                <span className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
                   <span style={{ color: info.color }}>{info.icon}</span> {info.label}
                 </span>
                 <div className="flex items-center gap-2">
-                  <span className="min-w-[2rem] text-right text-sm font-extrabold tabular-nums">{value}</span>
+                  <span className="min-w-[2rem] text-right text-sm font-semibold tabular-nums">{value}</span>
                   {editable && pointsAvailable > 0 && (
                     <Button
                       size="icon"
@@ -74,8 +74,8 @@ const StatusWindow = ({ stats, pointsAvailable, level, title, displayName, onAll
       {/* Footer — points available */}
       {editable && (
         <div className="flex items-center justify-between border-t border-border bg-primary/5 px-4 py-3">
-          <span className="text-sm font-bold text-muted-foreground">Puntos disponibles</span>
-          <span className={cn("text-lg font-black tabular-nums", pointsAvailable > 0 ? "text-primary" : "text-muted-foreground")}>
+          <span className="text-sm font-medium text-muted-foreground">Puntos disponibles</span>
+          <span className={cn("text-lg font-semibold tabular-nums", pointsAvailable > 0 ? "text-primary" : "text-muted-foreground")}>
             {pointsAvailable}
           </span>
         </div>

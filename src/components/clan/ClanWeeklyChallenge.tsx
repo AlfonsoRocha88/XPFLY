@@ -23,7 +23,7 @@ const ClanWeeklyChallenge = ({ clan }: { clan: Clan }) => {
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
           <Target className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-bold tracking-wide text-foreground">Reto semanal</h3>
+          <h3 className="text-sm font-medium tracking-wide text-foreground">Reto semanal</h3>
         </div>
         <div className="inline-flex items-center gap-1 text-xs text-muted-foreground">
           <Timer className="h-3 w-3" />
@@ -48,7 +48,7 @@ const ClanWeeklyChallenge = ({ clan }: { clan: Clan }) => {
     <div className="rounded-2xl border border-border bg-card/70 p-4">
       <div className="mb-2 flex items-center gap-2">
         <Crown className="h-4 w-4 text-amber-300" />
-        <h3 className="text-sm font-bold tracking-wide text-foreground">Contribuciones</h3>
+        <h3 className="text-sm font-medium tracking-wide text-foreground">Contribuciones</h3>
       </div>
       {isLoading ? (
         <p className="py-6 text-center text-xs text-muted-foreground">Cargando…</p>
@@ -63,7 +63,7 @@ const ClanWeeklyChallenge = ({ clan }: { clan: Clan }) => {
                 <li key={c.user_id} className="flex items-center gap-3 rounded-lg bg-muted/30 px-2 py-2">
                   <div className="w-6 shrink-0 text-center">
                     {i < 3 ? <MedalIcon rank={(i + 1) as 1 | 2 | 3} /> : (
-                      <span className="text-xs font-bold text-muted-foreground">{i + 1}</span>
+                      <span className="text-xs font-medium text-muted-foreground">{i + 1}</span>
                     )}
                   </div>
                   <Avatar className="h-8 w-8 ring-1 ring-border">
@@ -71,7 +71,7 @@ const ClanWeeklyChallenge = ({ clan }: { clan: Clan }) => {
                     <AvatarFallback className="text-xs">{name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <span className="min-w-0 flex-1 truncate text-sm font-semibold">{name}</span>
-                  <span className="rounded-md bg-primary/15 px-2 py-0.5 text-sm font-bold tabular-nums text-primary ring-1 ring-primary/30">
+                  <span className="rounded-md bg-primary/15 px-2 py-0.5 text-sm font-medium tabular-nums text-primary ring-1 ring-primary/30">
                     {c.count}
                   </span>
                 </li>

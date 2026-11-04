@@ -27,7 +27,7 @@ const WallpaperSelector = () => {
               key={id}
               onClick={() => setMode(id)}
               className={cn(
-                "flex items-center justify-center gap-2 rounded-xl border-2 py-3 text-sm font-extrabold transition-colors",
+                "flex items-center justify-center gap-2 rounded-xl border-2 py-3 text-sm font-semibold transition-colors",
                 mode === id ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40",
               )}
             >
@@ -59,7 +59,7 @@ const WallpaperSelector = () => {
                 >
                   {active && <Check className="h-5 w-5 text-white drop-shadow" strokeWidth={3} />}
                 </span>
-                <span className="w-full truncate text-center text-[11px] font-bold text-muted-foreground">{t.name}</span>
+                <span className="w-full truncate text-center text-[11px] font-medium text-muted-foreground">{t.name}</span>
               </button>
             );
           })}
@@ -87,7 +87,7 @@ const WallpaperSelector = () => {
                     <Check className="h-3 w-3" strokeWidth={3} />
                   </span>
                 )}
-                <span className="absolute inset-x-0 bottom-0 bg-card/85 py-1 text-center text-[11px] font-bold">{wp.name}</span>
+                <span className="absolute inset-x-0 bottom-0 bg-card/85 py-1 text-center text-[11px] font-medium">{wp.name}</span>
               </button>
             );
           })}
@@ -96,7 +96,7 @@ const WallpaperSelector = () => {
           <span className="flex items-center gap-2.5">
             <Wind className="h-4 w-4 text-primary" />
             <span>
-              <span className="block text-sm font-bold">Animar fondo</span>
+              <span className="block text-sm font-medium">Animar fondo</span>
               <span className="block text-xs text-muted-foreground">Desactívalo para máxima fluidez</span>
             </span>
           </span>

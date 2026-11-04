@@ -53,25 +53,25 @@ const MemberRow = ({ member, rank, onSelect }: { member: ClanMember; rank: numbe
     >
       <div className="w-7 shrink-0">
         {rank <= 3 ? <MedalIcon rank={rank as 1 | 2 | 3} /> : (
-          <span className="block text-center text-xs font-bold text-muted-foreground">{rank}</span>
+          <span className="block text-center text-xs font-medium text-muted-foreground">{rank}</span>
         )}
       </div>
       <div className="flex w-12 shrink-0 flex-col items-center">
         <LeagueShield league={leagueName} size={40} />
-        <span className="mt-0.5 font-bold text-xs text-muted-foreground">{tier ?? "∞"}</span>
+        <span className="mt-0.5 font-medium text-xs text-muted-foreground">{tier ?? "∞"}</span>
       </div>
       <div className="w-14 shrink-0 text-center">
-        <div className="text-sm font-bold tabular-nums text-foreground">{p?.trophies ?? 0}</div>
+        <div className="text-sm font-medium tabular-nums text-foreground">{p?.trophies ?? 0}</div>
         <div className="text-xs text-muted-foreground">trofeos</div>
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <span className="truncate text-sm font-semibold text-foreground">{p?.display_name || p?.username || "Jugador"}</span>
-          <span className="rounded-md bg-primary/15 px-1.5 py-0.5 text-xs font-bold text-primary ring-1 ring-primary/30">Nv {p?.level ?? 1}</span>
+          <span className="rounded-md bg-primary/15 px-1.5 py-0.5 text-xs font-medium text-primary ring-1 ring-primary/30">Nv {p?.level ?? 1}</span>
         </div>
         <RoleBadge role={member.role} className="mt-1" />
       </div>
-      <div className={cn("flex shrink-0 items-center gap-1 text-sm font-bold tabular-nums", streakCls)}>
+      <div className={cn("flex shrink-0 items-center gap-1 text-sm font-medium tabular-nums", streakCls)}>
         <span>{streak}</span>
         <span aria-hidden>🔥</span>
       </div>
@@ -114,17 +114,17 @@ const MemberSheet = ({
             <AvatarFallback>{(p?.display_name ?? p?.username ?? "?").charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-base font-bold">{p?.display_name || p?.username || "Jugador"}{isMe && " (Tú)"}</p>
+            <p className="truncate text-base font-medium">{p?.display_name || p?.username || "Jugador"}{isMe && " (Tú)"}</p>
             <div className="mt-1 flex flex-wrap items-center gap-1.5">
               <RoleBadge role={member.role} />
-              <span className="rounded-md bg-primary/15 px-1.5 py-0.5 text-xs font-bold text-primary ring-1 ring-primary/30">Nv {p?.level ?? 1}</span>
+              <span className="rounded-md bg-primary/15 px-1.5 py-0.5 text-xs font-medium text-primary ring-1 ring-primary/30">Nv {p?.level ?? 1}</span>
             </div>
           </div>
         </div>
         <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
-          <div className="rounded-lg border border-border bg-muted/40 p-2"><div className="font-bold text-foreground">{p?.trophies ?? 0}</div><div className="text-xs text-muted-foreground">Trofeos</div></div>
-          <div className="rounded-lg border border-border bg-muted/40 p-2"><div className="font-bold text-foreground">{p?.xp ?? 0}</div><div className="text-xs text-muted-foreground">XP</div></div>
-          <div className="rounded-lg border border-border bg-muted/40 p-2"><div className="font-bold text-foreground">{p?.daily_streak ?? 0} 🔥</div><div className="text-xs text-muted-foreground">Racha</div></div>
+          <div className="rounded-lg border border-border bg-muted/40 p-2"><div className="font-medium text-foreground">{p?.trophies ?? 0}</div><div className="text-xs text-muted-foreground">Trofeos</div></div>
+          <div className="rounded-lg border border-border bg-muted/40 p-2"><div className="font-medium text-foreground">{p?.xp ?? 0}</div><div className="text-xs text-muted-foreground">XP</div></div>
+          <div className="rounded-lg border border-border bg-muted/40 p-2"><div className="font-medium text-foreground">{p?.daily_streak ?? 0} 🔥</div><div className="text-xs text-muted-foreground">Racha</div></div>
         </div>
 
         {!isMe && viewerRole && (
@@ -196,7 +196,7 @@ const CreateWizard = ({ onCreated, onCancel }: { onCreated: () => void; onCancel
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <Button size="icon" variant="ghost" onClick={onCancel} aria-label="Volver"><ChevronLeft className="h-4 w-4" /></Button>
-        <h3 className="text-sm font-bold">Crear clan · Paso {step}/4</h3>
+        <h3 className="text-sm font-medium">Crear clan · Paso {step}/4</h3>
       </div>
       <div className="flex gap-1">
         {[1, 2, 3, 4].map((i) => (
@@ -263,7 +263,7 @@ const CreateWizard = ({ onCreated, onCancel }: { onCreated: () => void; onCancel
             <div className="mt-2 max-h-[200px] space-y-3 overflow-y-auto pr-1">
               {Object.entries(EMBLEM_ICONS_BY_CATEGORY).map(([cat, icons]) => (
                 <div key={cat}>
-                  <p className="text-xs font-bold text-muted-foreground">{cat}</p>
+                  <p className="text-xs font-medium text-muted-foreground">{cat}</p>
                   <div className="mt-1 grid grid-cols-7 gap-1.5">
                     {icons.map((i) => (
                       <button key={i.id} onClick={() => setEmblem({ ...emblem, icon: i.id as EmblemIcon })}
@@ -310,7 +310,7 @@ const CreateWizard = ({ onCreated, onCancel }: { onCreated: () => void; onCancel
             <div className="flex items-center gap-3">
               <EmblemSVG config={emblem} size={72} glow />
               <div className="min-w-0">
-                <p className="truncate text-base font-bold">{name}</p>
+                <p className="truncate text-base font-medium">{name}</p>
                 <p className="text-xs text-muted-foreground">{joinType === "open" ? "Abierto" : joinType === "request" ? "Por solicitud" : "Cerrado"}</p>
               </div>
             </div>
@@ -360,7 +360,7 @@ const ClanBrowser = ({ onCreate }: { onCreate: () => void }) => {
           <div key={c.id} className="flex items-center gap-3 rounded-xl border border-border bg-card/70 p-3">
             <EmblemSVG config={c.emblem_config} size={48} />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-bold">{c.name}</p>
+              <p className="truncate text-sm font-medium">{c.name}</p>
               <p className="text-[11px] text-muted-foreground">
                 <Users className="mr-1 inline h-3 w-3 align-[-2px]" />{c.member_count}/{c.max_members} · {c.xp} XP · {c.join_type === "open" ? "Abierto" : c.join_type === "request" ? "Solicitud" : "Cerrado"}
               </p>
@@ -479,7 +479,7 @@ const ClanScreen = ({ clan, viewerRole }: { clan: Clan; viewerRole: ClanRole | n
         <TabsContent value="members" className="mt-3 space-y-3">
           {canSeeRequests && incoming.length > 0 && (
             <div className="rounded-xl border border-primary/40 bg-primary/5 p-3">
-              <p className="mb-2 flex items-center gap-1 text-xs font-bold text-primary"><Bell className="h-3 w-3" /> Solicitudes pendientes ({incoming.length})</p>
+              <p className="mb-2 flex items-center gap-1 text-xs font-medium text-primary"><Bell className="h-3 w-3" /> Solicitudes pendientes ({incoming.length})</p>
               <div className="space-y-1">
                 {incoming.map((r) => (
                   <div key={r.id} className="flex items-center gap-2 rounded-lg bg-card/60 px-2 py-1.5">
@@ -597,7 +597,7 @@ const ClanScreen = ({ clan, viewerRole }: { clan: Clan; viewerRole: ClanRole | n
               <div className="mt-2 max-h-[180px] space-y-3 overflow-y-auto pr-1">
                 {Object.entries(EMBLEM_ICONS_BY_CATEGORY).map(([cat, icons]) => (
                   <div key={cat}>
-                    <p className="text-xs font-bold text-muted-foreground">{cat}</p>
+                    <p className="text-xs font-medium text-muted-foreground">{cat}</p>
                     <div className="mt-1 grid grid-cols-7 gap-1.5">
                       {icons.map((i) => (
                         <button key={i.id} onClick={() => setEditEmblem({ ...editEmblem, icon: i.id as EmblemIcon })}

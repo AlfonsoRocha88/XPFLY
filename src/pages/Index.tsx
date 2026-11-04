@@ -281,7 +281,7 @@ const Index = () => {
       className="fixed bottom-[calc(env(safe-area-inset-bottom)+5.5rem)] right-4 z-30 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lift transition-transform active:scale-90 md:bottom-8 md:right-8 md:h-auto md:w-auto md:gap-2 md:px-5 md:py-3.5"
     >
       <Plus className="h-7 w-7 md:h-5 md:w-5" strokeWidth={2.75} />
-      <span className="hidden text-[15px] font-extrabold md:inline">{label}</span>
+      <span className="hidden text-[15px] font-semibold md:inline">{label}</span>
     </button>
   );
 
@@ -352,7 +352,7 @@ const Index = () => {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => { playSfx("open"); setSuggestionsOpen(true); }}
-                      className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-extrabold text-primary transition-colors hover:bg-primary/15"
+                      className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/15"
                     >
                       <Sparkles className="h-3.5 w-3.5" /> Ideas de Pyro
                     </button>
@@ -442,7 +442,7 @@ const Index = () => {
                 key={id}
                 onClick={() => { playSfx("nav"); setProfileTab(id); }}
                 className={cn(
-                  "flex-1 rounded-full py-1.5 text-sm font-bold transition-all",
+                  "flex-1 rounded-full py-1.5 text-sm font-medium transition-all",
                   profileTab === id ? "bg-card shadow-soft" : "text-muted-foreground",
                 )}
               >
@@ -501,7 +501,7 @@ const Index = () => {
             style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 1.25rem)" }}
           >
             <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-muted md:hidden" />
-            <p className="mb-3 text-center text-base font-extrabold">¿Qué quieres crear?</p>
+            <p className="mb-3 text-center text-base font-semibold">¿Qué quieres crear?</p>
             <div className="flex flex-col gap-2">
               {[
                 { icon: Swords, title: "Nueva misión", desc: "Gana XP al completarla", onClick: () => openNewTask() },
@@ -517,7 +517,7 @@ const Index = () => {
                     <Icon className="h-5 w-5" />
                   </span>
                   <span>
-                    <span className="block text-[15px] font-extrabold">{title}</span>
+                    <span className="block text-[15px] font-semibold">{title}</span>
                     <span className="block text-sm text-muted-foreground">{desc}</span>
                   </span>
                 </button>

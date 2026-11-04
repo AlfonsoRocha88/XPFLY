@@ -1,4 +1,5 @@
-@import url('@fontsource-variable/nunito');
+@import url('@fontsource-variable/fraunces/full.css');
+@import url('@fontsource-variable/inter');
 
 @tailwind base;
 @tailwind components;
@@ -156,14 +157,21 @@ html, body {
 
   html, body {
     @apply bg-background text-foreground;
-    font-family: 'Nunito Variable', 'Nunito', system-ui, -apple-system, sans-serif;
+    font-family: 'Inter Variable', 'Inter', system-ui, -apple-system, sans-serif;
+    font-feature-settings: 'cv11', 'ss01';
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-weight: 800;
+    font-weight: 600;
     letter-spacing: -0.01em;
+  }
+
+  /* Fraunces with its soft axis on: elegant but warm, never sharp */
+  .font-serif {
+    font-variation-settings: "SOFT" 100, "WONK" 0;
+    font-optical-sizing: auto;
   }
 
   button, [role="button"] {
@@ -175,12 +183,13 @@ html, body {
 /* Legacy classes kept so every screen picks up the new type without rewrites */
 .font-pixel,
 .font-system {
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0;
 }
 .font-display {
-  font-weight: 900;
-  letter-spacing: -0.02em;
+  font-family: 'Fraunces Variable', 'Fraunces', Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
 @layer components {
@@ -191,11 +200,11 @@ html, body {
   }
 
   .section-title {
-    @apply text-lg font-extrabold tracking-tight text-foreground;
+    @apply font-serif text-xl font-medium tracking-tight text-foreground;
   }
 
   .eyebrow {
-    @apply text-xs font-bold text-muted-foreground;
+    @apply text-xs font-medium text-muted-foreground;
   }
 }
 
@@ -291,7 +300,7 @@ html, body {
 }
 
 .daily-claim-btn {
-  @apply rounded-full px-5 py-2 text-sm font-extrabold transition-transform active:scale-95;
+  @apply rounded-full px-5 py-2 text-sm font-semibold transition-transform active:scale-95;
   background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
   box-shadow: 0 4px 0 hsl(var(--primary) / 0.35);
@@ -591,7 +600,7 @@ html, body {
   background: hsl(var(--xp) / 0.15) !important;
   border: 1px solid hsl(var(--xp) / 0.4) !important;
   color: hsl(var(--foreground)) !important;
-  font-weight: 800 !important;
+  font-weight: 600 !important;
   animation: pyro-trophy-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 

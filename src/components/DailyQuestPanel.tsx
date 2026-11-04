@@ -47,7 +47,7 @@ const DailyQuestPanel = ({
             <Sun className="h-5 w-5" />
           </div>
           <div>
-            <h2 id="daily-quest-title" className="text-base font-extrabold leading-tight">Misiones diarias</h2>
+            <h2 id="daily-quest-title" className="font-serif text-lg font-medium leading-tight">Misiones diarias</h2>
             <p className="text-xs font-semibold text-muted-foreground">
               {completedCount === totalCount ? "¡Todas completadas! 🎉" : `${completedCount} de ${totalCount} completadas`}
             </p>
@@ -55,7 +55,7 @@ const DailyQuestPanel = ({
         </div>
         <div
           className={cn(
-            "flex items-center gap-1 rounded-full px-2.5 py-1 text-sm font-extrabold",
+            "flex items-center gap-1 rounded-full px-2.5 py-1 text-sm font-semibold",
             dailyStreak > 0 ? "bg-warning/15 text-warning" : "bg-muted text-muted-foreground",
           )}
           title={`Racha: ${dailyStreak} días · próximo hito: ${nextMilestone}`}
@@ -91,7 +91,7 @@ const DailyQuestPanel = ({
                 onToggle={() => onToggleComplete(task)}
                 label={isDone ? `Marcar "${task.title}" como pendiente` : `Completar "${task.title}"`}
               />
-              <span className={cn("flex-1 text-[15px] font-bold", isDone && "text-muted-foreground line-through")}>
+              <span className={cn("flex-1 text-[15px] font-medium", isDone && "text-muted-foreground line-through")}>
                 {task.title}
               </span>
               <button
@@ -113,7 +113,7 @@ const DailyQuestPanel = ({
             <Gift className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-sm font-extrabold">Recompensa diaria</p>
+            <p className="text-sm font-semibold">Recompensa diaria</p>
             <p className="text-xs font-semibold text-muted-foreground">+{streakBonusXp} XP y un cofre</p>
           </div>
         </div>
@@ -124,7 +124,7 @@ const DailyQuestPanel = ({
         ) : bonusClaimed && unopenedChests > 0 && onOpenChest ? (
           <button
             onClick={() => { playSfx("open"); onOpenChest(); }}
-            className="relative rounded-full bg-xp px-4 py-2 text-sm font-extrabold text-white shadow-[0_4px_0_hsl(var(--xp)/0.35)] transition-transform active:scale-95"
+            className="relative rounded-full bg-xp px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_0_hsl(var(--xp)/0.35)] transition-transform active:scale-95"
           >
             Abrir cofre
             {unopenedChests > 1 && (
@@ -134,9 +134,9 @@ const DailyQuestPanel = ({
             )}
           </button>
         ) : bonusClaimed ? (
-          <span className="text-xs font-extrabold text-success">Reclamada ✓</span>
+          <span className="text-xs font-semibold text-success">Reclamada ✓</span>
         ) : (
-          <span className="text-xs font-bold text-muted-foreground">{totalCount - completedCount} por hacer</span>
+          <span className="text-xs font-medium text-muted-foreground">{totalCount - completedCount} por hacer</span>
         )}
       </div>
     </section>

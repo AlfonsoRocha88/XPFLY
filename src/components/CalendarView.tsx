@@ -159,7 +159,7 @@ const CalendarView = ({ tasks, projects, onCreateAt, onEditTask, onDeleteTask }:
       {/* Toolbar */}
       <div className="space-y-3 px-4 pb-3 pt-4 md:px-8 md:pt-6">
         <div className="flex items-center justify-between gap-2">
-          <h1 className="truncate text-2xl font-black capitalize tracking-tight">{headerLabel}</h1>
+          <h1 className="truncate text-[28px] leading-tight capitalize font-serif font-medium tracking-tight">{headerLabel}</h1>
           <div className="flex shrink-0 items-center gap-1">
             <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate(-1)} aria-label="Anterior"><ChevronLeft className="h-5 w-5" /></Button>
             <Button variant="outline" size="sm" className="rounded-full" onClick={() => setCursor(new Date())}>Hoy</Button>
@@ -172,7 +172,7 @@ const CalendarView = ({ tasks, projects, onCreateAt, onEditTask, onDeleteTask }:
               key={v}
               onClick={() => setView(v)}
               className={cn(
-                "flex-1 rounded-full py-1.5 text-sm font-bold transition-all",
+                "flex-1 rounded-full py-1.5 text-sm font-medium transition-all",
                 view === v ? "bg-card text-foreground shadow-soft" : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -216,7 +216,7 @@ const MonthGrid = ({
   return (
     <div className="grid grid-cols-7 grid-rows-[auto_repeat(6,minmax(0,1fr))] h-full min-h-[600px]">
       {dayNames.map((d) => (
-        <div key={d} className="border-b border-r border-border p-2 text-center text-xs font-bold text-muted-foreground">{d}</div>
+        <div key={d} className="border-b border-r border-border p-2 text-center text-xs font-medium text-muted-foreground">{d}</div>
       ))}
       {days.map((day) => {
         const dayOccs = occurrences.filter((o) => isSameDay(o.start, day));
@@ -234,7 +234,7 @@ const MonthGrid = ({
                 onClick={() => onCreateAt(day)}
                 className={cn(
                   "text-xs w-6 h-6 rounded-full flex items-center justify-center transition-colors",
-                  isToday(day) ? "bg-primary text-primary-foreground font-bold" : "text-foreground hover:bg-accent",
+                  isToday(day) ? "bg-primary text-primary-foreground font-medium" : "text-foreground hover:bg-accent",
                   !inMonth && "text-muted-foreground/50"
                 )}
               >
@@ -285,7 +285,7 @@ const WeekGrid = ({
           <div className="font-pixel text-xs text-muted-foreground">{format(d, "EEEEE", { locale: es })}</div>
           <div className={cn(
             "text-sm mt-1 inline-flex w-7 h-7 items-center justify-center rounded-full",
-            isToday(d) && "bg-primary text-primary-foreground font-bold"
+            isToday(d) && "bg-primary text-primary-foreground font-medium"
           )}>
             {format(d, "d")}
           </div>

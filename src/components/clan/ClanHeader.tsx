@@ -91,7 +91,7 @@ const ClanHeader = ({ clan, viewerRole, onShare, onLeave, onDissolve, onEdit }: 
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 pr-10">
-            <h2 className="truncate text-2xl font-extrabold tracking-tight text-foreground">{clan.name}</h2>
+            <h2 className="truncate text-2xl font-serif font-medium tracking-tight text-foreground">{clan.name}</h2>
             <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ring-1", join.cls)}>
               <JoinIcon className="h-3 w-3" /> {join.label}
             </span>
@@ -152,7 +152,7 @@ export const ClanHeaderCompact = ({
   return (
     <div className="flex items-center gap-3 rounded-xl border border-border bg-card/70 px-3 py-2">
       <EmblemSVG config={clan.emblem_config} size={36} />
-      <span className="min-w-0 flex-1 truncate text-sm font-bold text-foreground">{clan.name}</span>
+      <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">{clan.name}</span>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button size="icon" variant="ghost" aria-label="Más opciones" className="h-8 w-8">

@@ -70,7 +70,7 @@ const TaskCard = ({ task, subtasks, onToggleComplete, onEdit, onDelete, onToggle
           onClick={() => onEdit(task)}
           aria-label={`Editar misión ${task.title}`}
         >
-          <p className={cn("text-[15px] font-bold leading-snug", isDone && "text-muted-foreground line-through")}>
+          <p className={cn("text-[15px] font-medium leading-snug", isDone && "text-muted-foreground line-through")}>
             {projectColor && (
               <span className="mr-1.5 inline-block h-2 w-2 rounded-full align-middle" style={{ backgroundColor: projectColor }} />
             )}
@@ -79,7 +79,7 @@ const TaskCard = ({ task, subtasks, onToggleComplete, onEdit, onDelete, onToggle
           {task.description && (
             <p className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">{task.description}</p>
           )}
-          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-bold">
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium">
             <span className="flex items-center gap-1.5" style={{ color: priority.color }}>
               <span className="h-2 w-2 rounded-full" style={{ backgroundColor: priority.color }} />
               {priority.label}
@@ -113,7 +113,7 @@ const TaskCard = ({ task, subtasks, onToggleComplete, onEdit, onDelete, onToggle
           <button
             onClick={() => setExpanded(!expanded)}
             onPointerDown={(e) => e.stopPropagation()}
-            className="flex items-center gap-1 text-xs font-bold text-muted-foreground hover:text-foreground"
+            className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
             aria-expanded={expanded}
           >
             <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", !expanded && "-rotate-90")} />

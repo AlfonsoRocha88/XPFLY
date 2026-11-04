@@ -121,7 +121,7 @@ const Character = () => {
           <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate("/")} aria-label="Volver">
             <ChevronLeft className="h-6 w-6" />
           </Button>
-          <h1 className="text-2xl font-black tracking-tight">Personaje</h1>
+          <h1 className="text-[28px] leading-tight font-serif font-medium tracking-tight">Personaje</h1>
         </div>
         <div className="flex items-center gap-2">
           {dirty && (
@@ -129,7 +129,7 @@ const Character = () => {
               <RotateCcw className="mr-1.5 h-4 w-4" /> Deshacer
             </Button>
           )}
-          <Button size="sm" className="rounded-full font-extrabold" onClick={handleSave} disabled={!dirty || updateAvatar.isPending}>
+          <Button size="sm" className="rounded-full font-semibold" onClick={handleSave} disabled={!dirty || updateAvatar.isPending}>
             <Save className="mr-1.5 h-4 w-4" /> Guardar
           </Button>
         </div>
@@ -150,7 +150,7 @@ const Character = () => {
               <Button
                 size="sm"
                 variant="outline"
-                className="mt-4 rounded-full bg-card font-bold"
+                className="mt-4 rounded-full bg-card font-medium"
                 onClick={() => regeneratePortrait(draftAvatar)}
                 disabled={generating}
               >
@@ -161,10 +161,10 @@ const Character = () => {
                 )}
               </Button>
               <div className="mt-4 text-center">
-                <div className="text-xl font-black">{profile?.display_name ?? "Jugador"}</div>
-                <div className="mt-0.5 text-sm font-bold text-primary">Nivel {level} · {classInfo.label}</div>
+                <div className="font-serif text-2xl font-medium">{profile?.display_name ?? "Jugador"}</div>
+                <div className="mt-0.5 text-sm font-medium text-primary">Nivel {level} · {classInfo.label}</div>
                 {equippedTitle && (
-                  <div className="mt-0.5 text-sm font-bold text-muted-foreground">
+                  <div className="mt-0.5 text-sm font-medium text-muted-foreground">
                     {equippedTitle.icon} {equippedTitle.name}
                   </div>
                 )}
@@ -219,7 +219,7 @@ const Character = () => {
                   highlight={freezes > 0}
                 />
                 <div className="flex items-center justify-between py-2">
-                  <span className="text-sm font-bold text-muted-foreground">Proteger racha</span>
+                  <span className="text-sm font-medium text-muted-foreground">Proteger racha</span>
                   <Button
                     size="sm"
                     variant="outline"
@@ -251,8 +251,8 @@ const Character = () => {
 
 const InfoRow = ({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) => (
   <div className="flex items-center justify-between py-2 border-b border-border/50">
-    <span className="text-sm font-bold text-muted-foreground">{label}</span>
-    <span className={highlight ? "font-extrabold text-primary" : "font-extrabold"}>{value}</span>
+    <span className="text-sm font-medium text-muted-foreground">{label}</span>
+    <span className={highlight ? "font-semibold text-primary" : "font-semibold"}>{value}</span>
   </div>
 );
 

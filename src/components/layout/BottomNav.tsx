@@ -36,12 +36,12 @@ const BottomNav = ({ current, onChange, badges = {} }: BottomNavProps) => (
             >
               <Icon className="h-[22px] w-[22px]" strokeWidth={active ? 2.4 : 2} />
               {badge > 0 && (
-                <span className="absolute right-2 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-extrabold leading-none text-destructive-foreground">
+                <span className="absolute right-2 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold leading-none text-destructive-foreground">
                   {badge > 9 ? "9+" : badge}
                 </span>
               )}
             </span>
-            <span className={cn("text-[11px] font-bold", active ? "text-primary" : "text-muted-foreground")}>
+            <span className={cn("text-[11px] font-medium", active ? "text-primary" : "text-muted-foreground")}>
               {label}
             </span>
           </button>

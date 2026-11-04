@@ -52,7 +52,7 @@ const ChestOpenOverlay = ({ open, reward, opening, onClose }: Props) => {
               <Gift className="h-24 w-24" strokeWidth={1.5} />
               <Sparkles className="absolute h-48 w-48 animate-spin text-xp/50 [animation-duration:3s]" />
             </div>
-            <p className="text-lg font-extrabold text-white">
+            <p className="text-lg font-semibold text-white">
               Abriendo cofre...
             </p>
           </>
@@ -65,14 +65,14 @@ const ChestOpenOverlay = ({ open, reward, opening, onClose }: Props) => {
               )}
             >
               <div className="text-7xl animate-bounce">{reward.icon}</div>
-              <p className="text-xl font-black">{reward.label}</p>
-              <p className="text-sm font-bold capitalize text-muted-foreground">
+              <p className="text-xl font-semibold">{reward.label}</p>
+              <p className="text-sm font-medium capitalize text-muted-foreground">
                 {reward.rarity}
               </p>
             </div>
             <button
               onClick={onClose}
-              className="rounded-full bg-primary px-8 py-3 text-base font-extrabold text-primary-foreground shadow-lift transition-transform active:scale-95"
+              className="rounded-full bg-primary px-8 py-3 text-base font-semibold text-primary-foreground shadow-lift transition-transform active:scale-95"
             >
               GENIAL
             </button>

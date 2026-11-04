@@ -46,7 +46,7 @@ const Shop = () => {
       <section className="surface flex flex-col items-center gap-4 p-6 text-center">
         <div className="flex w-full items-center justify-between">
           <h2 className="section-title">Cofres</h2>
-          <span className="flex items-center gap-1.5 rounded-full bg-xp/15 px-3 py-1 text-sm font-extrabold text-[hsl(38_92%_38%)] dark:text-xp">
+          <span className="flex items-center gap-1.5 rounded-full bg-xp/15 px-3 py-1 text-sm font-semibold text-[hsl(38_92%_38%)] dark:text-xp">
             <Coins className="h-4 w-4" /> {coins}
           </span>
         </div>
@@ -63,14 +63,14 @@ const Shop = () => {
         >
           <Gift className="h-14 w-14" strokeWidth={1.75} />
           {chests > 0 && (
-            <span className="absolute -right-2 -top-2 flex h-7 min-w-7 items-center justify-center rounded-full border-2 border-card bg-destructive px-1.5 text-xs font-extrabold text-white">
+            <span className="absolute -right-2 -top-2 flex h-7 min-w-7 items-center justify-center rounded-full border-2 border-card bg-destructive px-1.5 text-xs font-semibold text-white">
               {chests}
             </span>
           )}
         </button>
 
         <div>
-          <p className="text-[15px] font-extrabold">
+          <p className="text-[15px] font-semibold">
             {opening ? "Abriendo…" : chests > 0 ? `${chests} cofre${chests === 1 ? "" : "s"} disponible${chests === 1 ? "" : "s"}` : "Sin cofres por ahora"}
           </p>
           <p className="mt-0.5 text-sm text-muted-foreground">
@@ -81,8 +81,8 @@ const Shop = () => {
         {reward && rarity && (
           <div className="flex w-full max-w-xs flex-col items-center gap-1.5 rounded-2xl border border-border p-4 animate-in zoom-in-90 duration-300">
             <div className="text-5xl">{reward.icon}</div>
-            <p className="text-[15px] font-extrabold">{reward.label}</p>
-            <span className={cn("rounded-full px-2.5 py-0.5 text-xs font-extrabold", rarity.className)}>{rarity.label}</span>
+            <p className="text-[15px] font-semibold">{reward.label}</p>
+            <span className={cn("rounded-full px-2.5 py-0.5 text-xs font-semibold", rarity.className)}>{rarity.label}</span>
           </div>
         )}
       </section>
@@ -90,14 +90,14 @@ const Shop = () => {
       <section>
         <div className="mb-3 flex items-baseline justify-between">
           <h2 className="section-title">Artículos</h2>
-          <span className="text-xs font-bold text-muted-foreground">Próximamente</span>
+          <span className="text-xs font-medium text-muted-foreground">Próximamente</span>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {UPCOMING_ITEMS.map((item) => (
             <div key={item.id} className="surface flex flex-col items-center gap-1.5 p-4 text-center opacity-75">
               <div className="text-3xl">{item.icon}</div>
-              <p className="text-sm font-bold leading-tight">{item.name}</p>
-              <span className="flex items-center gap-1 text-xs font-extrabold text-muted-foreground">
+              <p className="text-sm font-medium leading-tight">{item.name}</p>
+              <span className="flex items-center gap-1 text-xs font-semibold text-muted-foreground">
                 <Coins className="h-3.5 w-3.5" /> {item.price}
               </span>
             </div>

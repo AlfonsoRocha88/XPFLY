@@ -24,8 +24,8 @@ const ProfileOverview = () => {
         {stats.map(({ icon: Icon, label, value, className }) => (
           <div key={label} className="rounded-xl bg-muted/60 px-2 py-2.5 text-center">
             <Icon className={`mx-auto h-5 w-5 ${className}`} />
-            <p className="mt-1 text-lg font-black leading-none tabular-nums">{value}</p>
-            <p className="mt-0.5 text-[11px] font-bold text-muted-foreground">{label}</p>
+            <p className="mt-1 font-serif text-xl font-medium leading-none tabular-nums">{value}</p>
+            <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">{label}</p>
           </div>
         ))}
       </div>
@@ -33,7 +33,7 @@ const ProfileOverview = () => {
       <div className="flex gap-2">
         <button
           onClick={() => navigate("/character")}
-          className="flex flex-1 items-center justify-between rounded-xl bg-primary/10 px-4 py-2.5 text-sm font-extrabold text-primary transition-colors hover:bg-primary/15"
+          className="flex flex-1 items-center justify-between rounded-xl bg-primary/10 px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/15"
         >
           Personaje y atributos <ChevronRight className="h-4 w-4" />
         </button>
