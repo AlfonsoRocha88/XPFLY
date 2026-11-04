@@ -12,11 +12,13 @@ export default {
         "2xl": "1400px",
       },
     },
-extend: {
+    extend: {
       fontFamily: {
-        pixel: ['Rajdhani', 'Inter', 'sans-serif'],
-        system: ['Rajdhani', 'Inter', 'sans-serif'],
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['"Nunito Variable"', 'Nunito', 'system-ui', 'sans-serif'],
+      },
+      boxShadow: {
+        soft: "0 1px 2px hsl(var(--shadow-color) / 0.04), 0 4px 16px hsl(var(--shadow-color) / 0.06)",
+        lift: "0 2px 4px hsl(var(--shadow-color) / 0.05), 0 12px 28px hsl(var(--shadow-color) / 0.10)",
       },
       colors: {
         border: "hsl(var(--border))",
@@ -52,6 +54,9 @@ extend: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        success: "hsl(var(--success))",
+        warning: "hsl(var(--warning))",
+        xp: "hsl(var(--xp))",
         "priority-low": "hsl(var(--priority-low))",
         "priority-medium": "hsl(var(--priority-medium))",
         "priority-high": "hsl(var(--priority-high))",
@@ -71,6 +76,7 @@ extend: {
         },
       },
       borderRadius: {
+        xl: "calc(var(--radius) + 4px)",
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",

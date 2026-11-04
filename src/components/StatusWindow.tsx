@@ -21,10 +21,10 @@ const StatusWindow = ({ stats, pointsAvailable, level, title, displayName, onAll
       {/* Header */}
       <div className="status-window-header">
         <div className="flex items-center gap-2">
-          <span className="font-system text-[10px] text-primary tracking-widest">[ STATUS ]</span>
+          <span className="font-system text-xs text-primary tracking-widest">[ STATUS ]</span>
         </div>
         <div className="text-right">
-          <div className="font-system text-[9px] text-muted-foreground">LV.</div>
+          <div className="font-system text-xs text-muted-foreground">LV.</div>
           <div className="font-system text-lg text-primary leading-none">{level}</div>
         </div>
       </div>
@@ -33,7 +33,7 @@ const StatusWindow = ({ stats, pointsAvailable, level, title, displayName, onAll
       {(displayName || title) && (
         <div className="px-4 py-2 border-b border-primary/20">
           {displayName && <div className="font-system text-sm text-foreground">{displayName}</div>}
-          {title && <div className="font-system text-[10px] text-primary/80 tracking-wider">{title}</div>}
+          {title && <div className="font-system text-xs text-primary/80 tracking-wider">{title}</div>}
         </div>
       )}
 
@@ -48,7 +48,7 @@ const StatusWindow = ({ stats, pointsAvailable, level, title, displayName, onAll
           return (
             <div key={key} className="space-y-1">
               <div className="flex items-center justify-between gap-2">
-                <span className="font-system text-[10px] text-muted-foreground tracking-wider flex items-center gap-1.5">
+                <span className="font-system text-xs text-muted-foreground tracking-wider flex items-center gap-1.5">
                   <span style={{ color: info.color }}>{info.icon}</span> {info.label}
                 </span>
                 <div className="flex items-center gap-2">
@@ -79,7 +79,7 @@ const StatusWindow = ({ stats, pointsAvailable, level, title, displayName, onAll
       {/* Footer — points available */}
       {editable && (
         <div className="px-4 py-3 border-t border-primary/20 bg-primary/5 flex items-center justify-between">
-          <span className="font-system text-[10px] text-muted-foreground tracking-wider">PUNTOS DISPONIBLES</span>
+          <span className="font-system text-xs text-muted-foreground tracking-wider">PUNTOS DISPONIBLES</span>
           <span className={cn("font-system text-base tabular-nums", pointsAvailable > 0 ? "text-primary animate-pulse" : "text-muted-foreground")}>
             {pointsAvailable}
           </span>

@@ -227,7 +227,7 @@ const TaskDialog = ({ open, onOpenChange, task, projects, defaultProjectId, defa
             {hasSchedule && (
               <div className="space-y-3">
                 <div>
-                  <label className="mb-1 block text-[10px] text-muted-foreground">Inicio</label>
+                  <label className="mb-1 block text-xs text-muted-foreground">Inicio</label>
                   <div className="grid grid-cols-2 gap-2">
                     <Popover>
                       <PopoverTrigger asChild>
@@ -255,7 +255,7 @@ const TaskDialog = ({ open, onOpenChange, task, projects, defaultProjectId, defa
                   </div>
                 </div>
                 <div>
-                  <label className="mb-1 block text-[10px] text-muted-foreground">Fin</label>
+                  <label className="mb-1 block text-xs text-muted-foreground">Fin</label>
                   <div className="grid grid-cols-2 gap-2">
                     <Popover>
                       <PopoverTrigger asChild>
@@ -309,7 +309,7 @@ const TaskDialog = ({ open, onOpenChange, task, projects, defaultProjectId, defa
                       onChange={(e) => setReminderInput(e.target.value)}
                       className="w-20 h-8"
                     />
-                    <span className="text-[10px] text-muted-foreground">min antes</span>
+                    <span className="text-xs text-muted-foreground">min antes</span>
                     <Button
                       type="button"
                       variant="outline"
@@ -329,7 +329,7 @@ const TaskDialog = ({ open, onOpenChange, task, projects, defaultProjectId, defa
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="h-6 px-2 text-[10px]"
+                        className="h-6 px-2 text-xs"
                         onClick={() => addReminder(m)}
                       >
                         +{formatReminder(m)}
@@ -350,7 +350,7 @@ const TaskDialog = ({ open, onOpenChange, task, projects, defaultProjectId, defa
                 <Repeat className="h-4 w-4 text-purple-400" />
                 <div>
                   <p className="text-sm font-medium">Repetir</p>
-                  <p className="text-[10px] text-muted-foreground">Ej: cada 12 horas, durante 7 días</p>
+                  <p className="text-xs text-muted-foreground">Ej: cada 12 horas, durante 7 días</p>
                 </div>
               </div>
               <Switch checked={hasRecurrence} onCheckedChange={setHasRecurrence} />
@@ -377,7 +377,7 @@ const TaskDialog = ({ open, onOpenChange, task, projects, defaultProjectId, defa
                   </Select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-[10px] text-muted-foreground">Repetir durante</label>
+                  <label className="mb-1 block text-xs text-muted-foreground">Repetir durante</label>
                   <div className="flex items-center gap-2">
                     <Input
                       type="number"
@@ -400,7 +400,7 @@ const TaskDialog = ({ open, onOpenChange, task, projects, defaultProjectId, defa
               <RotateCcw className="h-4 w-4 text-blue-400" />
               <div>
                 <p className="text-sm font-medium">Misión diaria</p>
-                <p className="text-[10px] text-muted-foreground">Se repite cada día automáticamente</p>
+                <p className="text-xs text-muted-foreground">Se repite cada día automáticamente</p>
               </div>
             </div>
             <Switch checked={isDaily} onCheckedChange={setIsDaily} />
@@ -409,7 +409,7 @@ const TaskDialog = ({ open, onOpenChange, task, projects, defaultProjectId, defa
           {isDaily && (
             <div className="rounded-lg border border-border bg-muted/30 p-3 space-y-2">
               <p className="text-xs font-medium">Días de la semana</p>
-              <p className="text-[10px] text-muted-foreground">Vacío = todos los días</p>
+              <p className="text-xs text-muted-foreground">Vacío = todos los días</p>
               <div className="flex gap-1 flex-wrap">
                 {[
                   { d: 1, l: "L" }, { d: 2, l: "M" }, { d: 3, l: "X" },

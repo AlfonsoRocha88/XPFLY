@@ -15,7 +15,7 @@ const RoleBadge = ({ role, className }: { role: string | null | undefined; class
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1",
+        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold uppercase tracking-wide ring-1",
         CLAN_ROLE_STYLE[r],
         className,
       )}

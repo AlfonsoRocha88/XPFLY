@@ -2,10 +2,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
-import type { TaskInsert, TaskUpdate } from "@/lib/types";
+import type { Task, TaskInsert, TaskUpdate } from "@/lib/types";
 import { pyroFeed, consumePyroSourceRect } from "./usePyro";
 
-export const useTasks = (projectId?: string | null) => {
+const TASK_KEYS = [["tasks"], ["subtasks"], ["all-tasks"], ["daily-tasks"]] as const;
+
+export const useTasks = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -29,19 +31,15 @@ export const useTasks = (projectId?: string | null) => {
   }, [user, queryClient]);
 
   const tasksQuery = useQuery({
-    queryKey: ["tasks", projectId],
+    queryKey: ["tasks"],
     queryFn: async () => {
-      let query = supabase
+      const { data, error } = await supabase
         .from("tasks")
         .select("*")
         .is("parent_task_id", null)
         .eq("is_daily", false)
         .not("tags", "cs", '{tipo:horario}')
         .order("position", { ascending: true });
-      if (projectId) {
-        query = query.eq("project_id", projectId);
-      }
-      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
@@ -65,18 +63,14 @@ export const useTasks = (projectId?: string | null) => {
   });
 
   const subtasksQuery = useQuery({
-    queryKey: ["subtasks", projectId],
+    queryKey: ["subtasks"],
     queryFn: async () => {
-      let query = supabase
+      const { data, error } = await supabase
         .from("tasks")
         .select("*")
         .not("parent_task_id", "is", null)
         .not("tags", "cs", '{tipo:horario}')
         .order("position", { ascending: true });
-      if (projectId) {
-        query = query.eq("project_id", projectId);
-      }
-      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
@@ -97,6 +91,19 @@ export const useTasks = (projectId?: string | null) => {
     enabled: !!user,
   });
 
+  const invalidateAll = () => {
+    TASK_KEYS.forEach((queryKey) => queryClient.invalidateQueries({ queryKey }));
+  };
+
+  // Patch every cached task list in place so checkboxes respond instantly.
+  const patchCaches = (id: string, patch: (t: Task) => Task | null) => {
+    TASK_KEYS.forEach((queryKey) => {
+      queryClient.setQueriesData<Task[]>({ queryKey }, (old) =>
+        old?.flatMap((t) => (t.id === id ? (patch(t) ?? []) : [t])),
+      );
+    });
+  };
+
   const createTask = useMutation({
     mutationFn: async (task: Omit<TaskInsert, "user_id">) => {
       const { data, error } = await supabase
@@ -108,10 +115,7 @@ export const useTasks = (projectId?: string | null) => {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      queryClient.invalidateQueries({ queryKey: ["subtasks"] });
-      queryClient.invalidateQueries({ queryKey: ["all-tasks"] });
-      queryClient.invalidateQueries({ queryKey: ["daily-tasks"] });
+      invalidateAll();
     },
   });
 
@@ -126,6 +130,11 @@ export const useTasks = (projectId?: string | null) => {
       if (error) throw error;
       return data;
     },
+    onMutate: async ({ id, ...updates }) => {
+      await Promise.all(TASK_KEYS.map((queryKey) => queryClient.cancelQueries({ queryKey })));
+      patchCaches(id, (t) => ({ ...t, ...updates } as Task));
+    },
+    onError: () => invalidateAll(),
     onSuccess: (data, vars) => {
       if (vars.status === "done") {
         const taskId = typeof data?.id === "string" ? data.id : vars.id;
@@ -135,10 +144,7 @@ export const useTasks = (projectId?: string | null) => {
           sourceRect: taskId ? consumePyroSourceRect(taskId) : undefined,
         });
       }
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      queryClient.invalidateQueries({ queryKey: ["subtasks"] });
-      queryClient.invalidateQueries({ queryKey: ["all-tasks"] });
-      queryClient.invalidateQueries({ queryKey: ["daily-tasks"] });
+      invalidateAll();
     },
   });
 
@@ -147,11 +153,12 @@ export const useTasks = (projectId?: string | null) => {
       const { error } = await supabase.from("tasks").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      queryClient.invalidateQueries({ queryKey: ["subtasks"] });
-      queryClient.invalidateQueries({ queryKey: ["all-tasks"] });
-      queryClient.invalidateQueries({ queryKey: ["daily-tasks"] });
+    onMutate: async (id) => {
+      await Promise.all(TASK_KEYS.map((queryKey) => queryClient.cancelQueries({ queryKey })));
+      patchCaches(id, () => null);
+    },
+    onSettled: () => {
+      invalidateAll();
     },
   });
 

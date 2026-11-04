@@ -288,7 +288,7 @@ export default function PyroOnboarding() {
         {/* Body */}
         <div className="mb-5 max-h-[40vh] overflow-y-auto pr-1">
           {cur.kind === "intro" && (
-            <div className="font-pixel text-[8px] text-muted-foreground text-center py-3">
+            <div className="font-pixel text-xs text-muted-foreground text-center py-3">
               [7 preguntas · ~1 minuto]
             </div>
           )}
@@ -319,7 +319,7 @@ export default function PyroOnboarding() {
 
           {cur.kind === "multi" && (
             <>
-              <div className="font-pixel text-[7px] text-muted-foreground mb-2">
+              <div className="font-pixel text-[11px] text-muted-foreground mb-2">
                 [puedes elegir varios]
               </div>
               <div className="grid grid-cols-2 gap-2">
@@ -368,18 +368,18 @@ export default function PyroOnboarding() {
             size="sm"
             onClick={onBack}
             disabled={step === 0 || saving}
-            className="font-pixel text-[8px]"
+            className="font-pixel text-xs"
           >
             Atrás
           </Button>
-          <div className="font-pixel text-[8px] text-muted-foreground">
+          <div className="font-pixel text-xs text-muted-foreground">
             {step + 1} / {total}
           </div>
           <Button
             size="sm"
             onClick={onNext}
             disabled={!cur.canNext || saving}
-            className="font-pixel text-[8px]"
+            className="font-pixel text-xs"
           >
             {saving ? "Guardando..." : step === total - 1 ? "¡Empezar!" : (cur as any).cta ?? "Siguiente"}
           </Button>

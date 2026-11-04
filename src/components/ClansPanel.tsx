@@ -35,7 +35,6 @@ import ClanHeader, { ClanHeaderCompact } from "@/components/clan/ClanHeader";
 import ClanWeeklyChallenge from "@/components/clan/ClanWeeklyChallenge";
 import ClanChat from "@/components/clan/ClanChat";
 
-interface ClansPanelProps { open?: boolean; onOpenChange?: (v: boolean) => void; hideTrigger?: boolean; embedded?: boolean }
 
 /* ───────────────────────────── Member row ───────────────────────────── */
 
@@ -59,16 +58,16 @@ const MemberRow = ({ member, rank, onSelect }: { member: ClanMember; rank: numbe
       </div>
       <div className="flex w-12 shrink-0 flex-col items-center">
         <LeagueShield league={leagueName} size={40} />
-        <span className="mt-0.5 font-bold text-[9px] uppercase tracking-wider text-muted-foreground">{tier ?? "∞"}</span>
+        <span className="mt-0.5 font-bold text-xs uppercase tracking-wider text-muted-foreground">{tier ?? "∞"}</span>
       </div>
       <div className="w-14 shrink-0 text-center">
         <div className="text-sm font-bold tabular-nums text-foreground">{p?.trophies ?? 0}</div>
-        <div className="text-[9px] uppercase tracking-wider text-muted-foreground">trofeos</div>
+        <div className="text-xs uppercase tracking-wider text-muted-foreground">trofeos</div>
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <span className="truncate text-sm font-semibold text-foreground">{p?.display_name || p?.username || "Jugador"}</span>
-          <span className="rounded-md bg-primary/15 px-1.5 py-0.5 text-[10px] font-bold text-primary ring-1 ring-primary/30">Nv {p?.level ?? 1}</span>
+          <span className="rounded-md bg-primary/15 px-1.5 py-0.5 text-xs font-bold text-primary ring-1 ring-primary/30">Nv {p?.level ?? 1}</span>
         </div>
         <RoleBadge role={member.role} className="mt-1" />
       </div>
@@ -118,14 +117,14 @@ const MemberSheet = ({
             <p className="truncate text-base font-bold">{p?.display_name || p?.username || "Jugador"}{isMe && " (Tú)"}</p>
             <div className="mt-1 flex flex-wrap items-center gap-1.5">
               <RoleBadge role={member.role} />
-              <span className="rounded-md bg-primary/15 px-1.5 py-0.5 text-[10px] font-bold text-primary ring-1 ring-primary/30">Nv {p?.level ?? 1}</span>
+              <span className="rounded-md bg-primary/15 px-1.5 py-0.5 text-xs font-bold text-primary ring-1 ring-primary/30">Nv {p?.level ?? 1}</span>
             </div>
           </div>
         </div>
         <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
-          <div className="rounded-lg border border-border bg-muted/40 p-2"><div className="font-bold text-foreground">{p?.trophies ?? 0}</div><div className="text-[10px] text-muted-foreground">Trofeos</div></div>
-          <div className="rounded-lg border border-border bg-muted/40 p-2"><div className="font-bold text-foreground">{p?.xp ?? 0}</div><div className="text-[10px] text-muted-foreground">XP</div></div>
-          <div className="rounded-lg border border-border bg-muted/40 p-2"><div className="font-bold text-foreground">{p?.daily_streak ?? 0} 🔥</div><div className="text-[10px] text-muted-foreground">Racha</div></div>
+          <div className="rounded-lg border border-border bg-muted/40 p-2"><div className="font-bold text-foreground">{p?.trophies ?? 0}</div><div className="text-xs text-muted-foreground">Trofeos</div></div>
+          <div className="rounded-lg border border-border bg-muted/40 p-2"><div className="font-bold text-foreground">{p?.xp ?? 0}</div><div className="text-xs text-muted-foreground">XP</div></div>
+          <div className="rounded-lg border border-border bg-muted/40 p-2"><div className="font-bold text-foreground">{p?.daily_streak ?? 0} 🔥</div><div className="text-xs text-muted-foreground">Racha</div></div>
         </div>
 
         {!isMe && viewerRole && (
@@ -264,7 +263,7 @@ const CreateWizard = ({ onCreated, onCancel }: { onCreated: () => void; onCancel
             <div className="mt-2 max-h-[200px] space-y-3 overflow-y-auto pr-1">
               {Object.entries(EMBLEM_ICONS_BY_CATEGORY).map(([cat, icons]) => (
                 <div key={cat}>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{cat}</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{cat}</p>
                   <div className="mt-1 grid grid-cols-7 gap-1.5">
                     {icons.map((i) => (
                       <button key={i.id} onClick={() => setEmblem({ ...emblem, icon: i.id as EmblemIcon })}
@@ -485,7 +484,7 @@ const ClanScreen = ({ clan, viewerRole }: { clan: Clan; viewerRole: ClanRole | n
                 {incoming.map((r) => (
                   <div key={r.id} className="flex items-center gap-2 rounded-lg bg-card/60 px-2 py-1.5">
                     <Avatar className="h-7 w-7"><AvatarImage src={r.profile?.avatar_url ?? undefined} /><AvatarFallback>{(r.profile?.display_name ?? "?").charAt(0)}</AvatarFallback></Avatar>
-                    <span className="flex-1 truncate text-sm">{r.profile?.display_name || r.profile?.username || "Jugador"} <span className="text-[10px] text-muted-foreground">Nv.{r.profile?.level ?? 1}</span></span>
+                    <span className="flex-1 truncate text-sm">{r.profile?.display_name || r.profile?.username || "Jugador"} <span className="text-xs text-muted-foreground">Nv.{r.profile?.level ?? 1}</span></span>
                     <Button size="icon" variant="ghost" className="h-7 w-7 text-emerald-400" onClick={() => respondJoinRequest.mutate({ requestId: r.id, accept: true })}><Check className="h-4 w-4" /></Button>
                     <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => respondJoinRequest.mutate({ requestId: r.id, accept: false })}><X className="h-4 w-4" /></Button>
                   </div>
@@ -598,7 +597,7 @@ const ClanScreen = ({ clan, viewerRole }: { clan: Clan; viewerRole: ClanRole | n
               <div className="mt-2 max-h-[180px] space-y-3 overflow-y-auto pr-1">
                 {Object.entries(EMBLEM_ICONS_BY_CATEGORY).map(([cat, icons]) => (
                   <div key={cat}>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{cat}</p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{cat}</p>
                     <div className="mt-1 grid grid-cols-7 gap-1.5">
                       {icons.map((i) => (
                         <button key={i.id} onClick={() => setEditEmblem({ ...editEmblem, icon: i.id as EmblemIcon })}
@@ -640,15 +639,12 @@ const ClanScreen = ({ clan, viewerRole }: { clan: Clan; viewerRole: ClanRole | n
 
 /* ─────────────────────────── Root panel ─────────────────────────── */
 
-const ClansPanel = ({ open: openProp, onOpenChange, hideTrigger, embedded = false }: ClansPanelProps = {}) => {
-  const [openInternal, setOpenInternal] = useState(false);
-  const open = openProp !== undefined ? openProp : openInternal;
-  const setOpen = (v: boolean) => { onOpenChange ? onOpenChange(v) : setOpenInternal(v); };
+const ClansPanel = () => {
   const { clan, isLoading, myRole } = useMyClan();
   const [creating, setCreating] = useState(false);
 
   const body = (
-      <div className="mt-2">
+      <div>
         {isLoading ? (
           <p className="py-10 text-center text-sm text-muted-foreground">Cargando…</p>
         ) : clan ? (
@@ -661,35 +657,7 @@ const ClansPanel = ({ open: openProp, onOpenChange, hideTrigger, embedded = fals
       </div>
   );
 
-  if (embedded) {
-    return (
-      <div className="mx-auto w-full max-w-xl pb-24">
-        <div className="mb-3 flex items-center gap-2">
-          <Shield className="h-5 w-5 text-primary" />
-          <h1 className="font-pixel text-xs">Clanes</h1>
-        </div>
-        {body}
-      </div>
-    );
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      {!hideTrigger && (
-        <DialogTrigger asChild>
-          <button className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors text-sidebar-foreground hover:bg-sidebar-accent/50">
-            <Shield className="h-4 w-4" /><span className="font-pixel text-[9px]">Clanes</span>
-          </button>
-        </DialogTrigger>
-      )}
-      <DialogContent className="max-w-xl max-h-[92vh] overflow-y-auto p-4 sm:p-5">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-base"><Shield className="h-5 w-5 text-primary" /> Clanes</DialogTitle>
-        </DialogHeader>
-        {body}
-      </DialogContent>
-    </Dialog>
-  );
+  return body;
 };
 
 export default ClansPanel;

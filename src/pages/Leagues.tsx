@@ -1,12 +1,10 @@
 import { useMemo, useRef, useState, useEffect } from "react";
-import { ArrowLeft, Shield, Trophy, Lock, ChevronUp } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Shield, Trophy, Lock, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
-import { WALLPAPERS } from "@/lib/wallpapers";
 import { LeagueShield } from "@/components/leagues/LeagueShield";
 import {
   LEAGUES,
@@ -50,7 +48,7 @@ const GlobalRow = ({ row, rank }: { row: LbRow; rank: number }) => (
   >
     <div
       className={cn(
-        "flex h-8 w-8 shrink-0 items-center justify-center rounded-md font-pixel text-[10px]",
+        "flex h-8 w-8 shrink-0 items-center justify-center rounded-md font-pixel text-xs",
         rank === 1 && "bg-primary/25 text-primary",
         rank === 2 && "bg-primary/15 text-primary/90",
         rank === 3 && "bg-primary/10 text-primary/80",
@@ -66,7 +64,7 @@ const GlobalRow = ({ row, rank }: { row: LbRow; rank: number }) => (
       {row.avatar_url ? (
         <img src={row.avatar_url} alt={row.name} className="h-full w-full object-cover" />
       ) : (
-        <span className="font-pixel text-[10px] text-muted-foreground">
+        <span className="font-pixel text-xs text-muted-foreground">
           {row.name.slice(0, 1).toUpperCase()}
         </span>
       )}
@@ -74,13 +72,13 @@ const GlobalRow = ({ row, rank }: { row: LbRow; rank: number }) => (
     <div className="flex-1 min-w-0">
       <p className={cn("truncate text-sm font-semibold", row.isUser && "text-primary")}>
         {row.name}
-        {row.isUser && <span className="ml-1 font-pixel text-[7px] text-primary/80">(TÚ)</span>}
+        {row.isUser && <span className="ml-1 font-pixel text-[11px] text-primary/80">(TÚ)</span>}
       </p>
-      <p className="truncate font-pixel text-[7px] tracking-wider text-muted-foreground">
+      <p className="truncate font-pixel text-[11px] tracking-wider text-muted-foreground">
         {row.league}
       </p>
     </div>
-    <div className="flex items-center gap-1 font-pixel text-[10px] text-primary">
+    <div className="flex items-center gap-1 font-pixel text-xs text-primary">
       <Trophy className="h-3 w-3" />
       {row.trophies}
     </div>
@@ -132,22 +130,21 @@ const Shield3D = ({
   </div>
 );
 
-interface LeaguesProps { embedded?: boolean }
-
-const Leagues = ({ embedded = false }: LeaguesProps = {}) => {
-  const navigate = useNavigate();
+const Leagues = () => {
   const { profile } = useProfile();
-  const trophies = (profile as any)?.trophies ?? 0;
-  const userName = (profile as any)?.display_name || (profile as any)?.username || "Tú";
-  const userId = (profile as any)?.user_id;
+  const trophies = profile?.trophies ?? 0;
+  const userName = profile?.display_name || profile?.username || "Tú";
+  const userId = profile?.user_id;
 
   const current = useMemo(() => getCurrentLeague(trophies), [trophies]);
   const next = useMemo(() => getNextLeague(trophies), [trophies]);
   const progress = useMemo(() => getDivisionProgress(trophies), [trophies]);
   const groups = useMemo(() => groupByLeague(), []);
 
+  // One leaderboard fetch feeds both the league and global tabs.
   const [leaderboard, setLeaderboard] = useState<LbRow[]>([]);
   const [loadingLb, setLoadingLb] = useState(true);
+  const [myGlobalRank, setMyGlobalRank] = useState<number>(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -155,12 +152,7 @@ const Leagues = ({ embedded = false }: LeaguesProps = {}) => {
       setLoadingLb(true);
       const { data, error } = await supabase.rpc("get_leaderboard", { _limit: 100 });
       if (cancelled) return;
-      if (error || !data) {
-        setLeaderboard([]);
-        setLoadingLb(false);
-        return;
-      }
-      const rows: LbRow[] = data.map((p: any) => ({
+      const rows: LbRow[] = error || !data ? [] : data.map((p: any) => ({
         user_id: p.user_id,
         name: p.display_name || p.username || "Cazador",
         avatar_url: p.avatar_url,
@@ -171,69 +163,23 @@ const Leagues = ({ embedded = false }: LeaguesProps = {}) => {
       }));
       setLeaderboard(rows);
       setLoadingLb(false);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [userId]);
-
-  const myRank = leaderboard.findIndex((p) => p.isUser) + 1;
-
-  // ===== Global Top 100 (by trophies) =====
-  const [globalRows, setGlobalRows] = useState<LbRow[]>([]);
-  const [loadingGlobal, setLoadingGlobal] = useState(true);
-  const [myGlobalRank, setMyGlobalRank] = useState<number>(0);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoadingGlobal(true);
-      const { data, error } = await supabase.rpc("get_leaderboard", { _limit: 100 });
-      if (cancelled) return;
-      if (error || !data) {
-        setGlobalRows([]);
-        setLoadingGlobal(false);
-        return;
-      }
-      const rows: LbRow[] = data.map((p: any) => ({
-        user_id: p.user_id,
-        name: p.display_name || p.username || "Cazador",
-        avatar_url: p.avatar_url,
-        xp: p.xp ?? 0,
-        trophies: p.trophies ?? 0,
-        league: leagueLabel(getCurrentLeague(p.trophies ?? 0)),
-        isUser: p.user_id === userId,
-      }));
-      setGlobalRows(rows);
 
       const inTopIdx = rows.findIndex((r) => r.isUser);
       if (inTopIdx >= 0) {
         setMyGlobalRank(inTopIdx + 1);
       } else if (userId) {
-        const { data: rank } = await supabase.rpc("get_global_trophy_rank", {
-          _user_id: userId,
-        });
+        const { data: rank } = await supabase.rpc("get_global_trophy_rank", { _user_id: userId });
         if (!cancelled) setMyGlobalRank(typeof rank === "number" ? rank : 0);
-      } else {
-        setMyGlobalRank(0);
       }
-      setLoadingGlobal(false);
     })();
     return () => {
       cancelled = true;
     };
   }, [userId, trophies]);
 
-  // Wallpaper coordinated with main GUI
-  const currentWallpaper = WALLPAPERS.find(
-    (w) => w.id === ((profile as any)?.wallpaper || "default"),
-  );
-  const wallpaperStyle: React.CSSProperties = currentWallpaper?.background
-    ? { background: currentWallpaper.background, backgroundAttachment: "fixed" }
-    : {};
-  const bgAnimations: boolean = (profile as any)?.bg_animations ?? true;
-  const wallpaperAnimated =
-    bgAnimations && !!currentWallpaper?.background && currentWallpaper.id !== "default";
+  const myRank = leaderboard.findIndex((p) => p.isUser) + 1;
+  const globalRows = leaderboard;
+  const loadingGlobal = loadingLb;
 
   // Mouse drag-to-scroll for the league strip (touch works natively)
   const stripRef = useRef<HTMLDivElement>(null);
@@ -256,33 +202,21 @@ const Leagues = ({ embedded = false }: LeaguesProps = {}) => {
   }, [current.league]);
 
   return (
-    <div
-      className={cn(embedded ? "h-full" : "min-h-screen pb-24 md:pb-6", wallpaperAnimated && "wp-animated")}
-      style={embedded ? undefined : wallpaperStyle}
-    >
-      <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-primary/20 bg-background/70 px-4 py-3 backdrop-blur-md md:px-6">
-        <div className="flex items-center gap-3">
-          {!embedded && (
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          )}
-          <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-primary" />
-            <h1 className="font-pixel text-[12px] tracking-wider text-primary">LIGAS</h1>
-          </div>
+    <div>
+      <div className="surface mb-4 flex items-center justify-between p-4">
+        <div>
+          <p className="eyebrow">Tu liga</p>
+          <p className="text-lg font-black">{leagueLabel(current)}</p>
         </div>
-        <div className="flex items-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-3 py-1.5">
-          <Trophy className="h-4 w-4 text-primary" />
-          <span className="font-pixel text-[10px] text-primary">{trophies}</span>
-        </div>
-      </header>
-
-      <div className="mx-auto max-w-2xl px-4 py-6 md:px-6">
+        <span className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-sm font-extrabold text-primary">
+          <Trophy className="h-4 w-4" /> {trophies}
+        </span>
+      </div>
+      <div>
         <Tabs defaultValue="liga" className="w-full">
           <TabsList className="mb-4 grid w-full grid-cols-2">
-            <TabsTrigger value="liga" className="font-pixel text-[9px] tracking-wider">LIGA</TabsTrigger>
-            <TabsTrigger value="global" className="font-pixel text-[9px] tracking-wider">GLOBAL</TabsTrigger>
+            <TabsTrigger value="liga" className="font-pixel text-xs tracking-wider">LIGA</TabsTrigger>
+            <TabsTrigger value="global" className="font-pixel text-xs tracking-wider">GLOBAL</TabsTrigger>
           </TabsList>
           <TabsContent value="liga">
         {/* Horizontal league shield strip — Duolingo style */}
@@ -337,7 +271,7 @@ const Leagues = ({ embedded = false }: LeaguesProps = {}) => {
                   />
                   <span
                     className={cn(
-                      "font-pixel text-[7px] tracking-wider text-center max-w-[72px] truncate",
+                      "font-pixel text-[11px] tracking-wider text-center max-w-[72px] truncate",
                       isCurrent ? "" : passed ? "text-primary" : "text-muted-foreground",
                     )}
                     style={isCurrent ? { color: g.color } : undefined}
@@ -358,7 +292,7 @@ const Leagues = ({ embedded = false }: LeaguesProps = {}) => {
           >
             Liga {leagueLabel(current)}
           </h2>
-          <p className="mt-1 font-pixel text-[9px] tracking-widest text-muted-foreground">
+          <p className="mt-1 font-pixel text-xs tracking-widest text-muted-foreground">
             TOP {PROMOTION_RANK} ASCIENDEN A LA SIGUIENTE LIGA
           </p>
         </div>
@@ -367,7 +301,7 @@ const Leagues = ({ embedded = false }: LeaguesProps = {}) => {
         <Card
           className="mb-6 overflow-hidden border-2 border-primary/40 bg-card/70 p-4 backdrop-blur"
         >
-          <div className="flex items-center justify-between font-pixel text-[8px] text-muted-foreground">
+          <div className="flex items-center justify-between font-pixel text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <Trophy className="h-3 w-3 text-primary" />
               <span className="text-primary">{trophies}</span>
@@ -386,7 +320,7 @@ const Leagues = ({ embedded = false }: LeaguesProps = {}) => {
               }}
             />
           </div>
-          <p className="mt-2 text-center font-pixel text-[7px] text-muted-foreground">
+          <p className="mt-2 text-center font-pixel text-[11px] text-muted-foreground">
             +1 trofeo por misión · +5 al completar todas las diarias
           </p>
         </Card>
@@ -394,11 +328,11 @@ const Leagues = ({ embedded = false }: LeaguesProps = {}) => {
         {/* Leaderboard — real users from profiles */}
         <div className="rounded-xl border border-border bg-card/60 p-2 backdrop-blur">
           {loadingLb ? (
-            <p className="py-8 text-center font-pixel text-[9px] tracking-widest text-muted-foreground">
+            <p className="py-8 text-center font-pixel text-xs tracking-widest text-muted-foreground">
               CARGANDO...
             </p>
           ) : leaderboard.length === 0 ? (
-            <p className="py-8 text-center font-pixel text-[9px] tracking-widest text-muted-foreground">
+            <p className="py-8 text-center font-pixel text-xs tracking-widest text-muted-foreground">
               SÉ EL PRIMERO EN APARECER AQUÍ
             </p>
           ) : leaderboard.map((p, i) => {
@@ -410,7 +344,7 @@ const Leagues = ({ embedded = false }: LeaguesProps = {}) => {
                 {showPromoDivider && (
                   <div className="my-2 flex items-center justify-center gap-2 border-y border-primary/30 bg-primary/5 py-1.5">
                     <ChevronUp className="h-3 w-3 text-primary" />
-                    <span className="font-pixel text-[8px] tracking-widest text-primary">
+                    <span className="font-pixel text-xs tracking-widest text-primary">
                       ZONA DE ASCENSO
                     </span>
                     <ChevronUp className="h-3 w-3 text-primary" />
@@ -425,7 +359,7 @@ const Leagues = ({ embedded = false }: LeaguesProps = {}) => {
                   {/* Rank */}
                   <div
                     className={cn(
-                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-md font-pixel text-[10px]",
+                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-md font-pixel text-xs",
                       rank === 1 && "bg-primary/25 text-primary",
                       rank === 2 && "bg-primary/15 text-primary/90",
                       rank === 3 && "bg-primary/10 text-primary/80",
@@ -445,7 +379,7 @@ const Leagues = ({ embedded = false }: LeaguesProps = {}) => {
                     {p.avatar_url ? (
                       <img src={p.avatar_url} alt={p.name} className="h-full w-full object-cover" />
                     ) : (
-                      <span className="font-pixel text-[10px] text-muted-foreground">
+                      <span className="font-pixel text-xs text-muted-foreground">
                         {p.name.slice(0, 1).toUpperCase()}
                       </span>
                     )}
@@ -460,15 +394,15 @@ const Leagues = ({ embedded = false }: LeaguesProps = {}) => {
                     >
                       {p.name}
                       {p.isUser && (
-                        <span className="ml-1 font-pixel text-[7px] text-primary/80">(TÚ)</span>
+                        <span className="ml-1 font-pixel text-[11px] text-primary/80">(TÚ)</span>
                       )}
                     </p>
-                    <p className="truncate font-pixel text-[7px] tracking-wider text-muted-foreground">
+                    <p className="truncate font-pixel text-[11px] tracking-wider text-muted-foreground">
                       {p.league} · {p.xp} XP
                     </p>
                   </div>
                   {/* Trophies */}
-                  <div className="flex items-center gap-1 font-pixel text-[10px] text-primary">
+                  <div className="flex items-center gap-1 font-pixel text-xs text-primary">
                     <Trophy className="h-3 w-3" />
                     {p.trophies}
                   </div>
@@ -479,7 +413,7 @@ const Leagues = ({ embedded = false }: LeaguesProps = {}) => {
         </div>
 
         {!loadingLb && myRank > 0 && (
-          <p className="mt-3 text-center font-pixel text-[8px] tracking-widest text-muted-foreground">
+          <p className="mt-3 text-center font-pixel text-xs tracking-widest text-muted-foreground">
             TU POSICIÓN: #{myRank} DE {leaderboard.length}
           </p>
         )}
@@ -492,18 +426,18 @@ const Leagues = ({ embedded = false }: LeaguesProps = {}) => {
               >
                 Ranking Global
               </h2>
-              <p className="mt-1 font-pixel text-[9px] tracking-widest text-muted-foreground">
+              <p className="mt-1 font-pixel text-xs tracking-widest text-muted-foreground">
                 TOP 100 CAZADORES POR TROFEOS
               </p>
             </div>
 
             <div className="rounded-xl border border-border bg-card/60 p-2 backdrop-blur">
               {loadingGlobal ? (
-                <p className="py-8 text-center font-pixel text-[9px] tracking-widest text-muted-foreground">
+                <p className="py-8 text-center font-pixel text-xs tracking-widest text-muted-foreground">
                   CARGANDO...
                 </p>
               ) : globalRows.length === 0 ? (
-                <p className="py-8 text-center font-pixel text-[9px] tracking-widest text-muted-foreground">
+                <p className="py-8 text-center font-pixel text-xs tracking-widest text-muted-foreground">
                   SÉ EL PRIMERO EN APARECER AQUÍ
                 </p>
               ) : (
@@ -518,7 +452,7 @@ const Leagues = ({ embedded = false }: LeaguesProps = {}) => {
 
             {!loadingGlobal && userId && myGlobalRank > globalRows.length && (
               <div className="sticky bottom-2 mt-3 rounded-xl border-2 border-primary/60 bg-background/90 p-2 shadow-lg backdrop-blur">
-                <p className="mb-1 text-center font-pixel text-[7px] tracking-widest text-primary">
+                <p className="mb-1 text-center font-pixel text-[11px] tracking-widest text-primary">
                   TU POSICIÓN
                 </p>
                 <GlobalRow

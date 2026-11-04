@@ -125,7 +125,7 @@ const AchievementsView = ({ tasks }: Props) => {
           type="button"
           onClick={() => setTab("stats")}
           className={cn(
-            "flex-1 rounded-xl border px-4 py-3 font-pixel text-[10px] uppercase transition",
+            "flex-1 rounded-xl border px-4 py-3 font-pixel text-xs uppercase transition",
             tab === "stats"
               ? "border-primary bg-primary/15 text-primary"
               : "border-border bg-card text-muted-foreground hover:bg-muted",
@@ -137,7 +137,7 @@ const AchievementsView = ({ tasks }: Props) => {
           type="button"
           onClick={() => setTab("achievements")}
           className={cn(
-            "flex-1 rounded-xl border px-4 py-3 font-pixel text-[10px] uppercase transition",
+            "flex-1 rounded-xl border px-4 py-3 font-pixel text-xs uppercase transition",
             tab === "achievements"
               ? "border-primary bg-primary/15 text-primary"
               : "border-border bg-card text-muted-foreground hover:bg-muted",
@@ -221,7 +221,7 @@ const AchievementsView = ({ tasks }: Props) => {
                         "repeating-linear-gradient(to right, hsl(var(--primary)) 0 6px, transparent 6px 12px)",
                     }}
                   />
-                  <span className="ml-2 text-[10px] font-semibold text-primary">
+                  <span className="ml-2 text-xs font-semibold text-primary">
                     avg
                   </span>
                 </div>
@@ -243,7 +243,7 @@ const AchievementsView = ({ tasks }: Props) => {
                           title={`${d.count} misiones`}
                         />
                       </div>
-                      <span className="text-[10px] text-muted-foreground">
+                      <span className="text-xs text-muted-foreground">
                         {DAY_LABELS[d.date.getDay()]}
                       </span>
                     </div>
@@ -1702,7 +1702,7 @@ function HexAchievement({
               <IconComp className="h-full w-full" />
             </div>
             {!locked && (
-              <span className="relative mt-0.5 text-[10px] font-black tracking-widest drop-shadow-[0_1px_0_rgba(255,255,255,0.35)]">
+              <span className="relative mt-0.5 text-xs font-black tracking-widest drop-shadow-[0_1px_0_rgba(255,255,255,0.35)]">
                 {ROMAN[ach.level]}
               </span>
             )}
@@ -1956,7 +1956,7 @@ function StreakCalendar({ completionByDay }: StreakCalendarProps) {
       </div>
 
       {/* Weekday header */}
-      <div className="mb-1 grid grid-cols-7 text-center text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+      <div className="mb-1 grid grid-cols-7 text-center text-xs font-medium uppercase tracking-wide text-muted-foreground">
         {WEEKDAYS.map((w) => (
           <div key={w} className="py-1">
             {w}

@@ -1,10 +1,10 @@
-import { useState, useCallback } from "react";
-import type { Task } from "@/lib/types";
-import type { Project } from "@/lib/types";
-import TaskCard from "./TaskCard";
-import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { useCallback, useMemo, useState } from "react";
+import { DndContext, closestCenter, type DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Sparkles } from "lucide-react";
+import type { Project, Task } from "@/lib/types";
+import TaskCard from "./TaskCard";
 
 interface ListViewProps {
   tasks: Task[];
@@ -15,22 +15,41 @@ interface ListViewProps {
   onDelete: (id: string) => void;
   onToggleSubtask: (task: Task) => void;
   onReorder: (taskId: string, newPosition: number) => void;
+  emptyMessage?: string;
 }
 
 const SortableTask = ({ task, ...props }: { task: Task } & Omit<React.ComponentProps<typeof TaskCard>, "task">) => {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: task.id });
-  const style = { transform: CSS.Transform.toString(transform), transition };
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id });
+  const style = { transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 10 : undefined };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={isDragging ? "opacity-90" : undefined}>
       <TaskCard task={task} {...props} />
     </div>
   );
 };
 
-const ListView = ({ tasks, subtasks, projects, onToggleComplete, onEdit, onDelete, onToggleSubtask, onReorder }: ListViewProps) => {
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+const ListView = ({ tasks, subtasks, projects, onToggleComplete, onEdit, onDelete, onToggleSubtask, onReorder, emptyMessage }: ListViewProps) => {
+  // Mouse drags after a few px; touch needs a short press so scrolling stays smooth.
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 300, tolerance: 8 } }),
+  );
   const [exitingIds, setExitingIds] = useState<Set<string>>(new Set());
+
+  const subtasksByParent = useMemo(() => {
+    const map = new Map<string, Task[]>();
+    subtasks.forEach((s) => {
+      if (!s.parent_task_id) return;
+      const list = map.get(s.parent_task_id) ?? [];
+      list.push(s);
+      map.set(s.parent_task_id, list);
+    });
+    return map;
+  }, [subtasks]);
+
+  const projectColors = useMemo(() => new Map(projects.map((p) => [p.id, p.color])), [projects]);
+
   const handleDelete = useCallback((id: string) => {
     setExitingIds((prev) => new Set(prev).add(id));
     setTimeout(() => onDelete(id), 280);
@@ -39,14 +58,14 @@ const ListView = ({ tasks, subtasks, projects, onToggleComplete, onEdit, onDelet
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const newIndex = tasks.findIndex((t) => t.id === over.id);
-    onReorder(active.id as string, newIndex);
+    onReorder(active.id as string, tasks.findIndex((t) => t.id === over.id));
   };
 
   if (tasks.length === 0) {
     return (
-      <div className="flex h-64 items-center justify-center rounded-xl border border-dashed border-border" role="status">
-        <p className="text-sm text-muted-foreground">No hay tareas. ¡Crea una nueva!</p>
+      <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border px-6 py-10 text-center" role="status">
+        <Sparkles className="h-6 w-6 text-primary" />
+        <p className="text-sm font-bold text-muted-foreground">{emptyMessage ?? "No hay misiones. ¡Crea una nueva!"}</p>
       </div>
     );
   }
@@ -54,24 +73,20 @@ const ListView = ({ tasks, subtasks, projects, onToggleComplete, onEdit, onDelet
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-        <div className="space-y-2" role="list" aria-label={`Lista de misiones, ${tasks.length} en total`}>
-          {tasks.map((task) => {
-            const taskSubtasks = subtasks.filter((s) => s.parent_task_id === task.id);
-            const project = projects.find((p) => p.id === task.project_id);
-            return (
-              <SortableTask
-                key={task.id}
-                task={task}
-                subtasks={taskSubtasks}
-                onToggleComplete={onToggleComplete}
-                onEdit={onEdit}
-                onDelete={handleDelete}
-                onToggleSubtask={onToggleSubtask}
-                projectColor={project?.color}
-                exiting={exitingIds.has(task.id)}
-              />
-            );
-          })}
+        <div className="space-y-2.5" role="list" aria-label={`Lista de misiones, ${tasks.length} en total`}>
+          {tasks.map((task) => (
+            <SortableTask
+              key={task.id}
+              task={task}
+              subtasks={subtasksByParent.get(task.id) ?? []}
+              onToggleComplete={onToggleComplete}
+              onEdit={onEdit}
+              onDelete={handleDelete}
+              onToggleSubtask={onToggleSubtask}
+              projectColor={task.project_id ? projectColors.get(task.project_id) : undefined}
+              exiting={exitingIds.has(task.id)}
+            />
+          ))}
         </div>
       </SortableContext>
     </DndContext>

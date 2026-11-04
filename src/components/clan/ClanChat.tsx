@@ -81,7 +81,7 @@ const ClanChat = ({ clanId }: { clanId: string }) => {
                   <div className={`inline-flex max-w-[90%] items-center gap-1.5 rounded-full bg-muted/40 px-3 py-1 text-[11px] ${t.tone}`}>
                     <Icon className="h-3 w-3" />
                     <span className="truncate">{t.line}</span>
-                    <span className="text-[9px] text-muted-foreground">· {timeAgo(it.ts)}</span>
+                    <span className="text-xs text-muted-foreground">· {timeAgo(it.ts)}</span>
                   </div>
                 </div>
               );
@@ -93,12 +93,12 @@ const ClanChat = ({ clanId }: { clanId: string }) => {
               <div key={it.id} className={`flex items-end gap-2 ${mine ? "flex-row-reverse" : ""}`}>
                 <Avatar className="h-7 w-7 shrink-0 ring-1 ring-border">
                   <AvatarImage src={m.profile?.avatar_url ?? undefined} />
-                  <AvatarFallback className="text-[9px]">{name.charAt(0)}</AvatarFallback>
+                  <AvatarFallback className="text-xs">{name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className={`max-w-[78%] ${mine ? "items-end" : "items-start"} flex flex-col`}>
                   <div className={`flex items-baseline gap-2 ${mine ? "flex-row-reverse" : ""}`}>
                     <span className="text-[11px] font-semibold text-foreground">{mine ? "Tú" : name}</span>
-                    <span className="text-[9px] text-muted-foreground">{timeAgo(m.created_at)}</span>
+                    <span className="text-xs text-muted-foreground">{timeAgo(m.created_at)}</span>
                   </div>
                   <div
                     className={`mt-0.5 rounded-2xl px-3 py-2 text-sm leading-snug ${

@@ -236,12 +236,12 @@ export default function ScheduleBlockDialog({ open, onOpenChange }: Props) {
 
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <Label className="font-pixel text-[9px]">Nombre</Label>
+            <Label className="font-pixel text-xs">Nombre</Label>
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej. Entrenamiento" />
           </div>
 
           <div className="space-y-1.5">
-            <Label className="font-pixel text-[9px]">Día(s) de la semana</Label>
+            <Label className="font-pixel text-xs">Día(s) de la semana</Label>
             <div className="flex flex-wrap gap-1.5">
               {DAY_LABELS.map((lbl, i) => {
                 const active = days.includes(i);
@@ -251,7 +251,7 @@ export default function ScheduleBlockDialog({ open, onOpenChange }: Props) {
                     type="button"
                     onClick={() => toggleDay(i)}
                     className={cn(
-                      "px-2.5 py-1.5 rounded-md font-pixel text-[9px] border transition-colors",
+                      "px-2.5 py-1.5 rounded-md font-pixel text-xs border transition-colors",
                       active
                         ? "bg-primary text-primary-foreground border-primary"
                         : "bg-muted/40 text-muted-foreground border-border hover:bg-muted"
@@ -266,7 +266,7 @@ export default function ScheduleBlockDialog({ open, onOpenChange }: Props) {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="font-pixel text-[9px]">Hora inicio</Label>
+              <Label className="font-pixel text-xs">Hora inicio</Label>
               <TimePicker
                 hour12={startH}
                 minute={startM}
@@ -275,7 +275,7 @@ export default function ScheduleBlockDialog({ open, onOpenChange }: Props) {
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="font-pixel text-[9px]">Hora fin</Label>
+              <Label className="font-pixel text-xs">Hora fin</Label>
               <TimePicker
                 hour12={endH}
                 minute={endM}
@@ -286,7 +286,7 @@ export default function ScheduleBlockDialog({ open, onOpenChange }: Props) {
           </div>
 
           <div className="space-y-1.5">
-            <Label className="font-pixel text-[9px]">Color</Label>
+            <Label className="font-pixel text-xs">Color</Label>
             <div className="flex flex-wrap gap-2">
               {COLOR_PRESETS.map((c) => (
                 <button
@@ -305,7 +305,7 @@ export default function ScheduleBlockDialog({ open, onOpenChange }: Props) {
           </div>
 
           <div className="space-y-1.5">
-            <Label className="font-pixel text-[9px]">Repetir por</Label>
+            <Label className="font-pixel text-xs">Repetir por</Label>
             <div className="flex items-center gap-2">
               <Input
                 type="number"
@@ -322,7 +322,7 @@ export default function ScheduleBlockDialog({ open, onOpenChange }: Props) {
                     type="button"
                     onClick={() => setRepeatUnit(u)}
                     className={cn(
-                      "px-3 py-1 rounded font-pixel text-[9px]",
+                      "px-3 py-1 rounded font-pixel text-xs",
                       repeatUnit === u ? "bg-background text-foreground" : "text-muted-foreground"
                     )}
                   >
@@ -334,10 +334,10 @@ export default function ScheduleBlockDialog({ open, onOpenChange }: Props) {
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)} className="font-pixel text-[9px]">
+            <Button variant="outline" onClick={() => onOpenChange(false)} className="font-pixel text-xs">
               Cancelar
             </Button>
-            <Button onClick={handleSave} disabled={saving} className="font-pixel text-[9px]">
+            <Button onClick={handleSave} disabled={saving} className="font-pixel text-xs">
               {saving ? "Guardando..." : "Guardar"}
             </Button>
           </div>

@@ -1,11 +1,4 @@
-@import url('@fontsource/inter/400.css');
-@import url('@fontsource/inter/500.css');
-@import url('@fontsource/inter/600.css');
-@import url('@fontsource/rajdhani/400.css');
-@import url('@fontsource/rajdhani/500.css');
-@import url('@fontsource/rajdhani/600.css');
-@import url('@fontsource/rajdhani/700.css');
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap');
+@import url('@fontsource-variable/nunito');
 
 @tailwind base;
 @tailwind components;
@@ -42,232 +35,118 @@ html, body {
 }
 
 /* =====================================================
-   Solo Leveling × Sword Art Online — Modern System UI
-   Clean, dark, glassmorphism with cyan/blue glow accents
+   XPFly — light & friendly
+   Soft surfaces, one accent color (from the theme), rounded shapes.
    ===================================================== */
 
 @layer base {
   :root {
-    /* Base — deep navy night */
-    --background: 222 47% 6%;
-    --foreground: 210 40% 96%;
+    --background: 225 35% 97%;
+    --foreground: 226 32% 15%;
 
-    --card: 222 40% 9%;
-    --card-foreground: 210 40% 96%;
+    --card: 0 0% 100%;
+    --card-foreground: 226 32% 15%;
 
-    --popover: 222 45% 8%;
-    --popover-foreground: 210 40% 96%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 226 32% 15%;
 
-    /* Primary — System cyan (Solo Leveling) */
-    --primary: 195 100% 60%;
-    --primary-foreground: 222 47% 6%;
-    --primary-glow: 195 100% 70%;
+    --primary: 252 75% 60%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 252 85% 72%;
 
-    --secondary: 222 35% 14%;
-    --secondary-foreground: 210 40% 96%;
+    --secondary: 225 30% 94%;
+    --secondary-foreground: 226 32% 18%;
 
-    --muted: 222 30% 12%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 225 30% 95%;
+    --muted-foreground: 225 12% 45%;
 
-    --accent: 220 90% 56%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 252 75% 60%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 75% 56%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 50% 22%;
-    --input: 222 35% 14%;
-    --ring: 195 100% 60%;
+    --success: 152 60% 40%;
+    --warning: 36 95% 50%;
+    --xp: 42 96% 50%;
 
-    --radius: 0.625rem;
+    --border: 225 22% 90%;
+    --input: 225 22% 88%;
+    --ring: 252 75% 60%;
 
-    /* Sidebar — slightly darker glass */
-    --sidebar-background: 222 50% 5%;
-    --sidebar-foreground: 215 20% 75%;
-    --sidebar-primary: 195 100% 60%;
-    --sidebar-primary-foreground: 222 47% 6%;
-    --sidebar-accent: 222 40% 11%;
-    --sidebar-accent-foreground: 210 40% 96%;
-    --sidebar-border: 215 40% 16%;
-    --sidebar-ring: 195 100% 60%;
+    --radius: 0.875rem;
 
-    /* Priorities — clean modern hues */
-    --priority-low: 160 70% 50%;
-    --priority-medium: 200 95% 60%;
-    --priority-high: 280 80% 65%;
-    --priority-urgent: 340 85% 60%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 225 14% 40%;
+    --sidebar-primary: 252 75% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 225 30% 95%;
+    --sidebar-accent-foreground: 226 32% 15%;
+    --sidebar-border: 225 22% 91%;
+    --sidebar-ring: 252 75% 60%;
 
-    --status-todo: 215 20% 60%;
-    --status-in-progress: 195 100% 60%;
-    --status-done: 160 70% 50%;
+    --priority-low: 152 60% 42%;
+    --priority-medium: 210 85% 52%;
+    --priority-high: 28 92% 52%;
+    --priority-urgent: 350 80% 56%;
 
-    --xp-bar: 195 100% 60%;
-    --xp-bar-bg: 222 40% 12%;
+    --status-todo: 225 12% 55%;
+    --status-in-progress: 210 85% 52%;
+    --status-done: 152 60% 42%;
 
-    /* Effects */
-    --glow-primary: 0 0 24px hsl(195 100% 60% / 0.45);
-    --glow-soft: 0 0 16px hsl(195 100% 60% / 0.25);
-    --gradient-system: linear-gradient(135deg, hsl(220 90% 56% / 0.15), hsl(195 100% 60% / 0.15));
-    --gradient-panel: linear-gradient(180deg, hsl(222 45% 9% / 0.92), hsl(222 50% 6% / 0.92));
+    --xp-bar: var(--primary);
+    --xp-bar-bg: 225 30% 92%;
+
+    --shadow-color: 228 40% 30%;
+    --gradient-panel: linear-gradient(180deg, hsl(var(--card)), hsl(var(--card)));
+  }
+
+  /* Optional dark mode — same accents, deep soft surfaces */
+  .dark {
+    --background: 230 22% 10%;
+    --foreground: 225 30% 95%;
+    --card: 230 20% 14%;
+    --card-foreground: 225 30% 95%;
+    --popover: 230 20% 14%;
+    --popover-foreground: 225 30% 95%;
+    --secondary: 230 18% 19%;
+    --secondary-foreground: 225 30% 95%;
+    --muted: 230 18% 18%;
+    --muted-foreground: 225 14% 65%;
+    --border: 230 16% 22%;
+    --input: 230 16% 24%;
+    --sidebar-background: 230 20% 12%;
+    --sidebar-foreground: 225 14% 70%;
+    --sidebar-accent: 230 18% 18%;
+    --sidebar-accent-foreground: 225 30% 95%;
+    --sidebar-border: 230 16% 20%;
+    --xp-bar-bg: 230 18% 20%;
+    --shadow-color: 230 50% 2%;
   }
 }
 
-/* =========== Color Themes (override --primary/--accent/--ring) =========== */
-.theme-system-cyan { /* default — Solo Leveling cyan */
-  --primary: 195 100% 60%;
-  --primary-glow: 195 100% 70%;
-  --accent: 220 90% 56%;
-  --ring: 195 100% 60%;
-  --sidebar-primary: 195 100% 60%;
-  --xp-bar: 195 100% 60%;
-}
-.theme-monarch-violet {
-  --primary: 270 90% 65%;
-  --primary-glow: 270 100% 75%;
-  --accent: 290 85% 60%;
-  --ring: 270 90% 65%;
-  --sidebar-primary: 270 90% 65%;
-  --xp-bar: 270 90% 65%;
-}
-.theme-ember-red {
-  --primary: 0 85% 60%;
-  --primary-glow: 15 95% 65%;
-  --accent: 25 90% 55%;
-  --ring: 0 85% 60%;
-  --sidebar-primary: 0 85% 60%;
-  --xp-bar: 0 85% 60%;
-}
-.theme-emerald-hunter {
-  --primary: 152 75% 50%;
-  --primary-glow: 160 80% 60%;
-  --accent: 175 70% 45%;
-  --ring: 152 75% 50%;
-  --sidebar-primary: 152 75% 50%;
-  --xp-bar: 152 75% 50%;
-}
-.theme-gold-arena {
-  --primary: 45 95% 58%;
-  --primary-glow: 50 100% 70%;
-  --accent: 30 90% 55%;
-  --ring: 45 95% 58%;
-  --sidebar-primary: 45 95% 58%;
-  --xp-bar: 45 95% 58%;
-}
-.theme-rose-blade {
-  --primary: 340 90% 62%;
-  --primary-glow: 330 95% 70%;
-  --accent: 310 80% 60%;
-  --ring: 340 90% 62%;
-  --sidebar-primary: 340 90% 62%;
-  --xp-bar: 340 90% 62%;
-}
+/* =========== Color themes — accent only, tuned for contrast on light surfaces =========== */
+.theme-system-cyan     { --primary: 196 85% 42%; --primary-glow: 196 85% 55%; }
+.theme-monarch-violet  { --primary: 262 70% 58%; --primary-glow: 262 80% 70%; }
+.theme-ember-red       { --primary: 4 76% 54%;   --primary-glow: 10 85% 65%; }
+.theme-emerald-hunter  { --primary: 156 64% 36%; --primary-glow: 156 60% 48%; }
+.theme-gold-arena      { --primary: 38 92% 44%;  --primary-glow: 42 95% 55%; }
+.theme-rose-blade      { --primary: 338 76% 54%; --primary-glow: 338 85% 66%; }
+.theme-cafe            { --primary: 22 45% 42%;  --primary-glow: 22 55% 55%; }
+.theme-navy            { --primary: 222 62% 40%; --primary-glow: 222 70% 55%; }
+.theme-pizarra         { --primary: 200 22% 38%; --primary-glow: 200 28% 52%; }
+.theme-oro-oscuro      { --primary: 40 85% 36%;  --primary-glow: 43 89% 48%; }
+.theme-lavanda         { --primary: 282 42% 56%; --primary-glow: 282 52% 70%; }
+.theme-menta           { --primary: 162 45% 38%; --primary-glow: 162 45% 52%; }
+.theme-rosa-pastel     { --primary: 340 68% 58%; --primary-glow: 340 78% 72%; }
+.theme-melocoton       { --primary: 14 80% 56%;  --primary-glow: 14 92% 68%; }
 
-/* ===== Dark full themes (override surfaces) ===== */
-.theme-cafe {
-  --primary: 22 55% 55%;
-  --primary-glow: 22 70% 65%;
-  --accent: 22 55% 55%;
-  --ring: 22 55% 55%;
-  --sidebar-primary: 22 55% 55%;
-  --xp-bar: 22 55% 55%;
-}
-.theme-navy {
-  --primary: 220 80% 62%;
-  --primary-glow: 220 90% 72%;
-  --accent: 220 80% 62%;
-  --ring: 220 80% 62%;
-  --sidebar-primary: 220 80% 62%;
-  --xp-bar: 220 80% 62%;
-}
-.theme-pizarra {
-  --primary: 199 35% 55%;
-  --primary-glow: 199 45% 65%;
-  --accent: 199 35% 55%;
-  --ring: 199 35% 55%;
-  --sidebar-primary: 199 35% 55%;
-  --xp-bar: 199 35% 55%;
-}
-.theme-oro-oscuro {
-  --primary: 43 89% 45%;
-  --primary-glow: 45 95% 58%;
-  --accent: 43 89% 45%;
-  --ring: 43 89% 45%;
-  --sidebar-primary: 43 89% 45%;
-  --xp-bar: 43 89% 45%;
-}
-
-/* ===== Pastel full themes (light surfaces, dark text) ===== */
-.theme-lavanda {
-  --primary: 285 45% 60%;
-  --primary-glow: 285 55% 72%;
-  --accent: 285 45% 60%;
-  --ring: 285 45% 60%;
-  --sidebar-primary: 285 45% 60%;
-  --xp-bar: 285 45% 60%;
-}
-.theme-menta {
-  --primary: 160 41% 45%;
-  --primary-glow: 160 50% 58%;
-  --accent: 160 41% 45%;
-  --ring: 160 41% 45%;
-  --sidebar-primary: 160 41% 45%;
-  --xp-bar: 160 41% 45%;
-}
-.theme-rosa-pastel {
-  --primary: 340 75% 60%;
-  --primary-glow: 340 82% 76%;
-  --accent: 340 75% 60%;
-  --ring: 340 75% 60%;
-  --sidebar-primary: 340 75% 60%;
-  --xp-bar: 340 75% 60%;
-}
-.theme-melocoton {
-  --primary: 13 85% 60%;
-  --primary-glow: 13 100% 72%;
-  --accent: 13 85% 60%;
-  --ring: 13 85% 60%;
-  --sidebar-primary: 13 85% 60%;
-  --xp-bar: 13 85% 60%;
-}
-
-/* =========== Light mode override =========== */
-.light {
-  --background: 210 30% 97%;
-  --foreground: 222 35% 12%;
-
-  --card: 0 0% 100%;
-  --card-foreground: 222 35% 12%;
-
-  --popover: 0 0% 100%;
-  --popover-foreground: 222 35% 12%;
-
-  --primary-foreground: 0 0% 100%;
-
-  --secondary: 210 25% 92%;
-  --secondary-foreground: 222 35% 14%;
-
-  --muted: 210 25% 93%;
-  --muted-foreground: 222 15% 38%;
-
-  --accent-foreground: 0 0% 100%;
-
-  --destructive: 0 80% 55%;
-  --destructive-foreground: 0 0% 100%;
-
-  --border: 215 25% 82%;
-  --input: 215 25% 88%;
-
-  --sidebar-background: 210 30% 95%;
-  --sidebar-foreground: 222 25% 25%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 210 25% 90%;
-  --sidebar-accent-foreground: 222 35% 14%;
-  --sidebar-border: 215 25% 80%;
-
-  --xp-bar-bg: 210 25% 88%;
-
-  --gradient-system: linear-gradient(135deg, hsl(var(--accent) / 0.10), hsl(var(--primary) / 0.10));
-  --gradient-panel: linear-gradient(180deg, hsl(0 0% 100% / 0.95), hsl(210 30% 96% / 0.95));
+[class*="theme-"] {
+  --accent: var(--primary);
+  --ring: var(--primary);
+  --sidebar-primary: var(--primary);
+  --sidebar-ring: var(--primary);
+  --xp-bar: var(--primary);
 }
 
 @layer base {
@@ -277,319 +156,199 @@ html, body {
 
   html, body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Nunito Variable', 'Nunito', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Rajdhani', 'Inter', sans-serif;
-    font-weight: 600;
-    letter-spacing: 0.01em;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  button, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
-/* =========== System Typography =========== */
-.font-pixel {
-  /* Legacy class — re-mapped to Rajdhani for the System look */
-  font-family: 'Rajdhani', 'Inter', sans-serif !important;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+/* =========== Typography helpers =========== */
+/* Legacy classes kept so every screen picks up the new type without rewrites */
+.font-pixel,
+.font-system {
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.font-display {
+  font-weight: 900;
+  letter-spacing: -0.02em;
 }
 
-.font-system {
-  font-family: 'Rajdhani', sans-serif;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+@layer components {
+  /* Generic surface used across screens */
+  .surface {
+    @apply rounded-2xl border border-border bg-card;
+    box-shadow: 0 1px 2px hsl(var(--shadow-color) / 0.04), 0 4px 16px hsl(var(--shadow-color) / 0.05);
+  }
+
+  .section-title {
+    @apply text-lg font-extrabold tracking-tight text-foreground;
+  }
+
+  .eyebrow {
+    @apply text-xs font-bold text-muted-foreground;
+  }
 }
 
 /* =========== XP Bar =========== */
 .xp-bar-bg {
-  @apply h-2 w-full overflow-hidden rounded-full;
+  @apply h-2.5 w-full overflow-hidden rounded-full;
   background: hsl(var(--xp-bar-bg));
-  border: 1px solid hsl(var(--border));
-  box-shadow: inset 0 1px 2px hsl(0 0% 0% / 0.4);
 }
 
 .xp-bar-fill {
-  @apply h-full transition-all duration-700 ease-out;
-  background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--primary-glow)));
-  box-shadow: 0 0 10px hsl(var(--primary) / 0.7);
+  @apply h-full rounded-full transition-[width] duration-700 ease-out;
+  background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary-glow)));
 }
 
-/* =========== XP Popup =========== */
+/* =========== XP Popup / Level up =========== */
 .xp-popup {
-  animation: xp-float 1.5s ease-out forwards;
-  text-shadow: 0 0 12px hsl(195 100% 60% / 0.8);
+  animation: xp-float 1.4s ease-out forwards;
 }
 
 @keyframes xp-float {
-  0%   { opacity: 1; transform: translateY(0) scale(1); }
-  50%  { opacity: 1; transform: translateY(-30px) scale(1.15); }
-  100% { opacity: 0; transform: translateY(-60px) scale(0.85); }
+  0%   { opacity: 0; transform: translateY(8px) scale(0.9); }
+  20%  { opacity: 1; transform: translateY(0) scale(1.05); }
+  70%  { opacity: 1; transform: translateY(-16px) scale(1); }
+  100% { opacity: 0; transform: translateY(-32px) scale(0.95); }
 }
 
-/* =========== Level Up =========== */
 .level-up-container {
-  animation: level-up-pulse 0.5s ease-out;
+  animation: level-up-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-@keyframes level-up-pulse {
-  0%   { transform: scale(0.5); opacity: 0; }
-  50%  { transform: scale(1.1); }
+@keyframes level-up-pop {
+  0%   { transform: scale(0.6); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
 }
 
-/* =========== Task Card — System window =========== */
+/* =========== Task card =========== */
 .task-card-game {
-  @apply rounded-lg p-3 transition-all duration-200;
-  background: linear-gradient(180deg, hsl(var(--card) / 0.9), hsl(var(--card) / 0.7));
-  border: 1px solid hsl(var(--border));
-  backdrop-filter: blur(8px);
+  @apply surface p-3.5 transition-[box-shadow,transform,opacity] duration-200;
   position: relative;
 }
 
-.task-card-game::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0;
-  width: 3px; height: 100%;
-  background: linear-gradient(180deg, hsl(var(--primary)), hsl(var(--accent)));
-  border-radius: var(--radius) 0 0 var(--radius);
-  opacity: 0.6;
-  transition: opacity 0.2s;
-}
-
-.task-card-game:hover {
-  border-color: hsl(var(--primary) / 0.5);
-  box-shadow: var(--glow-soft);
-  transform: translateY(-1px);
-}
-
-.task-card-game:hover::before {
-  opacity: 1;
+@media (hover: hover) {
+  .task-card-game:hover {
+    box-shadow: 0 2px 4px hsl(var(--shadow-color) / 0.05), 0 10px 24px hsl(var(--shadow-color) / 0.08);
+  }
 }
 
 .task-card-game.completed {
-  opacity: 0.55;
+  opacity: 0.6;
 }
 
-.task-card-game.completed::before {
-  background: hsl(var(--status-done));
-}
-
-/* =========== Pixel checkbox — replaced with system check =========== */
-.pixel-check {
-  @apply relative flex h-5 w-5 items-center justify-center rounded-md border-2 cursor-pointer transition-all;
-  border-color: hsl(var(--primary) / 0.5);
-  background: hsl(var(--card));
-}
-
-.pixel-check.checked {
-  border-color: hsl(var(--primary));
-  background: hsl(var(--primary));
-  box-shadow: 0 0 10px hsl(var(--primary) / 0.6);
-}
-
-/* =========== Daily Quest Panel — Solo Leveling System Window =========== */
+/* =========== Daily quests =========== */
 .daily-quest-panel {
-  @apply rounded-xl overflow-hidden relative;
-  background:
-    linear-gradient(180deg, hsl(var(--primary) / 0.08), hsl(var(--accent) / 0.08)),
-    var(--gradient-panel);
-  border: 1px solid hsl(var(--primary) / 0.4);
-  box-shadow:
-    0 0 40px hsl(var(--primary) / 0.15),
-    inset 0 1px 0 hsl(var(--primary) / 0.2);
-  backdrop-filter: blur(12px);
-}
-
-/* Decorative SAO-style corners */
-.daily-quest-panel::before,
-.daily-quest-panel::after {
-  content: '';
-  position: absolute;
-  width: 18px; height: 18px;
-  border-color: hsl(var(--primary));
-  pointer-events: none;
-}
-.daily-quest-panel::before {
-  top: 8px; left: 8px;
-  border-top: 2px solid; border-left: 2px solid;
-}
-.daily-quest-panel::after {
-  bottom: 8px; right: 8px;
-  border-bottom: 2px solid; border-right: 2px solid;
+  @apply surface overflow-hidden;
 }
 
 .daily-quest-header {
-  @apply flex items-center justify-between px-5 py-4;
-  background: linear-gradient(90deg, hsl(var(--accent) / 0.25) 0%, hsl(var(--primary) / 0.18) 100%);
-  border-bottom: 1px solid hsl(var(--primary) / 0.3);
+  @apply flex items-center justify-between px-4 pt-4 pb-2;
 }
 
 .daily-quest-icon {
-  @apply flex h-10 w-10 items-center justify-center rounded-lg;
-  background: hsl(var(--primary) / 0.15);
-  color: hsl(var(--primary-glow));
-  border: 1px solid hsl(var(--primary) / 0.5);
-  box-shadow: 0 0 16px hsl(var(--primary) / 0.4);
+  @apply flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary;
 }
 
 .daily-progress-bg {
-  @apply h-2 w-full overflow-hidden rounded-full;
+  @apply h-2.5 w-full overflow-hidden rounded-full;
   background: hsl(var(--muted));
-  border: 1px solid hsl(var(--border));
 }
 
 .daily-progress-fill {
-  @apply h-full transition-all duration-500 ease-out rounded-full;
-  background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)));
-  box-shadow: 0 0 10px hsl(var(--primary) / 0.7);
+  @apply h-full rounded-full transition-[width] duration-500 ease-out;
+  background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary-glow)));
 }
 
 .daily-quest-item {
-  @apply flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all;
-  background: hsl(var(--card) / 0.7);
-  border: 1px solid hsl(var(--border));
+  @apply flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors;
+  background: hsl(var(--muted) / 0.6);
 }
 
-.daily-quest-item:hover {
-  border-color: hsl(var(--primary) / 0.5);
-  background: hsl(var(--primary) / 0.08);
+@media (hover: hover) {
+  .daily-quest-item:hover {
+    background: hsl(var(--primary) / 0.08);
+  }
 }
 
 .daily-quest-item-done {
-  opacity: 0.5;
+  opacity: 0.6;
 }
 
 .daily-quest-reward {
-  @apply mx-4 mb-4 mt-3 rounded-lg p-3;
-  background: linear-gradient(135deg, hsl(var(--primary) / 0.12), hsl(var(--accent) / 0.12));
-  border: 1px solid hsl(var(--primary) / 0.35);
+  @apply mx-4 mb-4 mt-2 rounded-xl p-3;
+  background: hsl(var(--xp) / 0.1);
 }
 
 .daily-claim-btn {
-  @apply px-5 py-2 rounded-lg transition-all font-system text-xs;
-  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+  @apply rounded-full px-5 py-2 text-sm font-extrabold transition-transform active:scale-95;
+  background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
-  border: 1px solid hsl(var(--primary-glow));
-  box-shadow: 0 0 18px hsl(var(--primary) / 0.5);
+  box-shadow: 0 4px 0 hsl(var(--primary) / 0.35);
   animation: claim-pulse 2s ease-in-out infinite;
-  font-weight: 700;
-}
-
-.daily-claim-btn:hover {
-  box-shadow: 0 0 28px hsl(var(--primary) / 0.8);
-  transform: scale(1.04);
 }
 
 @keyframes claim-pulse {
-  0%, 100% { box-shadow: 0 0 18px hsl(var(--primary) / 0.5); }
-  50%      { box-shadow: 0 0 28px hsl(var(--primary) / 0.85); }
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.04); }
 }
 
-.daily-bonus-popup {
-  animation: bonus-appear 0.6s ease-out forwards;
-}
-
-@keyframes bonus-appear {
-  0%   { opacity: 0; transform: scale(0.5) translateY(20px); }
-  50%  { transform: scale(1.15) translateY(-10px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-/* =========== Party Header =========== */
-.party-header-card {
-  background: var(--gradient-panel);
-  border: 1px solid hsl(var(--primary) / 0.3);
-  box-shadow: 0 0 20px hsl(var(--primary) / 0.12);
-  backdrop-filter: blur(8px);
-}
-
-/* =========== Social Panel Dialog =========== */
+/* =========== Generic panels reused by social / clans / character =========== */
+.party-header-card,
 .social-panel-dialog {
-  border: 1px solid hsl(var(--primary) / 0.4);
-  box-shadow: 0 0 40px hsl(var(--primary) / 0.18);
-  backdrop-filter: blur(12px);
+  @apply surface;
 }
 
-/* =========== Status Window (Solo Leveling) =========== */
 .status-window {
-  @apply rounded-xl overflow-hidden relative;
-  background: var(--gradient-panel);
-  border: 1px solid hsl(var(--primary) / 0.5);
-  box-shadow:
-    0 0 30px hsl(var(--primary) / 0.18),
-    inset 0 1px 0 hsl(var(--primary) / 0.25);
-  backdrop-filter: blur(12px);
-}
-
-.status-window::before,
-.status-window::after {
-  content: '';
-  position: absolute;
-  width: 14px; height: 14px;
-  border-color: hsl(var(--primary));
-  pointer-events: none;
-}
-.status-window::before {
-  top: 6px; left: 6px;
-  border-top: 2px solid; border-left: 2px solid;
-}
-.status-window::after {
-  bottom: 6px; right: 6px;
-  border-bottom: 2px solid; border-right: 2px solid;
+  @apply surface overflow-hidden;
 }
 
 .status-window-header {
-  @apply flex items-center justify-between px-4 py-3;
-  background: linear-gradient(90deg, hsl(220 90% 18% / 0.6) 0%, hsl(195 80% 15% / 0.4) 100%);
-  border-bottom: 1px solid hsl(var(--primary) / 0.3);
+  @apply flex items-center justify-between border-b border-border px-4 py-3;
 }
 
 .stat-bar-bg {
-  @apply h-1.5 w-full overflow-hidden rounded-full;
+  @apply h-2 w-full overflow-hidden rounded-full;
   background: hsl(var(--muted));
-  border: 1px solid hsl(var(--border));
 }
 
 .stat-bar-fill {
-  @apply h-full transition-all duration-500 ease-out rounded-full;
+  @apply h-full rounded-full transition-[width] duration-500 ease-out;
 }
 
-/* =========== Character Showcase =========== */
 .character-showcase {
-  @apply relative rounded-xl p-8 flex items-center justify-center overflow-hidden;
-  background: linear-gradient(180deg, hsl(220 60% 12% / 0.7), hsl(222 50% 6% / 0.85));
-  border: 1px solid hsl(var(--primary) / 0.4);
-  box-shadow:
-    0 0 40px hsl(var(--primary) / 0.2),
-    inset 0 1px 0 hsl(var(--primary) / 0.25);
-  min-height: 420px;
+  @apply relative flex items-center justify-center overflow-hidden rounded-3xl p-8;
+  background: linear-gradient(180deg, hsl(var(--primary) / 0.12), hsl(var(--primary) / 0.03));
+  min-height: 360px;
 }
 
 .character-showcase-grid {
   position: absolute;
   inset: 0;
-  background-image:
-    linear-gradient(hsl(var(--primary) / 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, hsl(var(--primary) / 0.08) 1px, transparent 1px);
-  background-size: 24px 24px;
+  background-image: radial-gradient(hsl(var(--primary) / 0.15) 1px, transparent 1px);
+  background-size: 20px 20px;
   mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
   -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
   pointer-events: none;
 }
 
 /* =====================================================
-   Pyro — bolita de fuego azul (Fire Force × Solo Leveling)
+   Pyro — the blue fire companion
    ===================================================== */
 .pyro-sprite {
   position: relative;
   display: inline-block;
-  filter: drop-shadow(0 0 10px hsl(var(--primary) / 0.55)) drop-shadow(0 4px 6px hsl(var(--background) / 0.6));
+  filter: drop-shadow(0 4px 6px hsl(var(--shadow-color) / 0.15));
   cursor: pointer;
 }
 
@@ -607,7 +366,7 @@ html, body {
   position: absolute;
   inset: 10%;
   border-radius: 50%;
-  background: radial-gradient(circle, hsl(var(--primary) / 0.5) 0%, hsl(var(--primary) / 0) 70%);
+  background: radial-gradient(circle, hsl(205 100% 60% / 0.35) 0%, transparent 70%);
   filter: blur(8px);
   animation: pyro-glow-pulse 2.4s ease-in-out infinite;
   pointer-events: none;
@@ -636,9 +395,6 @@ html, body {
   100% { transform: translateY(0) scale(1); }
 }
 
-/* ---- Extended moods: eating / dying / revival / celebrating / sleeping ---- */
-
-/* EATING — scale up, mouth open overlay handled separately, end with flame burst */
 @keyframes pyro-eating {
   0%   { transform: scale(1); }
   20%  { transform: scale(1.2) translateY(-2px); }
@@ -648,9 +404,8 @@ html, body {
   100% { transform: scale(1); }
 }
 
-.pyro-mood-eating { filter: drop-shadow(0 0 18px hsl(35 95% 60% / 0.85)) drop-shadow(0 4px 8px hsl(var(--background) / 0.6)); }
 .pyro-mood-eating .pyro-glow {
-  background: radial-gradient(circle, hsl(35 95% 60% / 0.7) 0%, hsl(15 95% 55% / 0) 70%);
+  background: radial-gradient(circle, hsl(35 95% 60% / 0.6) 0%, transparent 70%);
   animation: pyro-glow-pulse 0.4s ease-in-out infinite;
 }
 
@@ -690,7 +445,6 @@ html, body {
   100% { opacity: 0; transform: scale(1.5); }
 }
 
-/* DYING — desaturate, shrink, slow tremble; halo dimmed */
 @keyframes pyro-tremble {
   0%, 100% { transform: scale(0.7) translate(0, 0); }
   20%      { transform: scale(0.7) translate(-1px, 0); }
@@ -698,24 +452,9 @@ html, body {
   60%      { transform: scale(0.7) translate(-1px, 1px); }
   80%      { transform: scale(0.7) translate(1px, 0); }
 }
-.pyro-mood-dying { filter: brightness(0.4) saturate(0.5) drop-shadow(0 0 4px hsl(var(--primary) / 0.15)); }
+.pyro-mood-dying { filter: grayscale(0.7) opacity(0.6); }
 .pyro-mood-dying .pyro-glow { opacity: 0.05 !important; animation: none; }
 
-/* App-wide vignette companion overlay */
-.pyro-app-vignette {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 30;
-  background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.15) 100%);
-  animation: pyro-vignette-in 1.2s ease-out;
-}
-@keyframes pyro-vignette-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-/* REVIVAL — dramatic scale-up + halo restored + radial flash */
 @keyframes pyro-revival {
   0%   { transform: scale(0.7); filter: brightness(0.4) saturate(0.5); }
   25%  { transform: scale(1.4); filter: brightness(1.6) saturate(1.4); }
@@ -748,7 +487,6 @@ html, body {
   100% { width: 220vmax; height: 220vmax; opacity: 0; }
 }
 
-/* CELEBRATING — fast bounce + rotate + halo color flash */
 @keyframes pyro-celebrate {
   0%   { transform: translateY(0) rotate(0deg) scale(1); }
   15%  { transform: translateY(-14px) rotate(-15deg) scale(1.1); }
@@ -767,115 +505,43 @@ html, body {
   100% { background: radial-gradient(circle, hsl(35 100% 60% / 0.8) 0%, transparent 70%); }
 }
 
-/* SLEEPING — slow sinusoidal float, dim halo */
 @keyframes pyro-sleep {
   0%, 100% { transform: translateY(0); }
   50%      { transform: translateY(-3px); }
 }
-.pyro-mood-sleeping { filter: brightness(0.85) saturate(0.7) drop-shadow(0 0 6px hsl(var(--primary) / 0.2)); }
+.pyro-mood-sleeping { filter: saturate(0.7) opacity(0.85); }
 .pyro-mood-sleeping .pyro-glow { opacity: 0.3; animation: pyro-glow-pulse 6s ease-in-out infinite; }
 
-/* Ghost-card flying toward Pyro on feed */
 @keyframes pyro-ghost-fly {
   0%   { transform: translate(0, 0) scale(1); opacity: 1; }
   60%  { opacity: 0.9; }
   100% { transform: translate(var(--ghost-dx, 0), var(--ghost-dy, 0)) scale(0); opacity: 0; }
 }
 
-/* Pyro speech bubble */
-.pyro-bubble {
-  position: absolute;
-  bottom: calc(100% + 14px);
-  left: 0;
-  max-width: min(280px, calc(100vw - 24px));
-  width: max-content;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-  hyphens: auto;
-  background: hsl(var(--card) / 0.96);
-  backdrop-filter: blur(8px);
-  border: 2px solid hsl(var(--primary) / 0.6);
-  border-radius: 12px;
-  padding: 10px 12px;
-  font-family: 'Rajdhani', sans-serif;
-  font-weight: 600;
-  font-size: 13px;
-  color: hsl(var(--foreground));
-  box-shadow: 0 0 16px hsl(var(--primary) / 0.35), 0 4px 12px hsl(var(--background) / 0.5);
-  animation: pyro-bubble-in 0.25s ease-out;
-  line-height: 1.3;
-}
-.pyro-bubble::after {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 18px;
-  width: 14px;
-  height: 14px;
-  background: hsl(var(--card) / 0.96);
-  border-right: 2px solid hsl(var(--primary) / 0.6);
-  border-bottom: 2px solid hsl(var(--primary) / 0.6);
-  transform: rotate(45deg);
-}
-
-/* Mobile variant: bubble below the sprite (sprite is at top) */
-.pyro-bubble-below {
-  bottom: auto;
-  top: calc(100% + 14px);
-  left: 0;
-  right: auto;
-  max-width: min(280px, calc(100vw - 24px));
-}
-.pyro-bubble-below::after {
-  bottom: auto;
-  top: -8px;
-  left: 18px;
-  right: auto;
-  border-right: none;
-  border-bottom: none;
-  border-left: 2px solid hsl(var(--primary) / 0.6);
-  border-top: 2px solid hsl(var(--primary) / 0.6);
-}
-
-@keyframes pyro-bubble-in {
-  from { opacity: 0; transform: translateY(6px) scale(0.9); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
 /* =====================================================
-   Animated wallpapers — subtle shifting gradient motion
-   Activated by adding `.wp-animated` to the container.
+   Wallpapers — soft, slow gradient drift
    ===================================================== */
 @keyframes wp-shift {
   0%   { background-position: 0% 0%, 100% 100%, 50% 50%, 0 0; }
   50%  { background-position: 100% 50%, 0% 50%, 50% 100%, 0 0; }
   100% { background-position: 0% 100%, 100% 0%, 50% 0%, 0 0; }
 }
-@keyframes wp-pulse {
-  0%, 100% { filter: hue-rotate(0deg) brightness(1); }
-  50%      { filter: hue-rotate(8deg) brightness(1.05); }
-}
 .wp-animated {
   background-size: 220% 220%, 220% 220%, 220% 220%, 100% 100% !important;
-  animation: wp-shift 28s ease-in-out infinite alternate, wp-pulse 14s ease-in-out infinite;
-  will-change: background-position, filter;
-}
-@media (prefers-reduced-motion: reduce) {
-  .wp-animated { animation: none !important; }
+  animation: wp-shift 40s ease-in-out infinite alternate;
 }
 
-/* Task card mount/unmount animations */
+/* Task card mount/unmount */
 @keyframes task-card-in {
-  0% { opacity: 0; transform: translateY(-6px) scale(0.97); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
+  0% { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 @keyframes task-card-out {
-  0% { opacity: 1; transform: translateX(0) scale(1); max-height: 200px; margin-bottom: 0.5rem; }
-  100% { opacity: 0; transform: translateX(40px) scale(0.92); max-height: 0; margin-bottom: 0; padding-top: 0; padding-bottom: 0; }
+  0% { opacity: 1; transform: translateX(0); max-height: 200px; margin-bottom: 0.5rem; }
+  100% { opacity: 0; transform: translateX(32px); max-height: 0; margin-bottom: 0; padding-top: 0; padding-bottom: 0; }
 }
 .task-card-enter {
-  animation: task-card-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: task-card-in 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .task-card-exit {
   animation: task-card-out 0.28s cubic-bezier(0.55, 0, 0.68, 0.2) forwards !important;
@@ -883,43 +549,17 @@ html, body {
   overflow: hidden;
 }
 
-/* =====================================================
-   XPFly logo — neon pulse + flicker (Solo Leveling vibe)
-   ===================================================== */
-.font-display {
-  font-family: 'Orbitron', 'Rajdhani', sans-serif;
-  letter-spacing: 0.04em;
+/* Section change fade */
+@keyframes section-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-@keyframes xpfly-neon {
-  0%, 100% {
-    filter:
-      drop-shadow(0 0 6px hsl(var(--primary) / 0.55))
-      drop-shadow(0 0 18px hsl(var(--primary) / 0.35))
-      drop-shadow(0 0 32px hsl(var(--accent) / 0.25));
-  }
-  50% {
-    filter:
-      drop-shadow(0 0 10px hsl(var(--primary) / 0.85))
-      drop-shadow(0 0 28px hsl(var(--primary) / 0.55))
-      drop-shadow(0 0 48px hsl(var(--accent) / 0.45));
-  }
-}
-@keyframes xpfly-flicker {
-  0%, 96%, 100% { opacity: 1; }
-  97% { opacity: 0.75; }
-  98% { opacity: 1; }
-  99% { opacity: 0.85; }
-}
-.xpfly-neon {
-  animation: xpfly-neon 3.2s ease-in-out infinite, xpfly-flicker 6s linear infinite;
-  will-change: filter, opacity;
-}
-@media (prefers-reduced-motion: reduce) {
-  .xpfly-neon { animation: none !important; }
+.section-enter {
+  animation: section-in 0.22s ease-out both;
 }
 
 /* =====================================================
-   Singularity shield — shimmer sweep + orbiting particles
+   League shield effects
    ===================================================== */
 @keyframes singularity-shimmer {
   0%   { transform: translateX(-120%) skewX(-20deg); opacity: 0; }
@@ -935,59 +575,35 @@ html, body {
   0%, 100% { opacity: 0.25; transform: scale(0.8); }
   50%      { opacity: 1;   transform: scale(1.15); }
 }
-.sing-shimmer {
-  animation: singularity-shimmer 3.6s ease-in-out infinite;
-}
-.sing-orbit {
-  animation: singularity-orbit 9s linear infinite;
-  transform-origin: 50% 52%;
-}
-.sing-twinkle {
-  animation: singularity-twinkle 2.4s ease-in-out infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .sing-shimmer, .sing-orbit, .sing-twinkle { animation: none !important; }
+.sing-shimmer { animation: singularity-shimmer 3.6s ease-in-out infinite; }
+.sing-orbit { animation: singularity-orbit 9s linear infinite; transform-origin: 50% 52%; }
+.sing-twinkle { animation: singularity-twinkle 2.4s ease-in-out infinite; }
+
+/* Logo */
+.xpfly-neon {
+  color: hsl(var(--primary));
 }
 
 /* =====================================================
-   Trophy bonus toast — shine + pop
+   Trophy bonus toast
    ===================================================== */
 @keyframes pyro-trophy-pop {
   0%   { transform: scale(0.7); opacity: 0; }
-  40%  { transform: scale(1.15); opacity: 1; }
+  40%  { transform: scale(1.1); opacity: 1; }
   100% { transform: scale(1); opacity: 1; }
 }
-@keyframes pyro-trophy-shine {
-  0%   { background-position: -180% 0; }
-  100% { background-position: 280% 0; }
-}
 .pyro-trophy-toast {
-  position: relative;
-  overflow: hidden;
-  border: 2px solid hsl(var(--primary) / 0.7) !important;
-  background: linear-gradient(135deg, hsl(45 90% 55% / 0.18), hsl(var(--primary) / 0.18)) !important;
+  background: hsl(var(--xp) / 0.15) !important;
+  border: 1px solid hsl(var(--xp) / 0.4) !important;
   color: hsl(var(--foreground)) !important;
-  font-family: var(--font-pixel, 'Press Start 2P'), monospace !important;
-  font-size: 11px !important;
-  letter-spacing: 0.5px;
-  box-shadow: 0 0 16px hsl(45 90% 55% / 0.45), 0 0 24px hsl(var(--primary) / 0.35) !important;
+  font-weight: 800 !important;
   animation: pyro-trophy-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
-.pyro-trophy-toast::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(110deg, transparent 30%, hsl(45 100% 80% / 0.55) 50%, transparent 70%);
-  background-size: 200% 100%;
-  background-position: -180% 0;
-  animation: pyro-trophy-shine 1.4s ease-out 120ms 1 both;
-  mix-blend-mode: screen;
-}
-@media (prefers-reduced-motion: reduce) {
-  .pyro-trophy-toast,
-  .pyro-trophy-toast::after { animation: none !important; }
-}
 
-/* Hide floating Pyro assistant on pages where Pyro lives in the header (e.g. Calendar). */
-body.hide-pyro-assistant .pyro-assistant-fixed { display: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,9 +1,7 @@
-import { useMemo } from "react";
-import { Sword, Shield, Flame, Trophy, CheckCircle2, Trash2, Gift, PackageOpen } from "lucide-react";
+import { Flame, Gift, Trash2, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Task } from "@/lib/types";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
+import TaskCheck from "@/components/TaskCheck";
 import { playSfx } from "@/lib/sfx";
 
 interface DailyQuestPanelProps {
@@ -33,197 +31,112 @@ const DailyQuestPanel = ({
   unopenedChests = 0,
   onOpenChest,
 }: DailyQuestPanelProps) => {
-  const todayDow = new Date().getDay();
-  const isScheduledToday = (t: Task) => {
-    const days = ((t as any).daily_days as number[] | undefined) ?? [];
-    return days.length === 0 || days.includes(todayDow);
-  };
-  const todayTasks = dailyTasks.filter(isScheduledToday);
-  const completedCount = todayTasks.filter((t) => t.status === "done").length;
-  const totalCount = todayTasks.length;
-  const progress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+  if (dailyTasks.length === 0) return null;
 
+  const completedCount = dailyTasks.filter((t) => t.status === "done").length;
+  const totalCount = dailyTasks.length;
+  const progress = (completedCount / totalCount) * 100;
   const nextMilestone = STREAK_MILESTONES.find((m) => m > dailyStreak) ?? 100;
   const streakBonusXp = Math.min(50 + dailyStreak * 5, 200);
 
-  if (dailyTasks.length === 0) return null;
-
   return (
-    <section
-      className="daily-quest-panel mb-6"
-      role="region"
-      aria-labelledby="daily-quest-title"
-    >
-      {/* Header - Solo Leveling style */}
+    <section className="daily-quest-panel" aria-labelledby="daily-quest-title">
       <div className="daily-quest-header">
         <div className="flex items-center gap-3">
           <div className="daily-quest-icon" aria-hidden="true">
-            <Sword className="h-5 w-5" />
+            <Sun className="h-5 w-5" />
           </div>
           <div>
-            <h2 id="daily-quest-title" className="font-pixel text-[10px] tracking-wider text-primary">
-              MISIONES DIARIAS
-            </h2>
-            <p className="font-pixel text-[7px] text-muted-foreground mt-1">
-              Se reinician cada día
+            <h2 id="daily-quest-title" className="text-base font-extrabold leading-tight">Misiones diarias</h2>
+            <p className="text-xs font-semibold text-muted-foreground">
+              {completedCount === totalCount ? "¡Todas completadas! 🎉" : `${completedCount} de ${totalCount} completadas`}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2" aria-label={`Racha actual: ${dailyStreak} días`}>
-          <Flame className={cn("h-4 w-4", dailyStreak > 0 ? "text-orange-400" : "text-muted-foreground")} aria-hidden="true" />
-          <span className="font-pixel text-[9px] text-orange-400">{dailyStreak}</span>
+        <div
+          className={cn(
+            "flex items-center gap-1 rounded-full px-2.5 py-1 text-sm font-extrabold",
+            dailyStreak > 0 ? "bg-warning/15 text-warning" : "bg-muted text-muted-foreground",
+          )}
+          title={`Racha: ${dailyStreak} días · próximo hito: ${nextMilestone}`}
+          aria-label={`Racha actual: ${dailyStreak} días`}
+        >
+          <Flame className="h-4 w-4" /> {dailyStreak}
         </div>
       </div>
 
-      {/* Progress bar */}
-      <div className="px-4 py-2">
-        <div className="flex items-center justify-between mb-1">
-          <span className="font-pixel text-[7px] text-muted-foreground">PROGRESO</span>
-          <span className="font-pixel text-[7px] text-primary">
-            {completedCount}/{totalCount}
-          </span>
-        </div>
+      <div className="px-4 pb-3">
         <div
           className="daily-progress-bg"
           role="progressbar"
           aria-valuenow={completedCount}
           aria-valuemin={0}
           aria-valuemax={totalCount}
-          aria-label={`Progreso de misiones diarias: ${completedCount} de ${totalCount}`}
         >
-          <div
-            className="daily-progress-fill"
-            style={{ width: `${progress}%` }}
-          />
+          <div className="daily-progress-fill" style={{ width: `${progress}%` }} />
         </div>
       </div>
 
-      {/* Quest list */}
-      <ul className="px-4 pb-2 space-y-1.5" role="list" aria-label="Lista de misiones diarias">
+      <ul className="space-y-1.5 px-4">
         {dailyTasks.map((task) => {
           const isDone = task.status === "done";
-          const scheduledToday = isScheduledToday(task);
           return (
             <li
               key={task.id}
-              className={cn(
-                "daily-quest-item group/daily cursor-pointer",
-                isDone && "daily-quest-item-done",
-                !scheduledToday && "opacity-50"
-              )}
+              className={cn("daily-quest-item group/daily cursor-pointer", isDone && "daily-quest-item-done")}
               onClick={() => onEditTask?.(task)}
-              onMouseEnter={() => playSfx("hover")}
-              aria-label={`Misión diaria: ${task.title}. Estado: ${isDone ? "completada" : "pendiente"}.${scheduledToday ? "" : " No programada para hoy."}`}
             >
-              <div className="relative flex items-center justify-center mt-0.5">
-                <Checkbox
-                  checked={isDone}
-                  onCheckedChange={() => onToggleComplete(task)}
-                  onClick={(e) => e.stopPropagation()}
-                  className="h-8 w-8"
-                  disabled={!scheduledToday}
-                  aria-label={isDone ? `Marcar "${task.title}" como pendiente` : `Marcar "${task.title}" como completada`}
-                />
-                <div className="absolute inset-0 -m-[6px]" aria-hidden="true" />
-              </div>
-              <span
-                className={cn(
-                  "text-xs flex-1",
-                  isDone
-                    ? "line-through text-muted-foreground"
-                    : "text-foreground"
-                )}
-              >
+              <TaskCheck
+                checked={isDone}
+                onToggle={() => onToggleComplete(task)}
+                label={isDone ? `Marcar "${task.title}" como pendiente` : `Completar "${task.title}"`}
+              />
+              <span className={cn("flex-1 text-[15px] font-bold", isDone && "text-muted-foreground line-through")}>
                 {task.title}
-                {!scheduledToday && (
-                  <span className="ml-2 font-pixel text-[7px] text-muted-foreground">(otro día)</span>
-                )}
               </span>
-              {isDone && (
-                <CheckCircle2 className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-              )}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 opacity-0 group-hover/daily:opacity-100 text-muted-foreground hover:text-destructive"
+              <button
+                type="button"
+                className="rounded-full p-1.5 text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/daily:opacity-100"
                 onClick={(e) => { e.stopPropagation(); playSfx("delete"); onDeleteTask(task.id); }}
                 aria-label={`Eliminar misión diaria ${task.title}`}
               >
-                <Trash2 className="h-3 w-3" aria-hidden="true" />
-              </Button>
+                <Trash2 className="h-4 w-4" />
+              </button>
             </li>
           );
         })}
       </ul>
 
-      {/* Reward section */}
-      <div className="daily-quest-reward">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Trophy className={cn("h-4 w-4", allCompleted ? "text-yellow-400" : "text-muted-foreground")} />
-            <div>
-              <p className="font-pixel text-[8px] text-yellow-400/80">RECOMPENSA</p>
-              <p className="font-pixel text-[7px] text-muted-foreground">
-                +{streakBonusXp} XP bonus
-              </p>
-            </div>
-            {/* Gift silhouette - animated when waiting, still & opened when claimed */}
-            {allCompleted && !bonusClaimed ? (
-              <div className="relative ml-1 animate-bounce" aria-hidden="true">
-                <div className="absolute inset-0 rounded-md bg-yellow-400/30 blur-md" />
-                <Gift
-                  className="relative h-7 w-7 text-yellow-300 drop-shadow-[0_0_8px_hsl(45_90%_60%/0.9)]"
-                  strokeWidth={2.5}
-                />
-                <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-yellow-200 animate-ping" />
-              </div>
-            ) : bonusClaimed ? (
-              <div className="relative ml-1 opacity-80" aria-hidden="true">
-                <PackageOpen
-                  className="relative h-7 w-7 text-blue-300/70"
-                  strokeWidth={2}
-                />
-              </div>
-            ) : null}
+      <div className="daily-quest-reward flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl bg-xp/20 text-xp", allCompleted && !bonusClaimed && "animate-bounce")}>
+            <Gift className="h-5 w-5" />
           </div>
-          {allCompleted && !bonusClaimed ? (
-            <button
-              onClick={() => { playSfx("xp"); onClaimBonus(); }}
-              onMouseEnter={() => playSfx("hover")}
-              className="daily-claim-btn"
-              aria-label={`Reclamar recompensa diaria de ${streakBonusXp} XP`}
-            >
-              <span className="font-pixel text-[8px]">RECLAMAR</span>
-            </button>
-          ) : bonusClaimed ? (
-            unopenedChests > 0 && onOpenChest ? (
-              <button
-                onClick={() => { playSfx("open"); onOpenChest(); }}
-                onMouseEnter={() => playSfx("hover")}
-                className="relative flex items-center gap-2 rounded-lg border-2 border-yellow-400 bg-yellow-400/10 px-3 py-1.5 shadow-[0_0_20px_hsl(45_90%_60%/0.5)] hover:bg-yellow-400/20 hover:scale-105 transition-all animate-pulse"
-                aria-label={`Abrir cofre${unopenedChests > 1 ? `, ${unopenedChests} disponibles` : ""}`}
-              >
-                <Gift className="h-4 w-4 text-yellow-300" aria-hidden="true" />
-                <span className="font-pixel text-[8px] text-yellow-300">ABRIR</span>
-                {unopenedChests > 1 && (
-                  <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full border border-background bg-destructive px-1 font-pixel text-[7px] text-destructive-foreground">
-                    {unopenedChests}
-                  </span>
-                )}
-              </button>
-            ) : (
-              <span className="font-pixel text-[7px] text-primary/70">RECLAMADO ✓</span>
-            )
-          ) : (
-            <Shield className="h-4 w-4 text-muted-foreground/30" aria-hidden="true" />
-          )}
+          <div>
+            <p className="text-sm font-extrabold">Recompensa diaria</p>
+            <p className="text-xs font-semibold text-muted-foreground">+{streakBonusXp} XP y un cofre</p>
+          </div>
         </div>
-        {dailyStreak > 0 && (
-          <div className="mt-2 flex items-center gap-2">
-            <span className="font-pixel text-[6px] text-muted-foreground">
-              Racha: {dailyStreak} días → próximo hito: {nextMilestone} días
-            </span>
-          </div>
+        {allCompleted && !bonusClaimed ? (
+          <button onClick={() => { playSfx("xp"); onClaimBonus(); }} className="daily-claim-btn">
+            Reclamar
+          </button>
+        ) : bonusClaimed && unopenedChests > 0 && onOpenChest ? (
+          <button
+            onClick={() => { playSfx("open"); onOpenChest(); }}
+            className="relative rounded-full bg-xp px-4 py-2 text-sm font-extrabold text-white shadow-[0_4px_0_hsl(var(--xp)/0.35)] transition-transform active:scale-95"
+          >
+            Abrir cofre
+            {unopenedChests > 1 && (
+              <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-card bg-destructive px-1 text-[10px] text-white">
+                {unopenedChests}
+              </span>
+            )}
+          </button>
+        ) : bonusClaimed ? (
+          <span className="text-xs font-extrabold text-success">Reclamada ✓</span>
+        ) : (
+          <span className="text-xs font-bold text-muted-foreground">{totalCount - completedCount} por hacer</span>
         )}
       </div>
     </section>

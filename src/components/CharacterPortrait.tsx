@@ -17,7 +17,7 @@ const CharacterPortrait = ({ url, size = 96, className, glow, loading }: Props) 
   return (
     <div
       className={cn(
-        "relative rounded-xl overflow-hidden border-2 border-primary/60 bg-gradient-to-b from-slate-900 to-slate-950",
+        "relative rounded-xl overflow-hidden border-2 border-primary/30 bg-primary/10",
         loading && "animate-pulse",
         className,
       )}
@@ -35,7 +35,6 @@ const CharacterPortrait = ({ url, size = 96, className, glow, loading }: Props) 
           <User className="h-1/2 w-1/2" strokeWidth={1.2} />
         </div>
       )}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
     </div>
   );
 };

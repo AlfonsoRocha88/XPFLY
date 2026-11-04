@@ -1,80 +1,75 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfile";
-import { Zap } from "lucide-react";
+import { Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
 import CharacterPortrait from "@/components/CharacterPortrait";
 import { getTitle } from "@/lib/titles";
 
-const PlayerHUD = ({ className }: { className?: string }) => {
+/** XP needed to go from level `lvl` to `lvl + 1`. */
+const xpStep = (lvl: number) => 50 + (lvl - 1) * 25;
+
+const PlayerHUD = ({ className, showStreak = false }: { className?: string; showStreak?: boolean }) => {
   const { profile } = useProfile();
   const navigate = useNavigate();
 
-  const { level, xp, xpForCurrentLevel, xpForNextLevel, progress, title, titleColor, titleIcon, avatarUrl, points } = useMemo(() => {
+  const { level, intoLevel, levelSize, progress, title, titleIcon } = useMemo(() => {
     const totalXp = profile?.xp ?? 0;
     const lvl = profile?.level ?? 1;
-
-    let xpCurrent = 0;
-    for (let i = 1; i < lvl; i++) xpCurrent += 50 + (i - 1) * 25;
-    const xpNext = xpCurrent + 50 + (lvl - 1) * 25;
-    const prog = xpNext > xpCurrent ? ((totalXp - xpCurrent) / (xpNext - xpCurrent)) * 100 : 0;
-
-    const t = getTitle((profile as any)?.equipped_title ?? null);
-
+    let base = 0;
+    for (let i = 1; i < lvl; i++) base += xpStep(i);
+    const size = xpStep(lvl);
+    const into = Math.max(0, totalXp - base);
+    const t = getTitle(profile?.equipped_title ?? null);
     return {
       level: lvl,
-      xp: totalXp,
-      xpForCurrentLevel: xpCurrent,
-      xpForNextLevel: xpNext,
-      progress: Math.min(Math.max(prog, 0), 100),
-      title: t?.name ?? "Sin título",
-      titleColor: t?.color ?? undefined,
+      intoLevel: into,
+      levelSize: size,
+      progress: Math.min(100, (into / size) * 100),
+      title: t?.name ?? null,
       titleIcon: t?.icon ?? "",
-      avatarUrl: (profile as any)?.avatar_url as string | null,
-      points: profile?.stat_points_available ?? 0,
     };
   }, [profile]);
 
+  const points = profile?.stat_points_available ?? 0;
+  const streak = profile?.daily_streak ?? 0;
+
   return (
-    <div className={cn("space-y-2", className)}>
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => navigate("/character")}
-          className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-primary/50 bg-primary/10 hover:border-primary hover:shadow-[0_0_12px_hsl(var(--primary)/0.5)] transition-all overflow-hidden shrink-0"
-          title="Personaje"
-        >
-          <CharacterPortrait url={avatarUrl} size={40} className="!rounded-md !border-0" />
-          {points > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground animate-pulse">
-              {points > 9 ? "9+" : points}
+    <div className={cn("flex items-center gap-3", className)}>
+      <button
+        onClick={() => navigate("/character")}
+        className="relative shrink-0 rounded-2xl transition-transform active:scale-95"
+        title="Ver personaje"
+        aria-label="Ver personaje"
+      >
+        <CharacterPortrait url={profile?.avatar_url} size={48} className="!rounded-2xl !border-0" />
+        {points > 0 && (
+          <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-card bg-primary px-1 text-[10px] font-extrabold text-primary-foreground">
+            {points > 9 ? "9+" : points}
+          </span>
+        )}
+      </button>
+
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline justify-between gap-2">
+          <p className="truncate text-[15px] font-extrabold">{profile?.display_name ?? "Jugador"}</p>
+          {showStreak && (
+            <span className={cn("flex shrink-0 items-center gap-0.5 text-sm font-extrabold", streak > 0 ? "text-warning" : "text-muted-foreground")}>
+              <Flame className="h-4 w-4" /> {streak}
             </span>
           )}
-        </button>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5">
-            <span className="font-pixel text-[8px] text-primary">LV.{level}</span>
-            <span
-              className="font-pixel text-[8px] truncate"
-              style={{ color: titleColor ?? "hsl(var(--muted-foreground))" }}
-            >
-              {titleIcon} {title}
-            </span>
+        </div>
+        <p className="truncate text-xs font-bold text-muted-foreground">
+          <span className="text-primary">Nivel {level}</span>
+          {title && <> · {titleIcon} {title}</>}
+        </p>
+        <div className="mt-1.5 flex items-center gap-2">
+          <div className="xp-bar-bg flex-1">
+            <div className="xp-bar-fill" style={{ width: `${progress}%` }} />
           </div>
-          <p className="font-pixel text-[8px] text-muted-foreground truncate mt-0.5">{profile?.display_name ?? "Jugador"}</p>
-        </div>
-      </div>
-
-      <div className="space-y-1">
-        <div className="flex items-center justify-between">
-          <span className="flex items-center gap-1 font-pixel text-[8px] text-accent-foreground">
-            <Zap className="h-3 w-3 text-yellow-400" /> XP
+          <span className="shrink-0 text-[11px] font-bold tabular-nums text-muted-foreground">
+            {intoLevel}/{levelSize} XP
           </span>
-          <span className="font-pixel text-[8px] text-muted-foreground">
-            {xp - xpForCurrentLevel}/{xpForNextLevel - xpForCurrentLevel}
-          </span>
-        </div>
-        <div className="xp-bar-bg">
-          <div className="xp-bar-fill" style={{ width: `${progress}%` }} />
         </div>
       </div>
     </div>

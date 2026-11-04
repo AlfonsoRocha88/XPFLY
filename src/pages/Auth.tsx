@@ -41,7 +41,7 @@ function PasswordStrength({ value, showError }: { value: string; showError?: boo
         ))}
       </div>
       <p
-        className={`font-display text-[10px] uppercase tracking-widest ${
+        className={`font-display text-xs uppercase tracking-widest ${
           tooShort && showError ? "text-destructive" : "text-muted-foreground"
         }`}
       >
@@ -160,15 +160,15 @@ const Auth = () => {
         <Card className="w-full max-w-md border-2 border-primary/30">
           <CardHeader className="text-center">
             <CardTitle className="font-pixel text-sm text-primary">Restablecer contraseña</CardTitle>
-            <CardDescription className="font-pixel text-[8px]">Ingresa tu email para recibir un enlace</CardDescription>
+            <CardDescription className="font-pixel text-xs">Ingresa tu email para recibir un enlace</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleResetPassword} className="space-y-4">
               <Input type="email" placeholder="tu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
-              <Button type="submit" className="w-full font-pixel text-[9px]" disabled={loading}>
+              <Button type="submit" className="w-full font-pixel text-xs" disabled={loading}>
                 {loading ? "Enviando..." : "Enviar enlace"}
               </Button>
-              <Button type="button" variant="ghost" className="w-full font-pixel text-[9px]" onClick={() => setShowReset(false)}>
+              <Button type="button" variant="ghost" className="w-full font-pixel text-xs" onClick={() => setShowReset(false)}>
                 Volver
               </Button>
             </form>
@@ -193,7 +193,7 @@ const Auth = () => {
           <CardTitle className="font-display text-sm text-primary mt-2 uppercase tracking-widest">
             {isLogin ? "Iniciar partida" : "Nuevo jugador"}
           </CardTitle>
-          <CardDescription className="font-pixel text-[8px] mt-2">
+          <CardDescription className="font-pixel text-xs mt-2">
             {isLogin ? "Continúa tu aventura" : "Únete a la aventura"}
           </CardDescription>
         </CardHeader>
@@ -241,15 +241,15 @@ const Auth = () => {
             </Button>
             <div className="flex flex-col gap-2 text-center">
               {isLogin && (
-                <button type="button" className="font-pixel text-[7px] text-muted-foreground hover:text-primary transition-colors" onClick={() => setUseEmailLogin(!useEmailLogin)}>
+                <button type="button" className="font-pixel text-[11px] text-muted-foreground hover:text-primary transition-colors" onClick={() => setUseEmailLogin(!useEmailLogin)}>
                   {useEmailLogin ? "Usar usuario en su lugar" : "¿Olvidaste tu usuario? Usar correo"}
                 </button>
               )}
-              <button type="button" className="font-pixel text-[8px] text-muted-foreground hover:text-primary transition-colors" onClick={() => setIsLogin(!isLogin)}>
+              <button type="button" className="font-pixel text-xs text-muted-foreground hover:text-primary transition-colors" onClick={() => setIsLogin(!isLogin)}>
                 {isLogin ? "¿Nuevo aquí? Crear cuenta" : "¿Ya tienes cuenta? Entrar"}
               </button>
               {isLogin && (
-                <button type="button" className="font-pixel text-[8px] text-muted-foreground hover:text-primary transition-colors" onClick={() => setShowReset(true)}>
+                <button type="button" className="font-pixel text-xs text-muted-foreground hover:text-primary transition-colors" onClick={() => setShowReset(true)}>
                   ¿Olvidaste tu contraseña?
                 </button>
               )}

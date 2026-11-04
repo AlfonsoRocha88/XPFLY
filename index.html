@@ -37,7 +37,8 @@
     <div id="root"></div>
     <script>
       try {
-        if (localStorage.getItem('app-mode') === 'light') document.documentElement.classList.add('light');
+        if (localStorage.getItem('app-mode') === 'dark') document.documentElement.classList.add('dark');
+        document.documentElement.classList.add('theme-' + (localStorage.getItem('lastTheme') || 'system-cyan'));
       } catch (e) {}
     </script>
     <script type="module" src="/src/main.tsx"></script>

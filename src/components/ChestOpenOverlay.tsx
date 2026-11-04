@@ -66,13 +66,13 @@ const ChestOpenOverlay = ({ open, reward, opening, onClose }: Props) => {
             >
               <div className="text-7xl animate-bounce">{reward.icon}</div>
               <p className="font-pixel text-[14px] text-foreground">{reward.label}</p>
-              <p className="font-pixel text-[8px] uppercase tracking-wider text-muted-foreground">
+              <p className="font-pixel text-xs uppercase tracking-wider text-muted-foreground">
                 {reward.rarity}
               </p>
             </div>
             <button
               onClick={onClose}
-              className="rounded-lg border-2 border-primary bg-primary/10 px-6 py-2 font-pixel text-[10px] tracking-wider text-primary hover:bg-primary/20"
+              className="rounded-lg border-2 border-primary bg-primary/10 px-6 py-2 font-pixel text-xs tracking-wider text-primary hover:bg-primary/20"
             >
               GENIAL
             </button>

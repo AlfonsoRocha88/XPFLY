@@ -1,28 +1,24 @@
-import { useState } from "react";
-import { format } from "date-fns";
+import { useRef, useState } from "react";
+import { format, isPast, isToday } from "date-fns";
 import { es } from "date-fns/locale";
-import { CalendarIcon, ChevronDown, ChevronRight, Trash2, GripVertical, Zap } from "lucide-react";
+import { CalendarDays, ChevronDown, Trash2 } from "lucide-react";
 import type { Task, TaskPriority } from "@/lib/types";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useRef } from "react";
+import TaskCheck from "@/components/TaskCheck";
 import { stashPyroSourceRect } from "@/hooks/usePyro";
 import { cn } from "@/lib/utils";
-import { playSfx } from "@/lib/sfx";
 
-const XP_REWARDS: Record<TaskPriority, number> = {
+export const XP_REWARDS: Record<TaskPriority, number> = {
   low: 10,
   medium: 20,
   high: 35,
   urgent: 50,
 };
 
-const priorityConfig: Record<TaskPriority, { label: string; class: string }> = {
-  low: { label: "Fácil", class: "bg-[hsl(142,60%,50%)]/15 text-[hsl(142,60%,50%)] border-[hsl(142,60%,50%)]/30" },
-  medium: { label: "Normal", class: "bg-[hsl(45,90%,55%)]/15 text-[hsl(45,90%,55%)] border-[hsl(45,90%,55%)]/30" },
-  high: { label: "Difícil", class: "bg-[hsl(25,90%,55%)]/15 text-[hsl(25,90%,55%)] border-[hsl(25,90%,55%)]/30" },
-  urgent: { label: "Épico", class: "bg-[hsl(0,72%,55%)]/15 text-[hsl(0,72%,55%)] border-[hsl(0,72%,55%)]/30" },
+export const PRIORITY_META: Record<TaskPriority, { label: string; color: string }> = {
+  low: { label: "Fácil", color: "hsl(var(--priority-low))" },
+  medium: { label: "Normal", color: "hsl(var(--priority-medium))" },
+  high: { label: "Difícil", color: "hsl(var(--priority-high))" },
+  urgent: { label: "Épico", color: "hsl(var(--priority-urgent))" },
 };
 
 interface TaskCardProps {
@@ -40,6 +36,10 @@ const TaskCard = ({ task, subtasks, onToggleComplete, onEdit, onDelete, onToggle
   const [expanded, setExpanded] = useState(false);
   const isDone = task.status === "done";
   const cardRef = useRef<HTMLDivElement | null>(null);
+  const priority = PRIORITY_META[task.priority];
+  const due = task.due_date ? new Date(task.due_date) : null;
+  const overdue = !!due && !isDone && isPast(due) && !isToday(due);
+  const doneSubtasks = subtasks.filter((s) => s.status === "done").length;
 
   const handleToggle = () => {
     if (!isDone && cardRef.current) {
@@ -53,100 +53,83 @@ const TaskCard = ({ task, subtasks, onToggleComplete, onEdit, onDelete, onToggle
     <div
       ref={cardRef}
       className={cn("task-card-game group task-card-enter", isDone && "completed", exiting && "task-card-exit")}
-      onMouseEnter={() => playSfx("hover")}
       role="listitem"
-      aria-label={`Misión: ${task.title}. Prioridad ${priorityConfig[task.priority].label}. Estado: ${isDone ? "completada" : "pendiente"}.`}
     >
-      <div className="flex items-start gap-1">
-        <div className="mt-0.5 cursor-grab text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true">
-          <GripVertical className="h-4 w-4" />
-        </div>
-        <div className="relative flex items-center justify-center">
-          <Checkbox
+      <div className="flex items-start gap-3">
+        <div className="pt-0.5">
+          <TaskCheck
             checked={isDone}
-            onCheckedChange={handleToggle}
-            className="h-8 w-8"
-            aria-label={isDone ? `Marcar "${task.title}" como pendiente` : `Marcar "${task.title}" como completada`}
+            onToggle={handleToggle}
+            label={isDone ? `Marcar "${task.title}" como pendiente` : `Completar "${task.title}"`}
           />
-          <div className="absolute inset-0 -m-[6px]" aria-hidden="true" />
         </div>
-        <div
-          className="flex-1 min-w-0"
+
+        <button
+          type="button"
+          className="min-w-0 flex-1 text-left"
           onClick={() => onEdit(task)}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onEdit(task); } }}
           aria-label={`Editar misión ${task.title}`}
         >
-          <div className="flex items-center gap-2">
-            {projectColor && <div className="h-2 w-2 rounded-full flex-shrink-0" style={{ backgroundColor: projectColor }} />}
-            <p className={cn("text-sm font-medium cursor-pointer hover:text-primary transition-colors", isDone && "line-through text-muted-foreground")}>
-              {task.title}
-            </p>
-          </div>
-          {task.description && (
-            <p className="mt-1 text-xs text-muted-foreground line-clamp-1">{task.description}</p>
-          )}
-          <div className="mt-2 flex flex-wrap items-center gap-1.5">
-            <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0", priorityConfig[task.priority].class)}>
-              {priorityConfig[task.priority].label}
-            </Badge>
-            {!isDone && (
-              <span className="flex items-center gap-0.5 text-[10px] font-pixel text-yellow-400/70">
-                <Zap className="h-3 w-3" /> +{XP_REWARDS[task.priority]}
-              </span>
+          <p className={cn("text-[15px] font-bold leading-snug", isDone && "text-muted-foreground line-through")}>
+            {projectColor && (
+              <span className="mr-1.5 inline-block h-2 w-2 rounded-full align-middle" style={{ backgroundColor: projectColor }} />
             )}
-            {task.due_date && (
-              <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                <CalendarIcon className="h-3 w-3" />
-                {format(new Date(task.due_date), "d MMM", { locale: es })}
+            {task.title}
+          </p>
+          {task.description && (
+            <p className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">{task.description}</p>
+          )}
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-bold">
+            <span className="flex items-center gap-1.5" style={{ color: priority.color }}>
+              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: priority.color }} />
+              {priority.label}
+            </span>
+            {!isDone && <span className="text-xp">+{XP_REWARDS[task.priority]} XP</span>}
+            {due && (
+              <span className={cn("flex items-center gap-1", overdue ? "text-destructive" : "text-muted-foreground")}>
+                <CalendarDays className="h-3.5 w-3.5" />
+                {isToday(due) ? "Hoy" : format(due, "d MMM", { locale: es })}
               </span>
             )}
             {task.tags?.map((tag) => (
-              <Badge key={tag} variant="secondary" className="text-[10px] px-1.5 py-0">{tag}</Badge>
+              <span key={tag} className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground">{tag}</span>
             ))}
           </div>
-        </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"
+        </button>
+
+        <button
+          type="button"
+          className="-mr-1 rounded-full p-1.5 text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
           onClick={() => onDelete(task.id)}
+          onPointerDown={(e) => e.stopPropagation()}
           aria-label={`Eliminar misión ${task.title}`}
         >
-          <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-        </Button>
+          <Trash2 className="h-4 w-4" />
+        </button>
       </div>
 
       {subtasks.length > 0 && (
-        <div className="ml-8 mt-2">
+        <div className="ml-10 mt-2">
           <button
             onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            onPointerDown={(e) => e.stopPropagation()}
+            className="flex items-center gap-1 text-xs font-bold text-muted-foreground hover:text-foreground"
             aria-expanded={expanded}
-            aria-label={`${expanded ? "Ocultar" : "Mostrar"} subtareas de ${task.title}`}
           >
-            {expanded ? <ChevronDown className="h-3 w-3" aria-hidden="true" /> : <ChevronRight className="h-3 w-3" aria-hidden="true" />}
-            {subtasks.filter((s) => s.status === "done").length}/{subtasks.length} subtareas
+            <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", !expanded && "-rotate-90")} />
+            {doneSubtasks}/{subtasks.length} subtareas
           </button>
           {expanded && (
-            <ul className="mt-2 space-y-1.5" role="list" aria-label={`Subtareas de ${task.title}`}>
+            <ul className="mt-2 space-y-2">
               {subtasks.map((sub) => (
-                <li
-                  key={sub.id}
-                  className="flex items-center gap-2"
-                  aria-label={`Subtarea ${sub.title}: ${sub.status === "done" ? "completada" : "pendiente"}`}
-                >
-                  <div className="relative flex items-center justify-center">
-                    <Checkbox
-                      checked={sub.status === "done"}
-                      onCheckedChange={() => onToggleSubtask(sub)}
-                      className="h-7 w-7"
-                      aria-label={sub.status === "done" ? `Marcar subtarea "${sub.title}" como pendiente` : `Marcar subtarea "${sub.title}" como completada`}
-                    />
-                    <div className="absolute inset-0 -m-[8px]" aria-hidden="true" />
-                  </div>
-                  <span className={cn("text-xs", sub.status === "done" && "line-through text-muted-foreground")}>{sub.title}</span>
+                <li key={sub.id} className="flex items-center gap-2.5">
+                  <TaskCheck
+                    size="sm"
+                    checked={sub.status === "done"}
+                    onToggle={() => onToggleSubtask(sub)}
+                    label={`Subtarea ${sub.title}`}
+                  />
+                  <span className={cn("text-sm", sub.status === "done" && "text-muted-foreground line-through")}>{sub.title}</span>
                 </li>
               ))}
             </ul>

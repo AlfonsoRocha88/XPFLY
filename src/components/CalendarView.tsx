@@ -159,7 +159,7 @@ const CalendarView = ({ tasks, projects, onCreateAt, onEditTask, onDeleteTask }:
       {/* Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => setCursor(new Date())} className="font-pixel text-[9px]">Hoy</Button>
+          <Button variant="outline" size="sm" onClick={() => setCursor(new Date())} className="font-pixel text-xs">Hoy</Button>
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}><ChevronLeft className="h-4 w-4" /></Button>
           <Button variant="ghost" size="icon" onClick={() => navigate(1)}><ChevronRight className="h-4 w-4" /></Button>
           <h2 className="font-pixel text-xs md:text-sm capitalize ml-2">{headerLabel}</h2>
@@ -170,7 +170,7 @@ const CalendarView = ({ tasks, projects, onCreateAt, onEditTask, onDeleteTask }:
               key={v}
               onClick={() => setView(v)}
               className={cn(
-                "px-3 py-1 rounded-md font-pixel text-[9px] transition-colors capitalize",
+                "px-3 py-1 rounded-md font-pixel text-xs transition-colors capitalize",
                 view === v ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -214,7 +214,7 @@ const MonthGrid = ({
   return (
     <div className="grid grid-cols-7 grid-rows-[auto_repeat(6,minmax(0,1fr))] h-full min-h-[600px]">
       {dayNames.map((d) => (
-        <div key={d} className="border-b border-r border-border p-2 text-center font-pixel text-[8px] text-muted-foreground bg-muted/30 uppercase">{d}</div>
+        <div key={d} className="border-b border-r border-border p-2 text-center font-pixel text-xs text-muted-foreground bg-muted/30 uppercase">{d}</div>
       ))}
       {days.map((day) => {
         const dayOccs = occurrences.filter((o) => isSameDay(o.start, day));
@@ -231,7 +231,7 @@ const MonthGrid = ({
               <button
                 onClick={() => onCreateAt(day)}
                 className={cn(
-                  "text-[10px] w-6 h-6 rounded-full flex items-center justify-center transition-colors",
+                  "text-xs w-6 h-6 rounded-full flex items-center justify-center transition-colors",
                   isToday(day) ? "bg-primary text-primary-foreground font-bold" : "text-foreground hover:bg-accent",
                   !inMonth && "text-muted-foreground/50"
                 )}
@@ -250,7 +250,7 @@ const MonthGrid = ({
                 <OccChip key={o.occurrenceKey} occ={o} color={getTaskColor(o.task, projectColor(o.task.project_id))} onEdit={onEditTask} onDelete={onDeleteTask} />
               ))}
               {dayOccs.length > 4 && (
-                <p className="text-[9px] text-muted-foreground px-1">+{dayOccs.length - 4} más</p>
+                <p className="text-xs text-muted-foreground px-1">+{dayOccs.length - 4} más</p>
               )}
             </div>
           </div>
@@ -280,7 +280,7 @@ const WeekGrid = ({
           onClick={() => onCreateAt(d)}
           className="border-b border-r border-border p-2 text-center hover:bg-accent/30 transition-colors"
         >
-          <div className="font-pixel text-[8px] text-muted-foreground uppercase">{format(d, "EEEEE", { locale: es })}</div>
+          <div className="font-pixel text-xs text-muted-foreground uppercase">{format(d, "EEEEE", { locale: es })}</div>
           <div className={cn(
             "text-sm mt-1 inline-flex w-7 h-7 items-center justify-center rounded-full",
             isToday(d) && "bg-primary text-primary-foreground font-bold"
@@ -292,7 +292,7 @@ const WeekGrid = ({
       {/* Hour gutter */}
       <div className="relative">
         {HOURS.map((h) => (
-          <div key={`hg-${h}`} style={{ height: HOUR_HEIGHT }} className="border-b border-r border-border px-1 text-right text-[10px] text-muted-foreground pt-0.5">
+          <div key={`hg-${h}`} style={{ height: HOUR_HEIGHT }} className="border-b border-r border-border px-1 text-right text-xs text-muted-foreground pt-0.5">
             {formatHour12(h)}
           </div>
         ))}
@@ -401,7 +401,7 @@ const OccTimeBlock = ({
           <Trash2 className="h-3 w-3" />
         </button>
       </div>
-      <p className="text-[9px] text-white/85 mt-0.5 truncate">
+      <p className="text-xs text-white/85 mt-0.5 truncate">
         {formatTime12(occ.start)} – {formatTime12(endDate)}
       </p>
     </div>
@@ -417,7 +417,7 @@ const OccChip = ({
   return (
     <div
       onClick={(e) => { e.stopPropagation(); onEdit(occ.task); }}
-      className="group/chip flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] cursor-pointer hover:opacity-80 transition-opacity"
+      className="group/chip flex items-center gap-1 rounded px-1.5 py-0.5 text-xs cursor-pointer hover:opacity-80 transition-opacity"
       style={{ backgroundColor: (color ?? "hsl(var(--primary))") + "30", borderLeft: `2px solid ${color ?? "hsl(var(--primary))"}` }}
     >
       {occ.task.start_time && <span className="text-muted-foreground shrink-0">{formatTime12(occ.start)}</span>}

@@ -92,13 +92,13 @@ const ClanHeader = ({ clan, viewerRole, onShare, onLeave, onDissolve, onEdit }: 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 pr-10">
             <h2 className="truncate text-2xl font-extrabold tracking-tight text-foreground">{clan.name}</h2>
-            <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ring-1", join.cls)}>
+            <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold uppercase ring-1", join.cls)}>
               <JoinIcon className="h-3 w-3" /> {join.label}
             </span>
             {isLeader && onEdit && (
               <button
                 onClick={onEdit}
-                className="inline-flex items-center gap-1 rounded-md bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary ring-1 ring-primary/30 transition-colors hover:bg-primary/25"
+                className="inline-flex items-center gap-1 rounded-md bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary ring-1 ring-primary/30 transition-colors hover:bg-primary/25"
               >
                 <Pencil className="h-3 w-3" /> Modificar
               </button>
@@ -118,7 +118,7 @@ const ClanHeader = ({ clan, viewerRole, onShare, onLeave, onDissolve, onEdit }: 
 
           <div className="mt-3 grid grid-cols-2 gap-3">
             <div>
-              <div className="flex items-center justify-between text-[10px] uppercase tracking-wide text-muted-foreground">
+              <div className="flex items-center justify-between text-xs uppercase tracking-wide text-muted-foreground">
                 <span>Nivel {clan.level}</span>
                 <span>{xpInLevel}/{xpForNext} XP</span>
               </div>

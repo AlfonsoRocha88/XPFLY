@@ -39,13 +39,13 @@ export default function IOSInstallBanner() {
         <div className="flex items-start gap-2">
           <Share className="h-5 w-5 text-primary shrink-0 mt-0.5" />
           <p className="text-xs leading-relaxed text-foreground">
-            <span className="font-pixel text-[8px] text-primary">Instala XPFly</span>
+            <span className="font-pixel text-xs text-primary">Instala XPFly</span>
             <br />
             toca compartir y selecciona <strong>'Añadir a pantalla de inicio'</strong> 🔥
           </p>
         </div>
         <div className="mt-2 flex justify-end">
-          <Button size="sm" variant="ghost" onClick={dismiss} className="font-pixel text-[8px] h-7">
+          <Button size="sm" variant="ghost" onClick={dismiss} className="font-pixel text-xs h-7">
             Entendido
           </Button>
         </div>

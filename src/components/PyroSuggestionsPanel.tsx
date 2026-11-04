@@ -112,7 +112,7 @@ export default function PyroSuggestionsPanel({
               if (e.key === "Enter" && !loading) handleGenerate();
             }}
           />
-          <Button onClick={handleGenerate} disabled={loading} size="sm" className="font-pixel text-[8px]">
+          <Button onClick={handleGenerate} disabled={loading} size="sm" className="font-pixel text-xs">
             {loading ? (
               <><RefreshCw className="mr-1 h-3 w-3 animate-spin" /> Pensando...</>
             ) : suggestions.length > 0 ? (
@@ -144,7 +144,7 @@ export default function PyroSuggestionsPanel({
                   </div>
                   <span
                     className={cn(
-                      "shrink-0 rounded border px-1.5 py-0.5 font-pixel text-[7px]",
+                      "shrink-0 rounded border px-1.5 py-0.5 font-pixel text-[11px]",
                       PRIORITY_COLOR[s.priority]
                     )}
                   >
@@ -154,7 +154,7 @@ export default function PyroSuggestionsPanel({
                 {s.description && (
                   <p className="text-xs text-muted-foreground mb-1.5">{s.description}</p>
                 )}
-                <div className="font-pixel text-[7px] text-primary/80 mb-2">
+                <div className="font-pixel text-[11px] text-primary/80 mb-2">
                   ~{s.estimated_minutes} MIN · {AREA_EMOJI[s.area]} {s.area.toUpperCase()}
                 </div>
                 <p className="text-xs italic text-foreground/70 mb-3 border-l-2 border-primary/40 pl-2">
@@ -165,7 +165,7 @@ export default function PyroSuggestionsPanel({
                     size="sm"
                     onClick={() => handleAccept(s, i)}
                     disabled={createTask.isPending}
-                    className="flex-1 font-pixel text-[8px]"
+                    className="flex-1 font-pixel text-xs"
                   >
                     <Plus className="mr-1 h-3 w-3" /> Aceptar
                   </Button>
@@ -173,7 +173,7 @@ export default function PyroSuggestionsPanel({
                     size="sm"
                     variant="ghost"
                     onClick={() => removeAt(i)}
-                    className="font-pixel text-[8px]"
+                    className="font-pixel text-xs"
                   >
                     <X className="mr-1 h-3 w-3" /> Descartar
                   </Button>
@@ -184,7 +184,7 @@ export default function PyroSuggestionsPanel({
         )}
 
         {!loading && suggestions.length === 0 && !error && (
-          <div className="font-pixel text-[8px] text-center text-muted-foreground py-4">
+          <div className="font-pixel text-xs text-center text-muted-foreground py-4">
             [pulsa GENERAR para que Pyro proponga misiones]
           </div>
         )}

@@ -8,18 +8,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-interface SocialPanelProps {
-  open?: boolean;
-  onOpenChange?: (v: boolean) => void;
-  hideTrigger?: boolean;
-  embedded?: boolean;
-}
-
-const SocialPanel = ({ open: openProp, onOpenChange, hideTrigger, embedded = false }: SocialPanelProps = {}) => {
+const SocialPanel = () => {
   const { user } = useAuth();
   const { profile } = useProfile();
   const { friends, pendingRequests, searchUser, sendRequest, respondRequest, removeFriend } = useFriends();
@@ -30,9 +22,6 @@ const SocialPanel = ({ open: openProp, onOpenChange, hideTrigger, embedded = fal
   const [searchError, setSearchError] = useState<string | null>(null);
   const [partyName, setPartyName] = useState("");
   const [copied, setCopied] = useState(false);
-  const [openInternal, setOpenInternal] = useState(false);
-  const open = openProp !== undefined ? openProp : openInternal;
-  const setOpen = (v: boolean) => { if (onOpenChange) onOpenChange(v); else setOpenInternal(v); };
 
   const myFriendCode = profile?.friend_code || "...";
 
@@ -100,18 +89,18 @@ const SocialPanel = ({ open: openProp, onOpenChange, hideTrigger, embedded = fal
   const body = (
       <Tabs defaultValue="friends" className="mt-2">
         <TabsList className="grid w-full grid-cols-2 bg-muted">
-          <TabsTrigger value="friends" className="font-pixel text-[8px]">
+          <TabsTrigger value="friends" className="font-pixel text-xs">
             <Users className="mr-1 h-3 w-3" /> Amigos
             {pendingRequests.length > 0 && (
-              <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[7px] text-destructive-foreground">
+              <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[11px] text-destructive-foreground">
                 {pendingRequests.length}
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="party" className="font-pixel text-[8px]">
+          <TabsTrigger value="party" className="font-pixel text-xs">
             <Swords className="mr-1 h-3 w-3" /> Party
             {partyInvites.length > 0 && (
-              <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[7px] text-destructive-foreground">
+              <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[11px] text-destructive-foreground">
                 {partyInvites.length}
               </span>
             )}
@@ -122,7 +111,7 @@ const SocialPanel = ({ open: openProp, onOpenChange, hideTrigger, embedded = fal
         <TabsContent value="friends" className="space-y-3 mt-3">
           {/* My friend code */}
           <div className="rounded-lg border border-border bg-card p-3">
-            <p className="text-[9px] font-pixel text-muted-foreground mb-2">Tu código de amigo</p>
+            <p className="text-xs font-pixel text-muted-foreground mb-2">Tu código de amigo</p>
             <div className="flex items-center gap-2">
               <code className="flex-1 rounded bg-muted px-3 py-1.5 text-sm font-mono tracking-wider">
                 {myFriendCode}
@@ -152,7 +141,7 @@ const SocialPanel = ({ open: openProp, onOpenChange, hideTrigger, embedded = fal
               </Button>
             </div>
             {searchError && (
-              <p className="text-[10px] text-destructive font-pixel">{searchError}</p>
+              <p className="text-xs text-destructive font-pixel">{searchError}</p>
             )}
             {preview && (() => {
               const lg = getCurrentLeague(preview.trophies || 0);
@@ -162,17 +151,17 @@ const SocialPanel = ({ open: openProp, onOpenChange, hideTrigger, embedded = fal
                     {preview.avatar_url ? (
                       <img src={preview.avatar_url} alt="" className="h-full w-full object-cover" />
                     ) : (
-                      <span className="font-pixel text-[10px] text-primary">Nv.{preview.level}</span>
+                      <span className="font-pixel text-xs text-primary">Nv.{preview.level}</span>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">
                       {preview.display_name || preview.username || "Jugador"}
                     </p>
-                    <p className="text-[10px] text-muted-foreground truncate">
+                    <p className="text-xs text-muted-foreground truncate">
                       @{preview.username || "—"} · Nv.{preview.level}
                     </p>
-                    <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
                       <Trophy className="h-3 w-3" style={{ color: lg.color }} /> {leagueLabel(lg)}
                     </p>
                   </div>
@@ -187,7 +176,7 @@ const SocialPanel = ({ open: openProp, onOpenChange, hideTrigger, embedded = fal
           {/* Pending requests */}
           {pendingRequests.length > 0 && (
             <div>
-              <p className="text-[8px] font-pixel text-muted-foreground mb-2 flex items-center gap-1">
+              <p className="text-xs font-pixel text-muted-foreground mb-2 flex items-center gap-1">
                 <Bell className="h-3 w-3" /> Solicitudes pendientes
               </p>
               <div className="space-y-1">
@@ -195,7 +184,7 @@ const SocialPanel = ({ open: openProp, onOpenChange, hideTrigger, embedded = fal
                   <div key={req.id} className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2">
                     <div>
                       <p className="text-sm font-medium">{req.friend_profile?.display_name || "Jugador"}</p>
-                      <p className="text-[10px] text-muted-foreground">Nv.{req.friend_profile?.level || 1}</p>
+                      <p className="text-xs text-muted-foreground">Nv.{req.friend_profile?.level || 1}</p>
                     </div>
                     <div className="flex gap-1">
                       <Button size="icon" variant="ghost" className="h-7 w-7 text-primary" onClick={() => respondRequest.mutate({ friendshipId: req.id, accept: true })}>
@@ -213,7 +202,7 @@ const SocialPanel = ({ open: openProp, onOpenChange, hideTrigger, embedded = fal
 
           {/* Friends list */}
           <div>
-            <p className="text-[8px] font-pixel text-muted-foreground mb-2">
+            <p className="text-xs font-pixel text-muted-foreground mb-2">
               Amigos ({friends.length})
             </p>
             {friends.length === 0 ? (
@@ -232,16 +221,16 @@ const SocialPanel = ({ open: openProp, onOpenChange, hideTrigger, embedded = fal
                         {fp?.avatar_url ? (
                           <img src={fp.avatar_url} alt="" className="h-full w-full object-cover" />
                         ) : (
-                          <span className="font-pixel text-[8px] text-primary">{fp?.level || 1}</span>
+                          <span className="font-pixel text-xs text-primary">{fp?.level || 1}</span>
                         )}
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-medium truncate">{fp?.display_name || fp?.username || "Jugador"}</p>
-                        <p className="text-[10px] text-muted-foreground flex items-center gap-2">
+                        <p className="text-xs text-muted-foreground flex items-center gap-2">
                           <span>Nv.{fp?.level || 1}</span>
                           <span>· {fp?.xp || 0} XP</span>
                         </p>
-                        <p className="text-[10px] text-muted-foreground flex items-center gap-2">
+                        <p className="text-xs text-muted-foreground flex items-center gap-2">
                           <span className="flex items-center gap-1"><Trophy className="h-3 w-3" style={{ color: lg.color }} />{leagueLabel(lg)}</span>
                           <span className="flex items-center gap-1"><Flame className="h-3 w-3 text-orange-500" />{fp?.daily_streak || 0}</span>
                         </p>
@@ -284,7 +273,7 @@ const SocialPanel = ({ open: openProp, onOpenChange, hideTrigger, embedded = fal
           {/* Party invites */}
           {partyInvites.length > 0 && (
             <div>
-              <p className="text-[8px] font-pixel text-muted-foreground mb-2 flex items-center gap-1">
+              <p className="text-xs font-pixel text-muted-foreground mb-2 flex items-center gap-1">
                 <Bell className="h-3 w-3" /> Invitaciones a party
               </p>
               {partyInvites.map((inv: any) => (
@@ -308,7 +297,7 @@ const SocialPanel = ({ open: openProp, onOpenChange, hideTrigger, embedded = fal
               <div className="text-center py-6">
                 <Swords className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
                 <p className="text-sm text-muted-foreground mb-1">No estás en una party</p>
-                <p className="text-[10px] text-muted-foreground">Crea una para jugar con amigos y ganar +10% XP</p>
+                <p className="text-xs text-muted-foreground">Crea una para jugar con amigos y ganar +10% XP</p>
               </div>
               <div className="flex gap-2">
                 <Input
@@ -329,15 +318,15 @@ const SocialPanel = ({ open: openProp, onOpenChange, hideTrigger, embedded = fal
               <div className="rounded-lg party-header-card p-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-pixel text-[10px] text-primary">{party.name}</p>
-                    <p className="text-[9px] text-muted-foreground mt-0.5">
+                    <p className="font-pixel text-xs text-primary">{party.name}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       {(party.members.filter(m => m.status === "accepted").length + 1)}/{party.max_members} miembros · +10% XP
                     </p>
                   </div>
                   <Button
                     size="sm"
                     variant="destructive"
-                    className="font-pixel text-[7px] h-7"
+                    className="font-pixel text-[11px] h-7"
                     onClick={() => {
                       leaveParty.mutate();
                       toast.success(party.leader_id === user?.id ? "Party disuelta" : "Saliste de la party");
@@ -353,7 +342,7 @@ const SocialPanel = ({ open: openProp, onOpenChange, hideTrigger, embedded = fal
               <div className="space-y-1">
                 <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2">
                   <Crown className="h-4 w-4 text-yellow-500" />
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/20 text-primary font-pixel text-[8px]">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/20 text-primary font-pixel text-xs">
                     {(party as any).leaderProfile?.level || 1}
                   </div>
                   <div className="flex-1">
@@ -370,7 +359,7 @@ const SocialPanel = ({ open: openProp, onOpenChange, hideTrigger, embedded = fal
                   .map((member) => (
                     <div key={member.id} className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
                       <Shield className="h-4 w-4 text-muted-foreground" />
-                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-muted text-muted-foreground font-pixel text-[8px]">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-muted text-muted-foreground font-pixel text-xs">
                         {member.profile?.level || 1}
                       </div>
                       <div className="flex-1">
@@ -408,7 +397,7 @@ const SocialPanel = ({ open: openProp, onOpenChange, hideTrigger, embedded = fal
               {/* Invite friends */}
               {party.leader_id === user?.id && friends.length > 0 && (
                 <div>
-                  <p className="text-[8px] font-pixel text-muted-foreground mb-2">Invitar amigos</p>
+                  <p className="text-xs font-pixel text-muted-foreground mb-2">Invitar amigos</p>
                   <div className="space-y-1 max-h-32 overflow-auto">
                     {friends.map((f) => {
                       const friendUserId = f.user_id === user?.id ? f.friend_id : f.user_id;
@@ -417,7 +406,7 @@ const SocialPanel = ({ open: openProp, onOpenChange, hideTrigger, embedded = fal
                       return (
                         <div key={f.id} className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-1.5">
                           <p className="text-sm">{f.friend_profile?.display_name || "Jugador"}</p>
-                          <Button size="sm" variant="outline" className="h-6 text-[10px]" onClick={() => handleInvite(friendUserId)}>
+                          <Button size="sm" variant="outline" className="h-6 text-xs" onClick={() => handleInvite(friendUserId)}>
                             <Send className="h-3 w-3 mr-1" /> Invitar
                           </Button>
                         </div>
@@ -432,44 +421,7 @@ const SocialPanel = ({ open: openProp, onOpenChange, hideTrigger, embedded = fal
       </Tabs>
   );
 
-  if (embedded) {
-    return (
-      <div className="mx-auto w-full max-w-lg pb-24">
-        <div className="mb-3 flex items-center gap-2">
-          <Swords className="h-5 w-5 text-primary" />
-          <h1 className="font-pixel text-xs">Centro Social</h1>
-        </div>
-        {body}
-      </div>
-    );
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      {!hideTrigger && (
-      <DialogTrigger asChild>
-        <button className="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors text-sidebar-foreground hover:bg-sidebar-accent/50">
-          <Users className="h-4 w-4" />
-          <span className="font-pixel text-[9px]">Social</span>
-          {totalNotifications > 0 && (
-            <span className="absolute right-2 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[8px] font-bold text-destructive-foreground">
-              {totalNotifications}
-            </span>
-          )}
-        </button>
-      </DialogTrigger>
-      )}
-      <DialogContent className="max-w-lg social-panel-dialog">
-        <DialogHeader>
-          <DialogTitle className="font-pixel text-xs flex items-center gap-2">
-            <Swords className="h-5 w-5 text-primary" /> Centro Social
-          </DialogTitle>
-        </DialogHeader>
-
-        {body}
-      </DialogContent>
-    </Dialog>
-  );
+  return body;
 };
 
 export default SocialPanel;

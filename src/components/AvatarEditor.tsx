@@ -95,7 +95,7 @@ const AvatarEditor = ({ config, onChange, unlockedOutfits = [] }: AvatarEditorPr
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <div className="space-y-2">
-    <h3 className="font-system text-[10px] text-primary/80 tracking-widest">{title}</h3>
+    <h3 className="font-system text-xs text-primary/80 tracking-widest">{title}</h3>
     {children}
   </div>
 );

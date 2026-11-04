@@ -25,7 +25,7 @@ const ClanWeeklyChallenge = ({ clan }: { clan: Clan }) => {
           <Target className="h-4 w-4 text-primary" />
           <h3 className="text-sm font-bold uppercase tracking-wide text-foreground">Reto semanal</h3>
         </div>
-        <div className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
+        <div className="inline-flex items-center gap-1 text-xs text-muted-foreground">
           <Timer className="h-3 w-3" />
           {timeUntil(clan.weekly_reset_at)}
         </div>
@@ -68,7 +68,7 @@ const ClanWeeklyChallenge = ({ clan }: { clan: Clan }) => {
                   </div>
                   <Avatar className="h-8 w-8 ring-1 ring-border">
                     <AvatarImage src={c.profile?.avatar_url ?? undefined} />
-                    <AvatarFallback className="text-[10px]">{name.charAt(0)}</AvatarFallback>
+                    <AvatarFallback className="text-xs">{name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <span className="min-w-0 flex-1 truncate text-sm font-semibold">{name}</span>
                   <span className="rounded-md bg-primary/15 px-2 py-0.5 text-sm font-bold tabular-nums text-primary ring-1 ring-primary/30">

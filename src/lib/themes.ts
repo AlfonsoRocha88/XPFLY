@@ -2,24 +2,24 @@ export interface AppTheme {
   id: string;
   name: string;
   className: string;
-  swatch: string; // tailwind-friendly hsl
+  swatch: string; // mirrors --primary for this theme in index.css
 }
 
 export const APP_THEMES: AppTheme[] = [
-  { id: "system-cyan", name: "System Cyan", className: "theme-system-cyan", swatch: "hsl(195 100% 60%)" },
-  { id: "monarch-violet", name: "Monarch Violet", className: "theme-monarch-violet", swatch: "hsl(270 90% 65%)" },
-  { id: "ember-red", name: "Ember Red", className: "theme-ember-red", swatch: "hsl(0 85% 60%)" },
-  { id: "emerald-hunter", name: "Emerald Hunter", className: "theme-emerald-hunter", swatch: "hsl(152 75% 50%)" },
-  { id: "gold-arena", name: "Gold Arena", className: "theme-gold-arena", swatch: "hsl(45 95% 58%)" },
-  { id: "rose-blade", name: "Rose Blade", className: "theme-rose-blade", swatch: "hsl(340 90% 62%)" },
-  { id: "cafe", name: "Café", className: "theme-cafe", swatch: "#6D4C41" },
-  { id: "navy", name: "Navy", className: "theme-navy", swatch: "#1B2A4A" },
-  { id: "lavanda", name: "Lavanda", className: "theme-lavanda", swatch: "#C39BD3" },
-  { id: "menta", name: "Menta", className: "theme-menta", swatch: "#7ECBB4" },
-  { id: "rosa-pastel", name: "Rosa pastel", className: "theme-rosa-pastel", swatch: "#F48FB1" },
-  { id: "melocoton", name: "Melocotón", className: "theme-melocoton", swatch: "#FFAB91" },
-  { id: "pizarra", name: "Pizarra", className: "theme-pizarra", swatch: "#455A64" },
-  { id: "oro-oscuro", name: "Oro oscuro", className: "theme-oro-oscuro", swatch: "#B8860B" },
+  { id: "system-cyan", name: "Cian", className: "theme-system-cyan", swatch: "hsl(196 85% 42%)" },
+  { id: "monarch-violet", name: "Violeta", className: "theme-monarch-violet", swatch: "hsl(262 70% 58%)" },
+  { id: "ember-red", name: "Rojo", className: "theme-ember-red", swatch: "hsl(4 76% 54%)" },
+  { id: "emerald-hunter", name: "Esmeralda", className: "theme-emerald-hunter", swatch: "hsl(156 64% 36%)" },
+  { id: "gold-arena", name: "Dorado", className: "theme-gold-arena", swatch: "hsl(38 92% 44%)" },
+  { id: "rose-blade", name: "Frambuesa", className: "theme-rose-blade", swatch: "hsl(338 76% 54%)" },
+  { id: "cafe", name: "Café", className: "theme-cafe", swatch: "hsl(22 45% 42%)" },
+  { id: "navy", name: "Navy", className: "theme-navy", swatch: "hsl(222 62% 40%)" },
+  { id: "lavanda", name: "Lavanda", className: "theme-lavanda", swatch: "hsl(282 42% 56%)" },
+  { id: "menta", name: "Menta", className: "theme-menta", swatch: "hsl(162 45% 38%)" },
+  { id: "rosa-pastel", name: "Rosa pastel", className: "theme-rosa-pastel", swatch: "hsl(340 68% 58%)" },
+  { id: "melocoton", name: "Melocotón", className: "theme-melocoton", swatch: "hsl(14 80% 56%)" },
+  { id: "pizarra", name: "Pizarra", className: "theme-pizarra", swatch: "hsl(200 22% 38%)" },
+  { id: "oro-oscuro", name: "Oro oscuro", className: "theme-oro-oscuro", swatch: "hsl(40 85% 36%)" },
 ];
 
 export const THEME_CLASS_NAMES = APP_THEMES.map((t) => t.className);

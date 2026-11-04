@@ -60,7 +60,7 @@ const TitlesPanel = ({ unlocked, equipped, progress, streak, onEquip, isPending 
                 <span className="text-xl" style={{ color: t.color }}>{t.icon}</span>
                 <div>
                   <div className="font-system text-sm text-foreground">{t.name}</div>
-                  <div className="text-[10px] text-muted-foreground">{t.description}</div>
+                  <div className="text-xs text-muted-foreground">{t.description}</div>
                 </div>
               </div>
               {t.isUnlocked ? (
@@ -71,7 +71,7 @@ const TitlesPanel = ({ unlocked, equipped, progress, streak, onEquip, isPending 
             </div>
 
             <div className="mt-3 space-y-1">
-              <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>{t.condition}</span>
                 <span className="tabular-nums">
                   {Math.min(t.value, t.goal)}/{t.goal}

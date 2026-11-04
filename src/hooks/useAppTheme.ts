@@ -1,30 +1,49 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 import { useProfile } from "@/hooks/useProfile";
 import { getThemeClass, THEME_CLASS_NAMES } from "@/lib/themes";
 
-/**
- * Applies the user's active theme + light/dark mode to <html>.
- * Use at any top-level route so theme is consistent across pages.
- */
+export type ColorMode = "light" | "dark";
+
+const MODE_KEY = "app-mode";
+const listeners = new Set<() => void>();
+
+function readMode(): ColorMode {
+  try {
+    return localStorage.getItem(MODE_KEY) === "dark" ? "dark" : "light";
+  } catch {
+    return "light";
+  }
+}
+
+function applyMode(mode: ColorMode) {
+  document.documentElement.classList.toggle("dark", mode === "dark");
+}
+
+/** Light is the default; dark is an opt-in stored per device. */
+export function useColorMode() {
+  const mode = useSyncExternalStore(
+    (cb) => { listeners.add(cb); return () => listeners.delete(cb); },
+    readMode,
+  );
+  const setMode = useCallback((m: ColorMode) => {
+    try { localStorage.setItem(MODE_KEY, m); } catch {}
+    applyMode(m);
+    listeners.forEach((l) => l());
+  }, []);
+  return { mode, setMode };
+}
+
+/** Applies the user's accent theme + color mode to <html>. */
 export function useAppTheme() {
   const { profile } = useProfile();
+  const theme = profile?.theme;
 
   useEffect(() => {
-    const cls = getThemeClass((profile as any)?.theme);
     const root = document.documentElement;
     THEME_CLASS_NAMES.forEach((c) => root.classList.remove(c));
-    root.classList.add(cls);
-    try {
-      if ((profile as any)?.theme) localStorage.setItem("lastTheme", (profile as any).theme);
-    } catch {}
-  }, [(profile as any)?.theme]);
+    root.classList.add(getThemeClass(theme));
+    try { if (theme) localStorage.setItem("lastTheme", theme); } catch {}
+  }, [theme]);
 
-  useEffect(() => {
-    const m = (profile as any)?.mode;
-    if (!m) return;
-    const root = document.documentElement;
-    if (m === "light") root.classList.add("light");
-    else root.classList.remove("light");
-    try { localStorage.setItem("lastMode", m); } catch {}
-  }, [(profile as any)?.mode]);
+  useEffect(() => { applyMode(readMode()); }, []);
 }

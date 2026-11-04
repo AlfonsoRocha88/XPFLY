@@ -1,13 +1,11 @@
 import { useEffect, useState, useMemo } from "react";
-import { ArrowLeft, Save, RotateCcw, Sparkles, Loader2 } from "lucide-react";
+import { ChevronLeft, Save, RotateCcw, Sparkles, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfile";
 import CharacterPortrait from "@/components/CharacterPortrait";
 import StatusWindow from "@/components/StatusWindow";
 import AvatarEditor from "@/components/AvatarEditor";
 import TitlesPanel from "@/components/TitlesPanel";
-import SocialPanel from "@/components/SocialPanel";
-import { useState as useStateReact } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AvatarConfig, DEFAULT_AVATAR, DEFAULT_STATS, PlayerStats, detectClass, CLASSES } from "@/lib/avatar-presets";
@@ -110,7 +108,7 @@ const Character = () => {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-full items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
@@ -118,30 +116,26 @@ const Character = () => {
 
   return (
     <div className="h-[100dvh] overflow-y-auto bg-background">
-      {/* Header */}
-      <header className="border-b border-border px-4 md:px-8 py-4 flex items-center justify-between sticky top-0 z-50 bg-background/95 backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
-            <ArrowLeft className="h-5 w-5" />
+      <header className="sticky top-0 z-50 flex items-center justify-between gap-3 bg-background/90 px-4 py-3 backdrop-blur-md md:px-8">
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate("/")} aria-label="Volver">
+            <ChevronLeft className="h-6 w-6" />
           </Button>
-          <div>
-            <h1 className="font-system text-lg text-primary tracking-wider">PERSONAJE</h1>
-            <p className="text-xs text-muted-foreground font-system tracking-wider">Personaliza tu avatar y stats</p>
-          </div>
+          <h1 className="text-2xl font-black tracking-tight">Personaje</h1>
         </div>
         <div className="flex items-center gap-2">
           {dirty && (
-            <Button variant="ghost" size="sm" onClick={handleReset}>
-              <RotateCcw className="h-4 w-4 mr-1.5" /> Deshacer
+            <Button variant="ghost" size="sm" className="rounded-full" onClick={handleReset}>
+              <RotateCcw className="mr-1.5 h-4 w-4" /> Deshacer
             </Button>
           )}
-          <Button size="sm" onClick={handleSave} disabled={!dirty || updateAvatar.isPending}>
-            <Save className="h-4 w-4 mr-1.5" /> Guardar
+          <Button size="sm" className="rounded-full font-extrabold" onClick={handleSave} disabled={!dirty || updateAvatar.isPending}>
+            <Save className="mr-1.5 h-4 w-4" /> Guardar
           </Button>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 md:px-8 py-6 grid gap-6 lg:grid-cols-[400px_1fr]">
+      <div className="mx-auto grid max-w-6xl gap-6 px-4 pb-10 pt-2 md:px-8 lg:grid-cols-[380px_1fr]">
         {/* Avatar showcase */}
         <div className="space-y-4">
           <div className="character-showcase">
@@ -149,14 +143,14 @@ const Character = () => {
             <div className="relative z-10 flex flex-col items-center">
               <CharacterPortrait
                 url={(profile as any)?.avatar_url}
-                size={300}
+                size={260}
                 glow={classGlow}
                 loading={generating}
               />
               <Button
                 size="sm"
                 variant="outline"
-                className="mt-3"
+                className="mt-4 rounded-full bg-card font-bold"
                 onClick={() => regeneratePortrait(draftAvatar)}
                 disabled={generating}
               >
@@ -167,18 +161,13 @@ const Character = () => {
                 )}
               </Button>
               <div className="mt-4 text-center">
-                <div className="font-system text-base text-foreground">{profile?.display_name ?? "Jugador"}</div>
-                <div className="font-system text-[11px] text-primary/80 tracking-widest mt-1">
-                  LV.{level}
-                </div>
+                <div className="text-xl font-black">{profile?.display_name ?? "Jugador"}</div>
+                <div className="mt-0.5 text-sm font-bold text-primary">Nivel {level} · {classInfo.label}</div>
                 {equippedTitle && (
-                  <div className="font-system text-[10px] tracking-widest mt-1" style={{ color: equippedTitle.color }}>
+                  <div className="mt-0.5 text-sm font-bold text-muted-foreground">
                     {equippedTitle.icon} {equippedTitle.name}
                   </div>
                 )}
-                <div className="font-system text-[11px] text-accent tracking-widest mt-1">
-                  ⚔ {classInfo.label}
-                </div>
               </div>
             </div>
           </div>
@@ -193,13 +182,12 @@ const Character = () => {
         </div>
 
         {/* Editor */}
-        <div className="rounded-xl border border-border bg-card/50 backdrop-blur-sm p-4 md:p-6">
+        <div className="surface p-4 md:p-6">
           <Tabs defaultValue="appearance">
-            <TabsList className="mb-4 flex-wrap h-auto">
-              <TabsTrigger value="appearance" className="font-system tracking-wider">APARIENCIA</TabsTrigger>
-              <TabsTrigger value="titles" className="font-system tracking-wider">TÍTULOS</TabsTrigger>
-              <TabsTrigger value="social" className="font-system tracking-wider">SOCIAL</TabsTrigger>
-              <TabsTrigger value="info" className="font-system tracking-wider">INFO</TabsTrigger>
+            <TabsList className="mb-4 grid w-full grid-cols-3">
+              <TabsTrigger value="appearance">Apariencia</TabsTrigger>
+              <TabsTrigger value="titles">Títulos</TabsTrigger>
+              <TabsTrigger value="info">Detalles</TabsTrigger>
             </TabsList>
 
             <TabsContent value="appearance">
@@ -217,10 +205,6 @@ const Character = () => {
               />
             </TabsContent>
 
-            <TabsContent value="social">
-              <SocialTab />
-            </TabsContent>
-
             <TabsContent value="info" className="space-y-4">
               <div className="space-y-3 text-sm">
                 <InfoRow label="Nivel" value={String(level)} />
@@ -235,9 +219,7 @@ const Character = () => {
                   highlight={freezes > 0}
                 />
                 <div className="flex items-center justify-between py-2">
-                  <span className="font-system text-[11px] text-muted-foreground tracking-wider">
-                    PROTEGER RACHA
-                  </span>
+                  <span className="text-sm font-bold text-muted-foreground">Proteger racha</span>
                   <Button
                     size="sm"
                     variant="outline"
@@ -269,24 +251,9 @@ const Character = () => {
 
 const InfoRow = ({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) => (
   <div className="flex items-center justify-between py-2 border-b border-border/50">
-    <span className="font-system text-[11px] text-muted-foreground tracking-wider">{label.toUpperCase()}</span>
-    <span className={highlight ? "font-system text-primary animate-pulse" : "font-system text-foreground"}>{value}</span>
+    <span className="text-sm font-bold text-muted-foreground">{label}</span>
+    <span className={highlight ? "font-extrabold text-primary" : "font-extrabold"}>{value}</span>
   </div>
 );
-
-const SocialTab = () => {
-  const [open, setOpen] = useStateReact(false);
-  return (
-    <div className="space-y-3">
-      <p className="font-system text-xs text-muted-foreground tracking-wider">
-        Gestiona tus amigos, party y código de invitación.
-      </p>
-      <Button onClick={() => setOpen(true)} className="font-pixel text-[10px] w-full">
-        ABRIR SOCIAL
-      </Button>
-      <SocialPanel open={open} onOpenChange={setOpen} hideTrigger />
-    </div>
-  );
-};
 
 export default Character;

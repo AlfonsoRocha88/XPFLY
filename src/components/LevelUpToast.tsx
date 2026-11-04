@@ -28,7 +28,7 @@ const LevelUpToast = ({ level, onComplete }: LevelUpToastProps) => {
           </div>
           <p className="font-pixel text-xs text-primary tracking-wider">¡NIVEL ARRIBA!</p>
           <p className="font-pixel text-3xl text-foreground">{level}</p>
-          <p className="font-pixel text-[8px] text-muted-foreground">Sigue así, campeón</p>
+          <p className="font-pixel text-xs text-muted-foreground">Sigue así, campeón</p>
         </div>
       </div>
     </div>

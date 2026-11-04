@@ -251,31 +251,31 @@ export default function PyroChat({ onClose }: Props) {
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-2">
             <div id="pyro-chat-title" className="font-pixel text-[11px] text-primary">PYRO</div>
-            <div className="font-pixel text-[7px] uppercase tracking-wider text-muted-foreground truncate">
+            <div className="font-pixel text-[11px] uppercase tracking-wider text-muted-foreground truncate">
               Espíritu de Fuego
             </div>
           </div>
           {/* PWR */}
           <div className="mt-1 flex items-center gap-2">
-            <span className="font-pixel text-[7px] text-muted-foreground w-7">PWR</span>
+            <span className="font-pixel text-[11px] text-muted-foreground w-7">PWR</span>
             <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-background/70">
               <div
                 className="h-full bg-gradient-to-r from-primary to-primary/60 transition-all duration-500"
                 style={{ width: `${pwrPct}%` }}
               />
             </div>
-            <span className="font-pixel text-[8px] text-primary tabular-nums">LV{powerLevel}</span>
+            <span className="font-pixel text-xs text-primary tabular-nums">LV{powerLevel}</span>
           </div>
           {/* HP / hunger */}
           <div className="mt-1 flex items-center gap-2">
-            <span className="font-pixel text-[7px] text-muted-foreground w-7">HP</span>
+            <span className="font-pixel text-[11px] text-muted-foreground w-7">HP</span>
             <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-background/70">
               <div
                 className={`h-full bg-gradient-to-r ${hungerColor} transition-all duration-500`}
                 style={{ width: `${hungerPct}%` }}
               />
             </div>
-            <span className="font-pixel text-[8px] text-muted-foreground tabular-nums">{hungerPct}%</span>
+            <span className="font-pixel text-xs text-muted-foreground tabular-nums">{hungerPct}%</span>
           </div>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
@@ -285,7 +285,7 @@ export default function PyroChat({ onClose }: Props) {
           {messages.length > 0 && (
             <button
               onClick={() => setMessages([])}
-              className="font-pixel text-[7px] text-muted-foreground hover:text-foreground"
+              className="font-pixel text-[11px] text-muted-foreground hover:text-foreground"
               aria-label="Borrar historial del chat"
             >
               LIMPIAR
@@ -305,7 +305,7 @@ export default function PyroChat({ onClose }: Props) {
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
             <PyroSprite size={64} />
-            <div className="font-pixel text-[10px] text-muted-foreground">
+            <div className="font-pixel text-xs text-muted-foreground">
               ¡Hola héroe!<br />Pregúntame lo que quieras 🔥
             </div>
           </div>
