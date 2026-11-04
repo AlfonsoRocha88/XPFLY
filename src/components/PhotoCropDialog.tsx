@@ -109,7 +109,7 @@ const PhotoCropDialog = ({ file, saving, onCancel, onConfirm }: PhotoCropDialogP
         <div className="flex gap-2">
           <Button variant="outline" className="flex-1" onClick={onCancel} disabled={saving}>Cancelar</Button>
           <Button className="flex-1" onClick={confirm} disabled={!img || saving}>
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Usar foto"}
+            {saving ? <><Loader2 className="h-4 w-4 animate-spin" /> Revisando…</> : "Usar foto"}
           </Button>
         </div>
       </DialogContent>

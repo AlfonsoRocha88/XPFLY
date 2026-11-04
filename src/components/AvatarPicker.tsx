@@ -54,22 +54,26 @@ const AvatarPicker = () => {
     setPending(file);
   };
 
+  // Photos are reviewed server-side (moderate-avatar) before anyone can see them.
   const upload = async (blob: Blob) => {
     if (!uid) return;
     setSaving(true);
     try {
-      const path = `${uid}/${PHOTO_PREFIX}${Date.now()}.webp`;
-      const { error } = await supabase.storage.from("avatars").upload(path, blob, { contentType: "image/webp" });
-      if (error) throw error;
-      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-      await updateProfile.mutateAsync({ avatar_url: data.publicUrl });
-
-      // Keep only the new photo in the user's folder (drops older photos and old AI portraits).
-      const { data: files } = await supabase.storage.from("avatars").list(uid);
-      const stale = (files ?? []).map((f) => `${uid}/${f.name}`).filter((p) => p !== path);
-      if (stale.length) await supabase.storage.from("avatars").remove(stale);
-
-      queryClient.setQueryData(["avatar-photo", uid], data.publicUrl);
+      const image = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+      const { data, error } = await supabase.functions.invoke("moderate-avatar", { body: { image } });
+      if (error && !data) throw error;
+      if (!data?.allowed) {
+        playSfx("error");
+        toast.error("No pudimos usar esta foto", { description: data?.reason ?? "Intenta con otra imagen." });
+        return;
+      }
+      queryClient.setQueryData(["avatar-photo", uid], data.url);
+      await queryClient.invalidateQueries({ queryKey: ["profile"] });
       playSfx("create");
       toast.success("Foto actualizada");
       setPending(null);

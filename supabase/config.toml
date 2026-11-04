@@ -41,3 +41,5 @@ verify_jwt = false
 
 [functions.cron-worker]
 verify_jwt = false
+[functions.moderate-avatar]
+verify_jwt = false
