@@ -38,11 +38,11 @@ const PlayerHUD = ({ className, showStreak = false }: { className?: string; show
     <div className={cn("flex items-center gap-3", className)}>
       <button
         onClick={() => navigate("/character")}
-        className="relative shrink-0 rounded-2xl transition-transform active:scale-95"
+        className="relative shrink-0 rounded-full transition-transform active:scale-95"
         title="Ver personaje"
         aria-label="Ver personaje"
       >
-        <CharacterPortrait url={profile?.avatar_url} size={48} className="!rounded-2xl !border-0" />
+        <CharacterPortrait url={profile?.avatar_url} seed={profile?.user_id} size={52} />
         {points > 0 && (
           <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-card bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
             {points > 9 ? "9+" : points}

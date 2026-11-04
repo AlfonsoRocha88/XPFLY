@@ -34,6 +34,7 @@ import LeagueShield from "@/components/leagues/LeagueShield";
 import ClanHeader, { ClanHeaderCompact } from "@/components/clan/ClanHeader";
 import ClanWeeklyChallenge from "@/components/clan/ClanWeeklyChallenge";
 import ClanChat from "@/components/clan/ClanChat";
+import { avatarSrc } from "@/lib/avatars";
 
 
 /* ───────────────────────────── Member row ───────────────────────────── */
@@ -110,7 +111,7 @@ const MemberSheet = ({
         </SheetHeader>
         <div className="mt-2 flex items-center gap-3">
           <Avatar className="h-14 w-14 ring-2 ring-primary/40">
-            <AvatarImage src={p?.avatar_url ?? undefined} />
+            <AvatarImage src={avatarSrc(p?.avatar_url, member.user_id)} />
             <AvatarFallback>{(p?.display_name ?? p?.username ?? "?").charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1">
@@ -483,7 +484,7 @@ const ClanScreen = ({ clan, viewerRole }: { clan: Clan; viewerRole: ClanRole | n
               <div className="space-y-1">
                 {incoming.map((r) => (
                   <div key={r.id} className="flex items-center gap-2 rounded-lg bg-card/60 px-2 py-1.5">
-                    <Avatar className="h-7 w-7"><AvatarImage src={r.profile?.avatar_url ?? undefined} /><AvatarFallback>{(r.profile?.display_name ?? "?").charAt(0)}</AvatarFallback></Avatar>
+                    <Avatar className="h-7 w-7"><AvatarImage src={avatarSrc(r.profile?.avatar_url, r.user_id)} /><AvatarFallback>{(r.profile?.display_name ?? "?").charAt(0)}</AvatarFallback></Avatar>
                     <span className="flex-1 truncate text-sm">{r.profile?.display_name || r.profile?.username || "Jugador"} <span className="text-xs text-muted-foreground">Nv.{r.profile?.level ?? 1}</span></span>
                     <Button size="icon" variant="ghost" className="h-7 w-7 text-emerald-400" onClick={() => respondJoinRequest.mutate({ requestId: r.id, accept: true })}><Check className="h-4 w-4" /></Button>
                     <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => respondJoinRequest.mutate({ requestId: r.id, accept: false })}><X className="h-4 w-4" /></Button>

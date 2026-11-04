@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { avatarSrc } from "@/lib/avatars";
 
 const SocialPanel = ({ view }: { view: "friends" | "party" }) => {
   const { user } = useAuth();
@@ -128,11 +129,7 @@ const SocialPanel = ({ view }: { view: "friends" | "party" }) => {
               return (
                 <div className="rounded-lg border border-primary/40 bg-primary/5 p-3 flex items-center gap-3">
                   <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden border border-primary/40">
-                    {preview.avatar_url ? (
-                      <img src={preview.avatar_url} alt="" className="h-full w-full object-cover" />
-                    ) : (
-                      <span className="font-pixel text-xs text-primary">Nv.{preview.level}</span>
-                    )}
+                    <img src={avatarSrc(preview.avatar_url, preview.user_id)} alt="" className="h-full w-full object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">
@@ -198,11 +195,7 @@ const SocialPanel = ({ view }: { view: "friends" | "party" }) => {
                   <div key={f.id} className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2">
                     <div className="flex items-center gap-2 min-w-0">
                       <div className="h-9 w-9 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden border border-primary/30">
-                        {fp?.avatar_url ? (
-                          <img src={fp.avatar_url} alt="" className="h-full w-full object-cover" />
-                        ) : (
-                          <span className="font-pixel text-xs text-primary">{fp?.level || 1}</span>
-                        )}
+                        <img src={avatarSrc(fp?.avatar_url, fp?.user_id)} alt="" className="h-full w-full object-cover" />
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-medium truncate">{fp?.display_name || fp?.username || "Jugador"}</p>

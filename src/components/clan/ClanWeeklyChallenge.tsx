@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useClanContributions, type Clan } from "@/hooks/useClans";
 import MedalIcon from "./MedalIcon";
+import { avatarSrc } from "@/lib/avatars";
 
 function timeUntil(iso: string) {
   const ms = new Date(iso).getTime() - Date.now();
@@ -67,7 +68,7 @@ const ClanWeeklyChallenge = ({ clan }: { clan: Clan }) => {
                     )}
                   </div>
                   <Avatar className="h-8 w-8 ring-1 ring-border">
-                    <AvatarImage src={c.profile?.avatar_url ?? undefined} />
+                    <AvatarImage src={avatarSrc(c.profile?.avatar_url, c.user_id)} />
                     <AvatarFallback className="text-xs">{name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <span className="min-w-0 flex-1 truncate text-sm font-semibold">{name}</span>

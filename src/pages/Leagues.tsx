@@ -15,6 +15,7 @@ import {
   type LeagueDivision,
 } from "@/lib/leagues";
 import { cn } from "@/lib/utils";
+import { avatarSrc } from "@/lib/avatars";
 
 /** Group divisions by league family, preserving order. */
 function groupByLeague(): { league: string; divisions: LeagueDivision[]; color: string; emblem: string }[] {
@@ -61,13 +62,7 @@ const GlobalRow = ({ row, rank }: { row: LbRow; rank: number }) => (
       className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 bg-muted"
       style={{ borderColor: row.isUser ? "hsl(var(--primary))" : "hsl(var(--border))" }}
     >
-      {row.avatar_url ? (
-        <img src={row.avatar_url} alt={row.name} className="h-full w-full object-cover" />
-      ) : (
-        <span className="font-pixel text-xs text-muted-foreground">
-          {row.name.slice(0, 1).toUpperCase()}
-        </span>
-      )}
+      <img src={avatarSrc(row.avatar_url, row.user_id)} alt={row.name} className="h-full w-full object-cover" />
     </div>
     <div className="flex-1 min-w-0">
       <p className={cn("truncate text-sm font-semibold", row.isUser && "text-primary")}>
@@ -376,13 +371,7 @@ const Leagues = () => {
                       borderColor: p.isUser ? "hsl(var(--primary))" : "hsl(var(--border))",
                     }}
                   >
-                    {p.avatar_url ? (
-                      <img src={p.avatar_url} alt={p.name} className="h-full w-full object-cover" />
-                    ) : (
-                      <span className="font-pixel text-xs text-muted-foreground">
-                        {p.name.slice(0, 1).toUpperCase()}
-                      </span>
-                    )}
+                    <img src={avatarSrc(p.avatar_url, p.user_id)} alt={p.name} className="h-full w-full object-cover" />
                   </div>
                   {/* Name + league */}
                   <div className="flex-1 min-w-0">

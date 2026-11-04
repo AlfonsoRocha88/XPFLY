@@ -1,33 +1,20 @@
-import { useEffect, useState, useMemo } from "react";
-import { ChevronLeft, Save, RotateCcw, Sparkles, Loader2 } from "lucide-react";
+import { useMemo } from "react";
+import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfile";
 import CharacterPortrait from "@/components/CharacterPortrait";
 import StatusWindow from "@/components/StatusWindow";
-import AvatarEditor from "@/components/AvatarEditor";
+import AvatarPicker from "@/components/AvatarPicker";
 import TitlesPanel from "@/components/TitlesPanel";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AvatarConfig, DEFAULT_AVATAR, DEFAULT_STATS, PlayerStats, detectClass, CLASSES } from "@/lib/avatar-presets";
+import { DEFAULT_STATS, PlayerStats, detectClass } from "@/lib/avatar-presets";
 import { getTitle, DEFAULT_TITLE_PROGRESS, TitleProgress } from "@/lib/titles";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
 
 const Character = () => {
   const navigate = useNavigate();
-  const { profile, updateAvatar, allocateStat, equipTitle, buyStreakFreeze, isLoading } = useProfile();
-  const queryClient = useQueryClient();
-
-  const [draftAvatar, setDraftAvatar] = useState<AvatarConfig>(DEFAULT_AVATAR);
-  const [dirty, setDirty] = useState(false);
-  const [generating, setGenerating] = useState(false);
-
-  useEffect(() => {
-    if (profile?.avatar_config) {
-      setDraftAvatar({ ...DEFAULT_AVATAR, ...(profile.avatar_config as Partial<AvatarConfig>) });
-    }
-  }, [profile?.avatar_config]);
+  const { profile, allocateStat, equipTitle, buyStreakFreeze, isLoading } = useProfile();
 
   const stats: PlayerStats = useMemo(
     () => ({ ...DEFAULT_STATS, ...((profile?.stats as Partial<PlayerStats>) ?? {}) }),
@@ -40,7 +27,6 @@ const Character = () => {
   const title = equippedTitle?.name ?? "Sin título";
   const pointsAvailable = profile?.stat_points_available ?? 0;
   const spent = profile?.stat_points_spent ?? 0;
-  const unlockedOutfits = (profile?.unlocked_outfits as string[] | undefined) ?? ["hunter", "casual"];
   const unlockedTitles = (profile?.unlocked_titles as string[] | undefined) ?? [];
   const titleProgress: TitleProgress = {
     ...DEFAULT_TITLE_PROGRESS,
@@ -50,53 +36,6 @@ const Character = () => {
   const freezes = profile?.streak_freezes ?? 0;
   const freezeMax = profile?.streak_freeze_max ?? 3;
   const classInfo = useMemo(() => detectClass(stats, spent), [stats, spent]);
-  const classGlow = classInfo.classId ? CLASSES[classInfo.classId].glow : null;
-
-  const handleAvatarChange = (next: AvatarConfig) => {
-    setDraftAvatar(next);
-    setDirty(true);
-  };
-
-  const handleSave = async () => {
-    try {
-      await updateAvatar.mutateAsync(draftAvatar);
-      setDirty(false);
-      await regeneratePortrait(draftAvatar);
-    } catch {
-      toast.error("Error al guardar");
-    }
-  };
-
-  const regeneratePortrait = async (cfg: AvatarConfig) => {
-    setGenerating(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("generate-avatar", {
-        body: {
-          config: cfg,
-          className: classInfo.label,
-          title: equippedTitle?.name ?? null,
-          gender: profile?.pyro_gender ?? null,
-        },
-      });
-      if (error) throw error;
-      if ((data as any)?.avatar_url) {
-        queryClient.invalidateQueries({ queryKey: ["profile"] });
-      }
-    } catch (e: any) {
-      toast.error("No se pudo generar el retrato", { description: e?.message });
-    } finally {
-      setGenerating(false);
-    }
-  };
-
-  const handleReset = () => {
-    if (profile?.avatar_config) {
-      setDraftAvatar({ ...DEFAULT_AVATAR, ...(profile.avatar_config as Partial<AvatarConfig>) });
-    } else {
-      setDraftAvatar(DEFAULT_AVATAR);
-    }
-    setDirty(false);
-  };
 
   const handleAllocate = async (stat: keyof PlayerStats) => {
     try {
@@ -123,16 +62,6 @@ const Character = () => {
           </Button>
           <h1 className="text-[28px] leading-tight font-serif font-medium tracking-tight">Personaje</h1>
         </div>
-        <div className="flex items-center gap-2">
-          {dirty && (
-            <Button variant="ghost" size="sm" className="rounded-full" onClick={handleReset}>
-              <RotateCcw className="mr-1.5 h-4 w-4" /> Deshacer
-            </Button>
-          )}
-          <Button size="sm" className="rounded-full font-semibold" onClick={handleSave} disabled={!dirty || updateAvatar.isPending}>
-            <Save className="mr-1.5 h-4 w-4" /> Guardar
-          </Button>
-        </div>
       </header>
 
       <div className="mx-auto grid max-w-6xl gap-6 px-4 pb-10 pt-2 md:px-8 lg:grid-cols-[380px_1fr]">
@@ -141,25 +70,7 @@ const Character = () => {
           <div className="character-showcase">
             <div className="character-showcase-grid" />
             <div className="relative z-10 flex flex-col items-center">
-              <CharacterPortrait
-                url={profile?.avatar_url}
-                size={260}
-                glow={classGlow}
-                loading={generating}
-              />
-              <Button
-                size="sm"
-                variant="outline"
-                className="mt-4 rounded-full bg-card font-medium"
-                onClick={() => regeneratePortrait(draftAvatar)}
-                disabled={generating}
-              >
-                {generating ? (
-                  <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> Generando…</>
-                ) : (
-                  <><Sparkles className="h-3.5 w-3.5 mr-1.5" /> Regenerar retrato</>
-                )}
-              </Button>
+              <CharacterPortrait url={profile?.avatar_url} seed={profile?.user_id} size={200} className="shadow-lift ring-4 ring-card" />
               <div className="mt-4 text-center">
                 <div className="font-serif text-2xl font-medium">{profile?.display_name ?? "Jugador"}</div>
                 <div className="mt-0.5 text-sm font-medium text-primary">Nivel {level} · {classInfo.label}</div>
@@ -185,13 +96,13 @@ const Character = () => {
         <div className="surface p-4 md:p-6">
           <Tabs defaultValue="appearance">
             <TabsList className="mb-4 grid w-full grid-cols-3">
-              <TabsTrigger value="appearance">Apariencia</TabsTrigger>
+              <TabsTrigger value="appearance">Avatar</TabsTrigger>
               <TabsTrigger value="titles">Títulos</TabsTrigger>
               <TabsTrigger value="info">Detalles</TabsTrigger>
             </TabsList>
 
             <TabsContent value="appearance">
-              <AvatarEditor config={draftAvatar} onChange={handleAvatarChange} unlockedOutfits={unlockedOutfits} />
+              <AvatarPicker />
             </TabsContent>
 
             <TabsContent value="titles">
@@ -235,11 +146,10 @@ const Character = () => {
                 </div>
                 <InfoRow label="Puntos asignados" value={String(profile?.stat_points_spent ?? 0)} />
                 <InfoRow label="Puntos disponibles" value={String(pointsAvailable)} highlight={pointsAvailable > 0} />
-                <InfoRow label="Outfits desbloqueados" value={String(unlockedOutfits.length)} />
               </div>
               <p className="text-xs text-muted-foreground pt-4 border-t border-border">
                 Ganas <span className="text-primary font-semibold">3 puntos de atributo</span> por cada nivel que subas.
-                Distribúyelos como quieras entre HP, MP, Fuerza, Inteligencia, Velocidad y Defensa. Cuando un stat alcance el <span className="text-primary font-semibold">60%</span> de tus puntos asignados, desbloquearás una <span className="text-accent font-semibold">clase</span> con un atuendo único. Los hitos de 6, 18 y 36 puntos suben el rango (Novato → Adepto → Maestro).
+                Distribúyelos como quieras entre HP, MP, Fuerza, Inteligencia, Velocidad y Defensa. Cuando un stat alcance el <span className="text-primary font-semibold">60%</span> de tus puntos asignados, desbloquearás una <span className="text-accent font-semibold">clase</span>. Los hitos de 6, 18 y 36 puntos suben el rango (Novato → Adepto → Maestro).
               </p>
             </TabsContent>
           </Tabs>

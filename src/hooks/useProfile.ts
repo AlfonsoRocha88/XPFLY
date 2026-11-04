@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import type { Profile } from "@/lib/types";
-import { AvatarConfig, PlayerStats, CLASSES, CLASS_TIER_NAMES, type ClassId } from "@/lib/avatar-presets";
+import { PlayerStats, CLASSES, CLASS_TIER_NAMES, type ClassId } from "@/lib/avatar-presets";
 import { getTitle } from "@/lib/titles";
 import { toast } from "sonner";
 import { pyroSay } from "./usePyro";
@@ -145,39 +145,21 @@ export const useProfile = () => {
   });
 
   const updateProfile = useMutation({
-    mutationFn: async (updates: { display_name?: string; avatar_url?: string; wallpaper?: string; outfit?: string; theme?: string; mode?: string; bg_animations?: boolean }) => {
-      let payload: any = { ...updates };
-      if (updates.outfit) {
-        // outfit is stored inside avatar_config
-        const current = queryClient.getQueryData<Profile>(["profile"]);
-        const cfg = (current?.avatar_config as Partial<AvatarConfig>) ?? {};
-        payload = { ...payload, avatar_config: { ...cfg, outfit: updates.outfit } as any };
-        delete payload.outfit;
-      }
+    mutationFn: async (updates: { display_name?: string; avatar_url?: string; wallpaper?: string; theme?: string; bg_animations?: boolean }) => {
       const { data, error } = await supabase
         .from("profiles")
-        .update(payload)
+        .update(updates)
         .eq("user_id", user!.id)
         .select()
         .single();
       if (error) throw error;
       return data;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["profile"] }),
-  });
-
-  const updateAvatar = useMutation({
-    mutationFn: async (avatar: AvatarConfig) => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .update({ avatar_config: avatar as any })
-        .eq("user_id", user!.id)
-        .select()
-        .single();
-      if (error) throw error;
-      return data;
+    // Show the change immediately; the realtime channel and refetch confirm it.
+    onMutate: (updates) => {
+      queryClient.setQueryData<Profile | null>(["profile"], (old) => (old ? { ...old, ...updates } : old));
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["profile"] }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["profile"] }),
   });
 
   const allocateStat = useMutation({
@@ -307,7 +289,6 @@ export const useProfile = () => {
     profile: profileQuery.data,
     isLoading: profileQuery.isLoading,
     updateProfile,
-    updateAvatar,
     allocateStat,
     addXp,
     claimDailyBonus,

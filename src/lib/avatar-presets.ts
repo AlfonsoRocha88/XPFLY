@@ -1,14 +1,3 @@
-export interface AvatarConfig {
-  skinColor: string;
-  hairStyle: string;
-  hairColor: string;
-  eyeStyle: string;
-  eyeColor: string;
-  faceStyle: string;
-  height: number; // 0.85 - 1.15
-  outfit: string;
-}
-
 export interface PlayerStats {
   hp: number;
   mp: number;
@@ -18,17 +7,6 @@ export interface PlayerStats {
   def: number;
 }
 
-export const DEFAULT_AVATAR: AvatarConfig = {
-  skinColor: "#f5d0a9",
-  hairStyle: "short",
-  hairColor: "#2b1810",
-  eyeStyle: "normal",
-  eyeColor: "#3b82f6",
-  faceStyle: "round",
-  height: 1.0,
-  outfit: "hunter",
-};
-
 export const DEFAULT_STATS: PlayerStats = {
   hp: 10,
   mp: 10,
@@ -37,85 +15,6 @@ export const DEFAULT_STATS: PlayerStats = {
   spd: 10,
   def: 10,
 };
-
-export const POINTS_PER_LEVEL = 3;
-
-// Color palettes
-export const SKIN_COLORS = [
-  "#fbe1c4", "#f5d0a9", "#e6b58a", "#c98e6b", "#9c6b4a", "#6b4426", "#3d2614",
-];
-
-export const HAIR_COLORS = [
-  "#0a0a0a", "#2b1810", "#5a3a1f", "#a06a3a", "#d4a017", "#e8d5a8",
-  "#9b6bff", "#3b82f6", "#22c55e", "#ef4444", "#ec4899", "#06b6d4", "#ffffff",
-];
-
-export const EYE_COLORS = [
-  "#1a1a2e", "#3b1f0a", "#5a3a1f", "#22c55e", "#06b6d4", "#3b82f6",
-  "#9b6bff", "#ef4444", "#f59e0b", "#ec4899",
-];
-
-export const HAIR_STYLES = [
-  { id: "short", name: "Corto" },
-  { id: "spiky", name: "Spiky" },
-  { id: "long", name: "Largo" },
-  { id: "ponytail", name: "Coleta" },
-  { id: "bangs", name: "Flequillo" },
-  { id: "messy", name: "Despeinado" },
-  { id: "mohawk", name: "Mohawk" },
-  { id: "bald", name: "Calvo" },
-];
-
-export const EYE_STYLES = [
-  { id: "normal", name: "Normales" },
-  { id: "sharp", name: "Afilados" },
-  { id: "big", name: "Grandes" },
-  { id: "closed", name: "Cerrados" },
-  { id: "glow", name: "Brillantes" },
-];
-
-export const FACE_STYLES = [
-  { id: "round", name: "Redondo" },
-  { id: "angular", name: "Anguloso" },
-  { id: "soft", name: "Suave" },
-];
-
-export const OUTFITS = [
-  { id: "hunter", name: "Cazador", color: "#1e293b", accent: "#06b6d4" },
-  { id: "casual", name: "Casual", color: "#475569", accent: "#94a3b8" },
-  { id: "armor", name: "Armadura", color: "#334155", accent: "#facc15" },
-  { id: "mage", name: "Mago", color: "#581c87", accent: "#c4b5fd" },
-];
-
-// Extended outfits unlocked through class progression
-export const CLASS_OUTFITS = [
-  // Pure single-stat classes
-  { id: "mage_apprentice", name: "Aprendiz Mago", color: "#3b1d6b", accent: "#a78bfa", trim: "#facc15" },
-  { id: "mage_master",     name: "Mago Maestro", color: "#1e0e4a", accent: "#c4b5fd", trim: "#fde047" },
-  { id: "warrior_apprentice", name: "Guerrero Novato", color: "#3f1d1d", accent: "#f97316", trim: "#fbbf24" },
-  { id: "warrior_master",     name: "Guerrero Maestro", color: "#1f0c0c", accent: "#fb923c", trim: "#fde047" },
-  { id: "rogue_apprentice", name: "Asesino Novato", color: "#0a2e1a", accent: "#22c55e", trim: "#86efac" },
-  { id: "rogue_master",     name: "Asesino Maestro", color: "#04130c", accent: "#4ade80", trim: "#fbbf24" },
-  { id: "tank_apprentice", name: "Guardián Novato", color: "#3a3a0e", accent: "#facc15", trim: "#fde68a" },
-  { id: "tank_master",     name: "Guardián Maestro", color: "#1f1f08", accent: "#fde047", trim: "#fef3c7" },
-  // Hybrids
-  { id: "battlemage_apprentice", name: "Battlemage Novato", color: "#2a1140", accent: "#f97316", trim: "#a78bfa" },
-  { id: "battlemage_master",     name: "Battlemage Maestro", color: "#160820", accent: "#fb923c", trim: "#c4b5fd" },
-  { id: "spellblade_apprentice", name: "Spellblade Novato", color: "#0e2440", accent: "#a78bfa", trim: "#22c55e" },
-  { id: "spellblade_master",     name: "Spellblade Maestro", color: "#06122a", accent: "#c4b5fd", trim: "#4ade80" },
-  { id: "paladin_apprentice", name: "Paladín Novato", color: "#3a2a0a", accent: "#facc15", trim: "#fde047" },
-  { id: "paladin_master",     name: "Paladín Maestro", color: "#1a1305", accent: "#fde047", trim: "#fef3c7" },
-  { id: "ranger_apprentice", name: "Ranger Novato", color: "#0a3020", accent: "#22c55e", trim: "#a3e635" },
-  { id: "ranger_master",     name: "Ranger Maestro", color: "#041a10", accent: "#4ade80", trim: "#fde047" },
-  { id: "monk_apprentice", name: "Monje Novato", color: "#2a1a40", accent: "#06b6d4", trim: "#a78bfa" },
-  { id: "monk_master",     name: "Monje Maestro", color: "#15082a", accent: "#22d3ee", trim: "#c4b5fd" },
-];
-
-export const ALL_OUTFITS = [...OUTFITS, ...CLASS_OUTFITS];
-
-export function getOutfit(id: string) {
-  return ALL_OUTFITS.find((o) => o.id === id) ?? OUTFITS[0];
-}
 
 /* ----------------------------------------------------------
    Hybrid class system
@@ -231,7 +130,3 @@ export const STAT_INFO: Record<keyof PlayerStats, { label: string; color: string
   spd: { label: "VELOCIDAD", color: "#22c55e", icon: "➤" },
   def: { label: "DEFENSA", color: "#facc15", icon: "🛡" },
 };
-
-export function calculateExpectedPoints(level: number): number {
-  return Math.max(0, (level - 1) * POINTS_PER_LEVEL);
-}

@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useClanActivity, useClanMessages, type ClanActivity, type ClanMessage } from "@/hooks/useClans";
 import { timeAgo } from "./timeAgo";
+import { avatarSrc } from "@/lib/avatars";
 
 function activityText(a: ClanActivity): { Icon: any; line: string; tone: string } {
   const name = a.profile?.display_name || a.profile?.username || "Un héroe";
@@ -92,7 +93,7 @@ const ClanChat = ({ clanId }: { clanId: string }) => {
             return (
               <div key={it.id} className={`flex items-end gap-2 ${mine ? "flex-row-reverse" : ""}`}>
                 <Avatar className="h-7 w-7 shrink-0 ring-1 ring-border">
-                  <AvatarImage src={m.profile?.avatar_url ?? undefined} />
+                  <AvatarImage src={avatarSrc(m.profile?.avatar_url, m.user_id)} />
                   <AvatarFallback className="text-xs">{name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className={`max-w-[78%] ${mine ? "items-end" : "items-start"} flex flex-col`}>
