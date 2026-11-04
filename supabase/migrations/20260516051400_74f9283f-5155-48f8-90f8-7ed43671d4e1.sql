@@ -119,11 +119,17 @@ REVOKE EXECUTE ON FUNCTION public.bump_clan_weekly_progress() FROM PUBLIC, anon,
 REVOKE EXECUTE ON FUNCTION public.log_league_change() FROM PUBLIC, anon, authenticated;
 
 -- 5) Realtime: deny private channel subscriptions (app uses only postgres_changes)
-ALTER TABLE IF EXISTS realtime.messages ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Deny all realtime broadcast" ON realtime.messages;
-CREATE POLICY "Deny all realtime broadcast"
-ON realtime.messages
-FOR ALL
-TO authenticated, anon
-USING (false)
-WITH CHECK (false);
+-- Skipped on projects where the migration role does not own realtime.messages
+-- (standard Supabase); there, private channels already require explicit policies.
+DO $$ BEGIN
+  ALTER TABLE IF EXISTS realtime.messages ENABLE ROW LEVEL SECURITY;
+  DROP POLICY IF EXISTS "Deny all realtime broadcast" ON realtime.messages;
+  CREATE POLICY "Deny all realtime broadcast"
+  ON realtime.messages
+  FOR ALL
+  TO authenticated, anon
+  USING (false)
+  WITH CHECK (false);
+EXCEPTION WHEN insufficient_privilege THEN
+  RAISE NOTICE 'Skipping realtime.messages policy: %', SQLERRM;
+END $$;

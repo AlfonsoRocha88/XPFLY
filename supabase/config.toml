@@ -1,4 +1,4 @@
-project_id = "xpfly"
+project_id = "krjtzumgvoxxrnbpncqw"
 
 [functions.pyro-chat]
 verify_jwt = false
