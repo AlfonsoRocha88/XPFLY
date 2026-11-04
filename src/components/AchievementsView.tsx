@@ -22,6 +22,7 @@ import type { Task } from "@/lib/types";
 
 interface Props {
   tasks: Task[];
+  view: "stats" | "achievements";
 }
 
 const DAY_LABELS = ["D", "L", "M", "X", "J", "V", "S"];
@@ -49,11 +50,10 @@ function heatColor(value: number, avg: number): string {
   return `rgb(${r}, ${g}, ${b})`;
 }
 
-const AchievementsView = ({ tasks }: Props) => {
+const AchievementsView = ({ tasks, view: tab }: Props) => {
   const { profile } = useProfile();
-  const [tab, setTab] = useState<"stats" | "achievements">("stats");
 
-  const streak = (profile as any)?.daily_streak ?? 0;
+  const streak = profile?.daily_streak ?? 0;
 
   // Frozen state: freeze used today (yesterday's miss covered) and user hasn't
   // completed the daily yet today.
@@ -63,7 +63,7 @@ const AchievementsView = ({ tasks }: Props) => {
       if (!flag) return false;
       const today = new Date().toISOString().slice(0, 10);
       if (flag !== today) return false;
-      const dc = (profile as any)?.daily_completed_at as string | null | undefined;
+      const dc = profile?.daily_completed_at as string | null | undefined;
       if (dc && dc.slice(0, 10) === today) return false;
       return true;
     } catch {
@@ -118,35 +118,7 @@ const AchievementsView = ({ tasks }: Props) => {
   }, [tasks]);
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Top tab buttons */}
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => setTab("stats")}
-          className={cn(
-            "flex-1 rounded-xl border px-4 py-3 font-pixel text-xs uppercase transition",
-            tab === "stats"
-              ? "border-primary bg-primary/15 text-primary"
-              : "border-border bg-card text-muted-foreground hover:bg-muted",
-          )}
-        >
-          Estadísticas
-        </button>
-        <button
-          type="button"
-          onClick={() => setTab("achievements")}
-          className={cn(
-            "flex-1 rounded-xl border px-4 py-3 font-pixel text-xs uppercase transition",
-            tab === "achievements"
-              ? "border-primary bg-primary/15 text-primary"
-              : "border-border bg-card text-muted-foreground hover:bg-muted",
-          )}
-        >
-          Logros
-        </button>
-      </div>
-
+    <div className="flex flex-col gap-4">
       {tab === "achievements" ? (
         <AchievementsErrorBoundary>
           <AchievementsGrid />
@@ -154,12 +126,10 @@ const AchievementsView = ({ tasks }: Props) => {
       ) : (
         <>
           {/* Streak + Pyro */}
-          <div className="flex items-center justify-center gap-4 py-4">
+          <div className="surface flex items-center justify-center gap-6 py-5">
             <div className="flex flex-col items-start">
-              <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                Racha
-              </span>
-              <span className="text-6xl font-extrabold leading-none text-foreground tabular-nums">
+              <span className="eyebrow">Racha actual</span>
+              <span className="text-6xl font-black leading-none text-foreground tabular-nums">
                 {streak}
               </span>
               <span className="mt-1 text-xs text-muted-foreground">
@@ -173,12 +143,10 @@ const AchievementsView = ({ tasks }: Props) => {
           </div>
 
           {/* Daily average — Apple Screen Time style */}
-          <div className="rounded-2xl border border-border bg-card p-5">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">
-              Promedio diario
-            </p>
+          <div className="surface p-5">
+            <p className="eyebrow">Promedio diario</p>
             <div className="mt-1 flex items-end gap-3">
-              <span className="text-5xl font-bold leading-none tabular-nums text-foreground">
+              <span className="text-5xl font-black leading-none tabular-nums text-foreground">
                 {avgLast.toFixed(1)}
               </span>
               <span
@@ -201,10 +169,8 @@ const AchievementsView = ({ tasks }: Props) => {
           </div>
 
           {/* Weekly bar chart */}
-          <div className="rounded-2xl border border-border bg-card p-5">
-            <p className="mb-4 text-xs uppercase tracking-wide text-muted-foreground">
-              Últimos 7 días
-            </p>
+          <div className="surface p-5">
+            <p className="eyebrow mb-4">Últimos 7 días</p>
             <div className="relative h-44">
               {/* Avg dashed line */}
               {avgLast > 0 && (
@@ -221,9 +187,7 @@ const AchievementsView = ({ tasks }: Props) => {
                         "repeating-linear-gradient(to right, hsl(var(--primary)) 0 6px, transparent 6px 12px)",
                     }}
                   />
-                  <span className="ml-2 text-xs font-semibold text-primary">
-                    avg
-                  </span>
+                  <span className="ml-2 text-xs font-bold text-primary">prom.</span>
                 </div>
               )}
               <div className="flex h-full items-end gap-2">
@@ -1702,7 +1666,7 @@ function HexAchievement({
               <IconComp className="h-full w-full" />
             </div>
             {!locked && (
-              <span className="relative mt-0.5 text-xs font-black tracking-widest drop-shadow-[0_1px_0_rgba(255,255,255,0.35)]">
+              <span className="relative mt-0.5 text-xs font-black drop-shadow-[0_1px_0_rgba(255,255,255,0.35)]">
                 {ROMAN[ach.level]}
               </span>
             )}
@@ -1921,7 +1885,7 @@ function StreakCalendar({ completionByDay }: StreakCalendarProps) {
   };
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-5">
+    <div className="surface p-5">
       {/* Header */}
       <div className="mb-3 flex items-center justify-between">
         <button
@@ -1956,7 +1920,7 @@ function StreakCalendar({ completionByDay }: StreakCalendarProps) {
       </div>
 
       {/* Weekday header */}
-      <div className="mb-1 grid grid-cols-7 text-center text-xs font-medium uppercase tracking-wide text-muted-foreground">
+      <div className="mb-1 grid grid-cols-7 text-center text-xs font-medium tracking-wide text-muted-foreground">
         {WEEKDAYS.map((w) => (
           <div key={w} className="py-1">
             {w}

@@ -33,7 +33,7 @@ export function usePyroProgression() {
   const { profile } = useProfile();
   const prevPowerLevelRef = useRef<number | null>(null);
 
-  const powerLevel: number = (profile as any)?.pyro_power_level ?? 0;
+  const powerLevel: number = profile?.pyro_power_level ?? 0;
   const [unlocked, setUnlocked] = useState<Set<FeatureKey>>(() => unlockedFeaturesAt(powerLevel));
 
   useEffect(() => {
@@ -45,7 +45,7 @@ export function usePyroProgression() {
    * Detect transitions client-side by comparing against the previously seen
    * value and fire a cutscene for each tier crossed.
    */
-  const missionsTotal: number = (profile as any)?.missions_completed_total ?? 0;
+  const missionsTotal: number = profile?.missions_completed_total ?? 0;
   useEffect(() => {
     if (!user || !profile) return;
     const prev = prevPowerLevelRef.current;

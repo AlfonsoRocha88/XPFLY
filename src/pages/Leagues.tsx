@@ -74,7 +74,7 @@ const GlobalRow = ({ row, rank }: { row: LbRow; rank: number }) => (
         {row.name}
         {row.isUser && <span className="ml-1 font-pixel text-[11px] text-primary/80">(TÚ)</span>}
       </p>
-      <p className="truncate font-pixel text-[11px] tracking-wider text-muted-foreground">
+      <p className="truncate font-pixel text-[11px] text-muted-foreground">
         {row.league}
       </p>
     </div>
@@ -215,8 +215,8 @@ const Leagues = () => {
       <div>
         <Tabs defaultValue="liga" className="w-full">
           <TabsList className="mb-4 grid w-full grid-cols-2">
-            <TabsTrigger value="liga" className="font-pixel text-xs tracking-wider">LIGA</TabsTrigger>
-            <TabsTrigger value="global" className="font-pixel text-xs tracking-wider">GLOBAL</TabsTrigger>
+            <TabsTrigger value="liga" className="font-pixel text-xs">Liga</TabsTrigger>
+            <TabsTrigger value="global" className="font-pixel text-xs">Global</TabsTrigger>
           </TabsList>
           <TabsContent value="liga">
         {/* Horizontal league shield strip — Duolingo style */}
@@ -271,7 +271,7 @@ const Leagues = () => {
                   />
                   <span
                     className={cn(
-                      "font-pixel text-[11px] tracking-wider text-center max-w-[72px] truncate",
+                      "font-pixel text-[11px] text-center max-w-[72px] truncate",
                       isCurrent ? "" : passed ? "text-primary" : "text-muted-foreground",
                     )}
                     style={isCurrent ? { color: g.color } : undefined}
@@ -292,8 +292,8 @@ const Leagues = () => {
           >
             Liga {leagueLabel(current)}
           </h2>
-          <p className="mt-1 font-pixel text-xs tracking-widest text-muted-foreground">
-            TOP {PROMOTION_RANK} ASCIENDEN A LA SIGUIENTE LIGA
+          <p className="mt-1 font-pixel text-xs text-muted-foreground">
+            Los {PROMOTION_RANK} primeros ascienden a la siguiente liga
           </p>
         </div>
 
@@ -308,7 +308,7 @@ const Leagues = () => {
               <span className="ml-1">trofeos</span>
             </span>
             <span className="text-right">
-              {next ? `${next.minTrophies} → ${leagueLabel(next)}` : "MÁXIMA LIGA"}
+              {next ? `${next.minTrophies} → ${leagueLabel(next)}` : "Liga máxima"}
             </span>
           </div>
           <div className="relative mt-2 h-4 overflow-hidden rounded-full border border-border bg-muted">
@@ -328,12 +328,12 @@ const Leagues = () => {
         {/* Leaderboard — real users from profiles */}
         <div className="rounded-xl border border-border bg-card/60 p-2 backdrop-blur">
           {loadingLb ? (
-            <p className="py-8 text-center font-pixel text-xs tracking-widest text-muted-foreground">
+            <p className="py-8 text-center font-pixel text-xs text-muted-foreground">
               CARGANDO...
             </p>
           ) : leaderboard.length === 0 ? (
-            <p className="py-8 text-center font-pixel text-xs tracking-widest text-muted-foreground">
-              SÉ EL PRIMERO EN APARECER AQUÍ
+            <p className="py-8 text-center font-pixel text-xs text-muted-foreground">
+              Sé el primero en aparecer aquí
             </p>
           ) : leaderboard.map((p, i) => {
             const rank = i + 1;
@@ -344,8 +344,8 @@ const Leagues = () => {
                 {showPromoDivider && (
                   <div className="my-2 flex items-center justify-center gap-2 border-y border-primary/30 bg-primary/5 py-1.5">
                     <ChevronUp className="h-3 w-3 text-primary" />
-                    <span className="font-pixel text-xs tracking-widest text-primary">
-                      ZONA DE ASCENSO
+                    <span className="font-pixel text-xs text-primary">
+                      Zona de ascenso
                     </span>
                     <ChevronUp className="h-3 w-3 text-primary" />
                   </div>
@@ -397,7 +397,7 @@ const Leagues = () => {
                         <span className="ml-1 font-pixel text-[11px] text-primary/80">(TÚ)</span>
                       )}
                     </p>
-                    <p className="truncate font-pixel text-[11px] tracking-wider text-muted-foreground">
+                    <p className="truncate font-pixel text-[11px] text-muted-foreground">
                       {p.league} · {p.xp} XP
                     </p>
                   </div>
@@ -413,7 +413,7 @@ const Leagues = () => {
         </div>
 
         {!loadingLb && myRank > 0 && (
-          <p className="mt-3 text-center font-pixel text-xs tracking-widest text-muted-foreground">
+          <p className="mt-3 text-center font-pixel text-xs text-muted-foreground">
             TU POSICIÓN: #{myRank} DE {leaderboard.length}
           </p>
         )}
@@ -426,19 +426,19 @@ const Leagues = () => {
               >
                 Ranking Global
               </h2>
-              <p className="mt-1 font-pixel text-xs tracking-widest text-muted-foreground">
-                TOP 100 CAZADORES POR TROFEOS
+              <p className="mt-1 font-pixel text-xs text-muted-foreground">
+                Top 100 por trofeos
               </p>
             </div>
 
             <div className="rounded-xl border border-border bg-card/60 p-2 backdrop-blur">
               {loadingGlobal ? (
-                <p className="py-8 text-center font-pixel text-xs tracking-widest text-muted-foreground">
+                <p className="py-8 text-center font-pixel text-xs text-muted-foreground">
                   CARGANDO...
                 </p>
               ) : globalRows.length === 0 ? (
-                <p className="py-8 text-center font-pixel text-xs tracking-widest text-muted-foreground">
-                  SÉ EL PRIMERO EN APARECER AQUÍ
+                <p className="py-8 text-center font-pixel text-xs text-muted-foreground">
+                  Sé el primero en aparecer aquí
                 </p>
               ) : (
                 globalRows.map((p, i) => {
@@ -452,15 +452,15 @@ const Leagues = () => {
 
             {!loadingGlobal && userId && myGlobalRank > globalRows.length && (
               <div className="sticky bottom-2 mt-3 rounded-xl border-2 border-primary/60 bg-background/90 p-2 shadow-lg backdrop-blur">
-                <p className="mb-1 text-center font-pixel text-[11px] tracking-widest text-primary">
+                <p className="mb-1 text-center font-pixel text-[11px] text-primary">
                   TU POSICIÓN
                 </p>
                 <GlobalRow
                   row={{
                     user_id: userId,
                     name: userName,
-                    avatar_url: (profile as any)?.avatar_url ?? null,
-                    xp: (profile as any)?.xp ?? 0,
+                    avatar_url: profile?.avatar_url ?? null,
+                    xp: profile?.xp ?? 0,
                     trophies,
                     league: leagueLabel(current),
                     isUser: true,

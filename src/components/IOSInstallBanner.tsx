@@ -27,7 +27,7 @@ export default function IOSInstallBanner() {
 
   return (
     <div className="fixed bottom-3 left-3 right-3 z-[200] animate-fade-in" role="dialog" aria-live="polite">
-      <div className="relative rounded-xl border-2 border-primary/60 bg-card/95 backdrop-blur-md p-3 pr-9 shadow-[0_0_28px_hsl(var(--primary)/0.45)]">
+      <div className="relative rounded-3xl bg-card backdrop-blur-md p-3 pr-9 shadow-lift">
         <button
           type="button"
           onClick={dismiss}

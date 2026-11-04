@@ -37,7 +37,7 @@ function deriveHungerState(lastIso: string | null | undefined): HungerState {
 export function usePyroHunger() {
   const { user } = useAuth();
   const { profile } = useProfile();
-  const lastMissionAt = (profile as any)?.last_mission_completed_at as string | null | undefined;
+  const lastMissionAt = profile?.last_mission_completed_at as string | null | undefined;
 
   const state: HungerState = deriveHungerState(lastMissionAt);
   const [revivalTick, setRevivalTick] = useState(0);

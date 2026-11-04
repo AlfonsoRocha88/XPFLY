@@ -35,20 +35,20 @@ const Character = () => {
   );
 
   const level = profile?.level ?? 1;
-  const equippedTitleId = (profile as any)?.equipped_title as string | null;
+  const equippedTitleId = profile?.equipped_title as string | null;
   const equippedTitle = getTitle(equippedTitleId);
   const title = equippedTitle?.name ?? "Sin título";
   const pointsAvailable = profile?.stat_points_available ?? 0;
   const spent = profile?.stat_points_spent ?? 0;
-  const unlockedOutfits = ((profile as any)?.unlocked_outfits as string[] | undefined) ?? ["hunter", "casual"];
-  const unlockedTitles = ((profile as any)?.unlocked_titles as string[] | undefined) ?? [];
+  const unlockedOutfits = (profile?.unlocked_outfits as string[] | undefined) ?? ["hunter", "casual"];
+  const unlockedTitles = (profile?.unlocked_titles as string[] | undefined) ?? [];
   const titleProgress: TitleProgress = {
     ...DEFAULT_TITLE_PROGRESS,
-    ...(((profile as any)?.title_progress as Partial<TitleProgress>) ?? {}),
+    ...((profile?.title_progress as Partial<TitleProgress>) ?? {}),
   };
   const streak = profile?.daily_streak ?? 0;
-  const freezes = (profile as any)?.streak_freezes ?? 0;
-  const freezeMax = (profile as any)?.streak_freeze_max ?? 3;
+  const freezes = profile?.streak_freezes ?? 0;
+  const freezeMax = profile?.streak_freeze_max ?? 3;
   const classInfo = useMemo(() => detectClass(stats, spent), [stats, spent]);
   const classGlow = classInfo.classId ? CLASSES[classInfo.classId].glow : null;
 
@@ -75,7 +75,7 @@ const Character = () => {
           config: cfg,
           className: classInfo.label,
           title: equippedTitle?.name ?? null,
-          gender: (profile as any)?.pyro_gender ?? null,
+          gender: profile?.pyro_gender ?? null,
         },
       });
       if (error) throw error;
@@ -142,7 +142,7 @@ const Character = () => {
             <div className="character-showcase-grid" />
             <div className="relative z-10 flex flex-col items-center">
               <CharacterPortrait
-                url={(profile as any)?.avatar_url}
+                url={profile?.avatar_url}
                 size={260}
                 glow={classGlow}
                 loading={generating}

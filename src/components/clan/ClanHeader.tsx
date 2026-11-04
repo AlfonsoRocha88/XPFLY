@@ -92,7 +92,7 @@ const ClanHeader = ({ clan, viewerRole, onShare, onLeave, onDissolve, onEdit }: 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 pr-10">
             <h2 className="truncate text-2xl font-extrabold tracking-tight text-foreground">{clan.name}</h2>
-            <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold uppercase ring-1", join.cls)}>
+            <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ring-1", join.cls)}>
               <JoinIcon className="h-3 w-3" /> {join.label}
             </span>
             {isLeader && onEdit && (
@@ -118,7 +118,7 @@ const ClanHeader = ({ clan, viewerRole, onShare, onLeave, onDissolve, onEdit }: 
 
           <div className="mt-3 grid grid-cols-2 gap-3">
             <div>
-              <div className="flex items-center justify-between text-xs uppercase tracking-wide text-muted-foreground">
+              <div className="flex items-center justify-between text-xs tracking-wide text-muted-foreground">
                 <span>Nivel {clan.level}</span>
                 <span>{xpInLevel}/{xpForNext} XP</span>
               </div>

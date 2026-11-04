@@ -58,11 +58,11 @@ const MemberRow = ({ member, rank, onSelect }: { member: ClanMember; rank: numbe
       </div>
       <div className="flex w-12 shrink-0 flex-col items-center">
         <LeagueShield league={leagueName} size={40} />
-        <span className="mt-0.5 font-bold text-xs uppercase tracking-wider text-muted-foreground">{tier ?? "∞"}</span>
+        <span className="mt-0.5 font-bold text-xs text-muted-foreground">{tier ?? "∞"}</span>
       </div>
       <div className="w-14 shrink-0 text-center">
         <div className="text-sm font-bold tabular-nums text-foreground">{p?.trophies ?? 0}</div>
-        <div className="text-xs uppercase tracking-wider text-muted-foreground">trofeos</div>
+        <div className="text-xs text-muted-foreground">trofeos</div>
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
@@ -206,7 +206,7 @@ const CreateWizard = ({ onCreated, onCancel }: { onCreated: () => void; onCancel
 
       {step === 1 && (
         <div className="space-y-3">
-          <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Nombre del clan</label>
+          <label className="text-xs font-semibold tracking-wide text-muted-foreground">Nombre del clan</label>
           <Input value={name} onChange={(e) => setName(e.target.value.slice(0, 20))} placeholder="Cazadores de Sombras" maxLength={20} className="text-base" />
           <div className="text-xs">
             {name.trim().length < 3 ? <span className="text-muted-foreground">Mínimo 3 caracteres</span>
@@ -225,7 +225,7 @@ const CreateWizard = ({ onCreated, onCancel }: { onCreated: () => void; onCancel
             <EmblemSVG config={emblem} size={120} glow />
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Forma</p>
+            <p className="text-xs font-semibold tracking-wide text-muted-foreground">Forma</p>
             <div className="mt-2 grid grid-cols-6 gap-2">
               {EMBLEM_SHAPES.map((s) => (
                 <button key={s.id} onClick={() => setEmblem({ ...emblem, shape: s.id as EmblemShape })}
@@ -238,7 +238,7 @@ const CreateWizard = ({ onCreated, onCancel }: { onCreated: () => void; onCancel
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Color principal</p>
+              <p className="text-xs font-semibold tracking-wide text-muted-foreground">Color principal</p>
               <div className="mt-2 grid grid-cols-6 gap-1.5">
                 {EMBLEM_PALETTE.map((c) => (
                   <button key={c} onClick={() => setEmblem({ ...emblem, primary: c })}
@@ -248,7 +248,7 @@ const CreateWizard = ({ onCreated, onCancel }: { onCreated: () => void; onCancel
               </div>
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Color secundario</p>
+              <p className="text-xs font-semibold tracking-wide text-muted-foreground">Color secundario</p>
               <div className="mt-2 grid grid-cols-6 gap-1.5">
                 {EMBLEM_PALETTE.map((c) => (
                   <button key={c} onClick={() => setEmblem({ ...emblem, secondary: c })}
@@ -259,11 +259,11 @@ const CreateWizard = ({ onCreated, onCancel }: { onCreated: () => void; onCancel
             </div>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Símbolo</p>
+            <p className="text-xs font-semibold tracking-wide text-muted-foreground">Símbolo</p>
             <div className="mt-2 max-h-[200px] space-y-3 overflow-y-auto pr-1">
               {Object.entries(EMBLEM_ICONS_BY_CATEGORY).map(([cat, icons]) => (
                 <div key={cat}>
-                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{cat}</p>
+                  <p className="text-xs font-bold text-muted-foreground">{cat}</p>
                   <div className="mt-1 grid grid-cols-7 gap-1.5">
                     {icons.map((i) => (
                       <button key={i.id} onClick={() => setEmblem({ ...emblem, icon: i.id as EmblemIcon })}
@@ -286,9 +286,9 @@ const CreateWizard = ({ onCreated, onCancel }: { onCreated: () => void; onCancel
 
       {step === 3 && (
         <div className="space-y-3">
-          <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Descripción ({description.length}/100)</label>
+          <label className="text-xs font-semibold tracking-wide text-muted-foreground">Descripción ({description.length}/100)</label>
           <Textarea value={description} onChange={(e) => setDescription(e.target.value.slice(0, 100))} maxLength={100} rows={3} placeholder="Lema o propósito del clan…" />
-          <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Tipo de unión</label>
+          <label className="text-xs font-semibold tracking-wide text-muted-foreground">Tipo de unión</label>
           <div className="grid grid-cols-3 gap-2">
             {(["open", "request", "closed"] as const).map((j) => (
               <button key={j} onClick={() => setJoinType(j)}
@@ -559,7 +559,7 @@ const ClanScreen = ({ clan, viewerRole }: { clan: Clan; viewerRole: ClanRole | n
               <EmblemSVG config={editEmblem} size={100} glow />
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Forma</p>
+              <p className="text-xs font-semibold tracking-wide text-muted-foreground">Forma</p>
               <div className="mt-2 grid grid-cols-6 gap-2">
                 {EMBLEM_SHAPES.map((s) => (
                   <button key={s.id} onClick={() => setEditEmblem({ ...editEmblem, shape: s.id as EmblemShape })}
@@ -572,7 +572,7 @@ const ClanScreen = ({ clan, viewerRole }: { clan: Clan; viewerRole: ClanRole | n
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Principal</p>
+                <p className="text-xs font-semibold tracking-wide text-muted-foreground">Principal</p>
                 <div className="mt-2 grid grid-cols-6 gap-1.5">
                   {EMBLEM_PALETTE.map((c) => (
                     <button key={c} onClick={() => setEditEmblem({ ...editEmblem, primary: c })}
@@ -582,7 +582,7 @@ const ClanScreen = ({ clan, viewerRole }: { clan: Clan; viewerRole: ClanRole | n
                 </div>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Secundario</p>
+                <p className="text-xs font-semibold tracking-wide text-muted-foreground">Secundario</p>
                 <div className="mt-2 grid grid-cols-6 gap-1.5">
                   {EMBLEM_PALETTE.map((c) => (
                     <button key={c} onClick={() => setEditEmblem({ ...editEmblem, secondary: c })}
@@ -593,11 +593,11 @@ const ClanScreen = ({ clan, viewerRole }: { clan: Clan; viewerRole: ClanRole | n
               </div>
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Símbolo</p>
+              <p className="text-xs font-semibold tracking-wide text-muted-foreground">Símbolo</p>
               <div className="mt-2 max-h-[180px] space-y-3 overflow-y-auto pr-1">
                 {Object.entries(EMBLEM_ICONS_BY_CATEGORY).map(([cat, icons]) => (
                   <div key={cat}>
-                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{cat}</p>
+                    <p className="text-xs font-bold text-muted-foreground">{cat}</p>
                     <div className="mt-1 grid grid-cols-7 gap-1.5">
                       {icons.map((i) => (
                         <button key={i.id} onClick={() => setEditEmblem({ ...editEmblem, icon: i.id as EmblemIcon })}
@@ -612,11 +612,11 @@ const ClanScreen = ({ clan, viewerRole }: { clan: Clan; viewerRole: ClanRole | n
               </div>
             </div>
             <div>
-              <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Descripción ({editDescription.length}/100)</label>
+              <label className="text-xs font-semibold tracking-wide text-muted-foreground">Descripción ({editDescription.length}/100)</label>
               <Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value.slice(0, 100))} maxLength={100} rows={3} className="mt-2" />
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Tipo de unión</p>
+              <p className="text-xs font-semibold tracking-wide text-muted-foreground">Tipo de unión</p>
               <div className="mt-2 grid grid-cols-3 gap-2">
                 {(["open", "request", "closed"] as const).map((j) => (
                   <button key={j} onClick={() => setEditJoinType(j)}

@@ -31,7 +31,7 @@ const TitlesPanel = ({ unlocked, equipped, progress, streak, onEquip, isPending 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="font-system text-sm tracking-wider text-primary">TÍTULOS</h3>
+        <h3 className="font-system text-sm text-primary">Títulos</h3>
         {equipped && (
           <Button size="sm" variant="ghost" onClick={() => onEquip(null)} disabled={isPending}>
             Quitar título

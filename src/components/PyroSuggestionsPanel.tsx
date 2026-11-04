@@ -22,10 +22,10 @@ const AREA_EMOJI: Record<string, string> = {
 };
 
 const PRIORITY_LABEL: Record<PyroSuggestion["priority"], string> = {
-  low: "BAJA",
-  medium: "MEDIA",
-  high: "ALTA",
-  urgent: "URGENTE",
+  low: "Baja",
+  medium: "Media",
+  high: "Alta",
+  urgent: "Urgente",
 };
 
 const PRIORITY_COLOR: Record<PyroSuggestion["priority"], string> = {
@@ -46,7 +46,7 @@ export default function PyroSuggestionsPanel({
   const { createTask } = useTasks();
   const { loading, suggestions, error, hunger, generate, clear, removeAt } = usePyroMissionSuggestions();
   const [hint, setHint] = useState("");
-  const onboardingDone = (profile as any)?.pyro_onboarding_completed === true;
+  const onboardingDone = profile?.pyro_onboarding_completed === true;
 
   const handleGenerate = async () => {
     try { playSfx("open"); } catch { /* ignore */ }

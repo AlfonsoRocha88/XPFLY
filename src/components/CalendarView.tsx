@@ -157,21 +157,23 @@ const CalendarView = ({ tasks, projects, onCreateAt, onEditTask, onDeleteTask }:
   return (
     <div className="flex h-full flex-col">
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => setCursor(new Date())} className="font-pixel text-xs">Hoy</Button>
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}><ChevronLeft className="h-4 w-4" /></Button>
-          <Button variant="ghost" size="icon" onClick={() => navigate(1)}><ChevronRight className="h-4 w-4" /></Button>
-          <h2 className="font-pixel text-xs md:text-sm capitalize ml-2">{headerLabel}</h2>
+      <div className="space-y-3 px-4 pb-3 pt-4 md:px-8 md:pt-6">
+        <div className="flex items-center justify-between gap-2">
+          <h1 className="truncate text-2xl font-black capitalize tracking-tight">{headerLabel}</h1>
+          <div className="flex shrink-0 items-center gap-1">
+            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate(-1)} aria-label="Anterior"><ChevronLeft className="h-5 w-5" /></Button>
+            <Button variant="outline" size="sm" className="rounded-full" onClick={() => setCursor(new Date())}>Hoy</Button>
+            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate(1)} aria-label="Siguiente"><ChevronRight className="h-5 w-5" /></Button>
+          </div>
         </div>
-        <div className="flex rounded-lg bg-muted p-1">
+        <div className="flex rounded-full bg-muted p-1">
           {(["month", "week", "day"] as CalView[]).map((v) => (
             <button
               key={v}
               onClick={() => setView(v)}
               className={cn(
-                "px-3 py-1 rounded-md font-pixel text-xs transition-colors capitalize",
-                view === v ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                "flex-1 rounded-full py-1.5 text-sm font-bold transition-all",
+                view === v ? "bg-card text-foreground shadow-soft" : "text-muted-foreground hover:text-foreground"
               )}
             >
               {v === "month" ? "Mes" : v === "week" ? "Semana" : "Día"}
@@ -181,7 +183,7 @@ const CalendarView = ({ tasks, projects, onCreateAt, onEditTask, onDeleteTask }:
       </div>
 
       <div
-        className="flex-1 overflow-auto rounded-xl border border-border bg-card/40 backdrop-blur touch-pan-y"
+        className="mx-4 mb-4 flex-1 overflow-auto rounded-2xl border border-border bg-card shadow-soft touch-pan-y md:mx-8"
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
@@ -209,12 +211,12 @@ const MonthGrid = ({
   onCreateAt: (d: Date) => void; onEditTask: (t: Task) => void; onDeleteTask: (id: string) => void;
 }) => {
   const days = eachDayOfInterval({ start: range.start, end: range.end });
-  const dayNames = ["S", "M", "T", "W", "T", "F", "S"];
+  const dayNames = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
   return (
     <div className="grid grid-cols-7 grid-rows-[auto_repeat(6,minmax(0,1fr))] h-full min-h-[600px]">
       {dayNames.map((d) => (
-        <div key={d} className="border-b border-r border-border p-2 text-center font-pixel text-xs text-muted-foreground bg-muted/30 uppercase">{d}</div>
+        <div key={d} className="border-b border-r border-border p-2 text-center text-xs font-bold text-muted-foreground">{d}</div>
       ))}
       {days.map((day) => {
         const dayOccs = occurrences.filter((o) => isSameDay(o.start, day));
@@ -280,7 +282,7 @@ const WeekGrid = ({
           onClick={() => onCreateAt(d)}
           className="border-b border-r border-border p-2 text-center hover:bg-accent/30 transition-colors"
         >
-          <div className="font-pixel text-xs text-muted-foreground uppercase">{format(d, "EEEEE", { locale: es })}</div>
+          <div className="font-pixel text-xs text-muted-foreground">{format(d, "EEEEE", { locale: es })}</div>
           <div className={cn(
             "text-sm mt-1 inline-flex w-7 h-7 items-center justify-center rounded-full",
             isToday(d) && "bg-primary text-primary-foreground font-bold"

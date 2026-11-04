@@ -1,3 +1,4 @@
+import pyroImg from "@/assets/pyro-mascot.png";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,7 +42,7 @@ function PasswordStrength({ value, showError }: { value: string; showError?: boo
         ))}
       </div>
       <p
-        className={`font-display text-xs uppercase tracking-widest ${
+        className={`font-display text-xs ${
           tooShort && showError ? "text-destructive" : "text-muted-foreground"
         }`}
       >
@@ -179,21 +180,18 @@ const Auth = () => {
   }
 
   return (
-    <div className={`flex min-h-screen items-center justify-center p-4 scanlines ${wallpaperAnimated ? "wp-animated" : ""}`} style={wallpaperStyle}>
-      <Card className="w-full max-w-md border-2 border-primary/30 shadow-[0_0_40px_hsl(var(--primary)/0.15)]">
+    <div className={`flex h-full items-center justify-center overflow-y-auto p-4 ${wallpaperAnimated ? "wp-animated" : ""}`} style={wallpaperStyle}>
+      <Card className="w-full max-w-md rounded-3xl border-0 shadow-lift">
         <CardHeader className="text-center">
           <div className="mx-auto mb-2">
-            <h1 className="font-display xpfly-neon text-5xl font-black tracking-wider bg-gradient-to-br from-primary via-accent to-primary bg-clip-text text-transparent">
-              XPFly
-            </h1>
-            <p className="font-display mt-1 text-xs uppercase tracking-[0.35em] text-muted-foreground">
-              Level up your life
-            </p>
+            <img src={pyroImg} alt="" className="mx-auto mb-2 h-16 w-16 object-contain" />
+            <h1 className="text-5xl font-black tracking-tight text-primary">XPFly</h1>
+            <p className="mt-1 text-sm font-bold text-muted-foreground">Sube de nivel en tu vida real</p>
           </div>
-          <CardTitle className="font-display text-sm text-primary mt-2 uppercase tracking-widest">
+          <CardTitle className="mt-4 text-xl">
             {isLogin ? "Iniciar partida" : "Nuevo jugador"}
           </CardTitle>
-          <CardDescription className="font-pixel text-xs mt-2">
+          <CardDescription className="text-sm">
             {isLogin ? "Continúa tu aventura" : "Únete a la aventura"}
           </CardDescription>
         </CardHeader>
@@ -234,7 +232,7 @@ const Auth = () => {
             )}
             <Button
               type="submit"
-              className="w-full font-display text-xs uppercase tracking-widest"
+              className="h-12 w-full text-base font-extrabold"
               disabled={loading || (!isLogin && password.length > 0 && password.length < 6)}
             >
               {loading ? "Cargando..." : isLogin ? "Ingresar" : "🛡️ Crear cuenta"}

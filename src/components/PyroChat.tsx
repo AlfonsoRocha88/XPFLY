@@ -31,15 +31,15 @@ export default function PyroChat({ onClose }: Props) {
   const { state: hungerState } = usePyroHunger();
 
   // Header bars (compact) — derived like PyroStatusWidget
-  const powerLevel: number = (profile as any)?.pyro_power_level ?? 0;
-  const totalFed: number = (profile as any)?.missions_completed_total ?? 0;
+  const powerLevel: number = profile?.pyro_power_level ?? 0;
+  const totalFed: number = profile?.missions_completed_total ?? 0;
   const nextTier = PYRO_TIERS.find((t) => t.threshold > totalFed) ?? null;
   const prevThreshold = [...PYRO_TIERS].reverse().find((t) => totalFed >= t.threshold)?.threshold ?? 0;
   const denom = nextTier ? Math.max(1, nextTier.threshold - prevThreshold) : 1;
   const num = nextTier ? Math.max(0, Math.min(denom, totalFed - prevThreshold)) : denom;
   const pwrPct = Math.round((num / denom) * 100);
   // Hunger bar percentage: 4 segments × 5h, empties at 20h, refill on mission complete.
-  const lastMissionAt: string | null | undefined = (profile as any)?.last_mission_completed_at;
+  const lastMissionAt: string | null | undefined = profile?.last_mission_completed_at;
   const hoursSinceMission = lastMissionAt
     ? (Date.now() - new Date(lastMissionAt).getTime()) / 36e5
     : 0;
@@ -250,8 +250,8 @@ export default function PyroChat({ onClose }: Props) {
         <PyroSprite size={44} />
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-2">
-            <div id="pyro-chat-title" className="font-pixel text-[11px] text-primary">PYRO</div>
-            <div className="font-pixel text-[11px] uppercase tracking-wider text-muted-foreground truncate">
+            <div id="pyro-chat-title" className="font-pixel text-[11px] text-primary">Pyro</div>
+            <div className="font-pixel text-[11px] text-muted-foreground truncate">
               Espíritu de Fuego
             </div>
           </div>

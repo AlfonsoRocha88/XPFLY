@@ -16,6 +16,36 @@ const XP_REWARDS = {
   urgent: 50,
 };
 
+let reconciledFor: string | null = null;
+
+let realtime: { userId: string; users: number; remove: () => void } | null = null;
+function subscribeProfileChanges(userId: string, onRow: (row: unknown) => void) {
+  if (realtime && realtime.userId !== userId) {
+    realtime.remove();
+    realtime = null;
+  }
+  if (!realtime) {
+    const channel = supabase
+      .channel(`profile:${userId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "profiles", filter: `user_id=eq.${userId}` },
+        (payload) => onRow(payload.new),
+      )
+      .subscribe();
+    realtime = { userId, users: 0, remove: () => { supabase.removeChannel(channel); } };
+  }
+  const entry = realtime;
+  entry.users++;
+  return () => {
+    entry.users--;
+    if (entry.users === 0 && realtime === entry) {
+      entry.remove();
+      realtime = null;
+    }
+  };
+}
+
 export const useProfile = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -85,32 +115,19 @@ export const useProfile = () => {
     },
   });
 
-  const reconciledRef = useRef<string | null>(null);
+  // Many components call useProfile(); reconcile the streak once per user per session.
+  const profileUserId = profileQuery.data?.user_id;
   useEffect(() => {
-    if (!profileQuery.data) return;
-    const uid = (profileQuery.data as any).user_id as string;
-    if (reconciledRef.current === uid) return;
-    reconciledRef.current = uid;
+    if (!profileUserId || reconciledFor === profileUserId) return;
+    reconciledFor = profileUserId;
     reconcileStreak.mutate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profileQuery.data?.user_id]);
+  }, [profileUserId]);
 
-  // Realtime sync — propagate profile changes from other devices
+  // Realtime sync — one shared channel, ref-counted across hook instances.
   useEffect(() => {
     if (!user) return;
-    const channel = supabase
-      .channel(`profile:${user.id}:${Math.random().toString(36).slice(2)}`)
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "profiles", filter: `user_id=eq.${user.id}` },
-        (payload) => {
-          queryClient.setQueryData(["profile"], payload.new as any);
-        },
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return subscribeProfileChanges(user.id, (row) => queryClient.setQueryData(["profile"], row));
   }, [user?.id, queryClient]);
 
   const buyStreakFreeze = useMutation({

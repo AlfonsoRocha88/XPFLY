@@ -70,7 +70,7 @@ export default function PyroOnboarding() {
   const { profile } = useProfile();
   const queryClient = useQueryClient();
 
-  const completed: boolean = (profile as any)?.pyro_onboarding_completed ?? true;
+  const completed: boolean = profile?.pyro_onboarding_completed ?? true;
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
 
@@ -257,7 +257,7 @@ export default function PyroOnboarding() {
         }}
       />
 
-      <div className="relative w-full max-w-lg rounded-xl border-2 border-primary/60 bg-card/95 p-5 md:p-7 shadow-[0_0_40px_hsl(var(--primary)/0.4)] animate-scale-in">
+      <div className="relative w-full max-w-lg rounded-3xl bg-card p-5 md:p-7 shadow-lift animate-scale-in">
         {/* Progress */}
         <div className="mb-4 flex items-center gap-1">
           {Array.from({ length: total }).map((_, i) => (
@@ -265,7 +265,7 @@ export default function PyroOnboarding() {
               key={i}
               className={cn(
                 "h-1.5 flex-1 rounded-full transition-colors",
-                i <= step ? "bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.7)]" : "bg-muted"
+                i <= step ? "bg-primary shadow-lift" : "bg-muted"
               )}
             />
           ))}
@@ -305,7 +305,7 @@ export default function PyroOnboarding() {
                     className={cn(
                       "rounded-lg border-2 px-3 py-3 text-left text-sm transition-all",
                       active
-                        ? "border-primary bg-primary/15 text-foreground shadow-[0_0_14px_hsl(var(--primary)/0.45)]"
+                        ? "border-primary bg-primary/15 text-foreground shadow-lift"
                         : "border-border bg-card/60 text-foreground/85 hover:border-primary/60"
                     )}
                   >
@@ -333,7 +333,7 @@ export default function PyroOnboarding() {
                       className={cn(
                         "rounded-lg border-2 px-3 py-3 text-left text-sm transition-all",
                         active
-                          ? "border-primary bg-primary/15 text-foreground shadow-[0_0_14px_hsl(var(--primary)/0.45)]"
+                          ? "border-primary bg-primary/15 text-foreground shadow-lift"
                           : "border-border bg-card/60 text-foreground/85 hover:border-primary/60"
                       )}
                     >

@@ -20,7 +20,7 @@ const AvatarEditor = ({ config, onChange, unlockedOutfits = [] }: AvatarEditorPr
   return (
     <div className="space-y-6">
       {/* Face */}
-      <Section title="ROSTRO">
+      <Section title="Rostro">
         <div className="flex flex-wrap gap-2">
           {FACE_STYLES.map((s) => (
             <OptionButton key={s.id} active={config.faceStyle === s.id} onClick={() => update("faceStyle", s.id)}>
@@ -31,12 +31,12 @@ const AvatarEditor = ({ config, onChange, unlockedOutfits = [] }: AvatarEditorPr
       </Section>
 
       {/* Skin */}
-      <Section title="COLOR DE PIEL">
+      <Section title="Color de piel">
         <ColorRow colors={SKIN_COLORS} active={config.skinColor} onSelect={(c) => update("skinColor", c)} />
       </Section>
 
       {/* Hair style */}
-      <Section title="ESTILO DE PELO">
+      <Section title="Estilo de pelo">
         <div className="flex flex-wrap gap-2">
           {HAIR_STYLES.map((s) => (
             <OptionButton key={s.id} active={config.hairStyle === s.id} onClick={() => update("hairStyle", s.id)}>
@@ -47,12 +47,12 @@ const AvatarEditor = ({ config, onChange, unlockedOutfits = [] }: AvatarEditorPr
       </Section>
 
       {/* Hair color */}
-      <Section title="COLOR DE PELO">
+      <Section title="Color de pelo">
         <ColorRow colors={HAIR_COLORS} active={config.hairColor} onSelect={(c) => update("hairColor", c)} />
       </Section>
 
       {/* Eye style */}
-      <Section title="ESTILO DE OJOS">
+      <Section title="Estilo de ojos">
         <div className="flex flex-wrap gap-2">
           {EYE_STYLES.map((s) => (
             <OptionButton key={s.id} active={config.eyeStyle === s.id} onClick={() => update("eyeStyle", s.id)}>
@@ -63,7 +63,7 @@ const AvatarEditor = ({ config, onChange, unlockedOutfits = [] }: AvatarEditorPr
       </Section>
 
       {/* Eye color */}
-      <Section title="COLOR DE OJOS">
+      <Section title="Color de ojos">
         <ColorRow colors={EYE_COLORS} active={config.eyeColor} onSelect={(c) => update("eyeColor", c)} />
       </Section>
 
@@ -95,7 +95,7 @@ const AvatarEditor = ({ config, onChange, unlockedOutfits = [] }: AvatarEditorPr
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <div className="space-y-2">
-    <h3 className="font-system text-xs text-primary/80 tracking-widest">{title}</h3>
+    <h3 className="font-system text-xs text-primary/80">{title}</h3>
     {children}
   </div>
 );
@@ -104,7 +104,7 @@ const OptionButton = ({ active, onClick, children }: { active: boolean; onClick:
   <button
     onClick={onClick}
     className={cn(
-      "px-3 py-1.5 rounded-md text-xs font-system tracking-wider transition-all border",
+      "px-3 py-1.5 rounded-md text-xs font-system transition-all border",
       active
         ? "bg-primary/15 border-primary text-primary shadow-[0_0_12px_hsl(var(--primary)/0.4)]"
         : "bg-card border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"

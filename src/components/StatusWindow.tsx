@@ -20,25 +20,20 @@ const StatusWindow = ({ stats, pointsAvailable, level, title, displayName, onAll
     <div className={cn("status-window", className)}>
       {/* Header */}
       <div className="status-window-header">
-        <div className="flex items-center gap-2">
-          <span className="font-system text-xs text-primary tracking-widest">[ STATUS ]</span>
-        </div>
-        <div className="text-right">
-          <div className="font-system text-xs text-muted-foreground">LV.</div>
-          <div className="font-system text-lg text-primary leading-none">{level}</div>
-        </div>
+        <span className="text-base font-extrabold">Atributos</span>
+        <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-extrabold text-primary">Nivel {level}</span>
       </div>
 
       {/* Player info */}
       {(displayName || title) && (
-        <div className="px-4 py-2 border-b border-primary/20">
+        <div className="border-b border-border px-4 py-2">
           {displayName && <div className="font-system text-sm text-foreground">{displayName}</div>}
-          {title && <div className="font-system text-xs text-primary/80 tracking-wider">{title}</div>}
+          {title && <div className="font-system text-xs text-primary/80">{title}</div>}
         </div>
       )}
 
       {/* Stats list */}
-      <div className="p-4 space-y-2.5">
+      <div className="space-y-3 p-4">
         {(Object.keys(STAT_INFO) as Array<keyof PlayerStats>).map((key) => {
           const info = STAT_INFO[key];
           const value = stats[key] ?? 10;
@@ -48,16 +43,16 @@ const StatusWindow = ({ stats, pointsAvailable, level, title, displayName, onAll
           return (
             <div key={key} className="space-y-1">
               <div className="flex items-center justify-between gap-2">
-                <span className="font-system text-xs text-muted-foreground tracking-wider flex items-center gap-1.5">
+                <span className="flex items-center gap-1.5 text-sm font-bold text-muted-foreground">
                   <span style={{ color: info.color }}>{info.icon}</span> {info.label}
                 </span>
                 <div className="flex items-center gap-2">
-                  <span className="font-system text-sm text-foreground tabular-nums min-w-[2rem] text-right">{value}</span>
+                  <span className="min-w-[2rem] text-right text-sm font-extrabold tabular-nums">{value}</span>
                   {editable && pointsAvailable > 0 && (
                     <Button
                       size="icon"
                       variant="outline"
-                      className="h-6 w-6 border-primary/50 hover:border-primary hover:bg-primary/10"
+                      className="h-7 w-7 rounded-full border-primary/40 hover:bg-primary/10"
                       onClick={() => onAllocate?.(key)}
                     >
                       <Plus className="h-3 w-3 text-primary" />
@@ -78,9 +73,9 @@ const StatusWindow = ({ stats, pointsAvailable, level, title, displayName, onAll
 
       {/* Footer — points available */}
       {editable && (
-        <div className="px-4 py-3 border-t border-primary/20 bg-primary/5 flex items-center justify-between">
-          <span className="font-system text-xs text-muted-foreground tracking-wider">PUNTOS DISPONIBLES</span>
-          <span className={cn("font-system text-base tabular-nums", pointsAvailable > 0 ? "text-primary animate-pulse" : "text-muted-foreground")}>
+        <div className="flex items-center justify-between border-t border-border bg-primary/5 px-4 py-3">
+          <span className="text-sm font-bold text-muted-foreground">Puntos disponibles</span>
+          <span className={cn("text-lg font-black tabular-nums", pointsAvailable > 0 ? "text-primary" : "text-muted-foreground")}>
             {pointsAvailable}
           </span>
         </div>

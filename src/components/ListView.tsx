@@ -63,7 +63,7 @@ const ListView = ({ tasks, subtasks, projects, onToggleComplete, onEdit, onDelet
 
   if (tasks.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border px-6 py-10 text-center" role="status">
+      <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-card/70 px-6 py-10 text-center" role="status">
         <Sparkles className="h-6 w-6 text-primary" />
         <p className="text-sm font-bold text-muted-foreground">{emptyMessage ?? "No hay misiones. ¡Crea una nueva!"}</p>
       </div>

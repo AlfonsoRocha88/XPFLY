@@ -31,10 +31,10 @@ const ChestOpenOverlay = ({ open, reward, opening, onClose }: Props) => {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/40 backdrop-blur-sm animate-in fade-in duration-200">
       <button
         onClick={onClose}
-        className="absolute right-4 top-4 rounded-full border border-border bg-background/80 p-2 text-foreground hover:bg-background"
+        className="absolute right-4 top-[calc(env(safe-area-inset-top)+1rem)] rounded-full bg-card p-2 text-foreground shadow-soft"
         aria-label="Cerrar"
       >
         <X className="h-5 w-5" />
@@ -45,34 +45,34 @@ const ChestOpenOverlay = ({ open, reward, opening, onClose }: Props) => {
           <>
             <div
               className={cn(
-                "relative flex h-40 w-40 items-center justify-center rounded-3xl border-4 border-yellow-400 bg-yellow-400/10 shadow-[0_0_60px_hsl(45_90%_60%/0.7)]",
+                "relative flex h-40 w-40 items-center justify-center rounded-[2rem] bg-card text-xp shadow-lift",
                 shake && "animate-bounce"
               )}
             >
-              <Gift className="h-24 w-24 text-yellow-300" />
-              <Sparkles className="absolute h-44 w-44 animate-spin text-yellow-300/70" />
+              <Gift className="h-24 w-24" strokeWidth={1.5} />
+              <Sparkles className="absolute h-48 w-48 animate-spin text-xp/50 [animation-duration:3s]" />
             </div>
-            <p className="font-pixel text-[12px] tracking-wider text-yellow-300">
-              ABRIENDO COFRE...
+            <p className="text-lg font-extrabold text-white">
+              Abriendo cofre...
             </p>
           </>
         ) : (
           <>
             <div
               className={cn(
-                "flex flex-col items-center gap-3 rounded-2xl border-4 bg-card p-8 animate-in zoom-in-50 duration-500",
+                "flex flex-col items-center gap-3 rounded-3xl border-4 bg-card p-8 animate-in zoom-in-50 duration-500",
                 RARITY_COLORS[reward.rarity]
               )}
             >
               <div className="text-7xl animate-bounce">{reward.icon}</div>
-              <p className="font-pixel text-[14px] text-foreground">{reward.label}</p>
-              <p className="font-pixel text-xs uppercase tracking-wider text-muted-foreground">
+              <p className="text-xl font-black">{reward.label}</p>
+              <p className="text-sm font-bold capitalize text-muted-foreground">
                 {reward.rarity}
               </p>
             </div>
             <button
               onClick={onClose}
-              className="rounded-lg border-2 border-primary bg-primary/10 px-6 py-2 font-pixel text-xs tracking-wider text-primary hover:bg-primary/20"
+              className="rounded-full bg-primary px-8 py-3 text-base font-extrabold text-primary-foreground shadow-lift transition-transform active:scale-95"
             >
               GENIAL
             </button>

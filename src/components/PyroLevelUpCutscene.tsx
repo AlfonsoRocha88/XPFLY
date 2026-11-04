@@ -71,10 +71,10 @@ export default function PyroLevelUpCutscene() {
         </div>
 
         <div
-          className="font-pixel text-xs tracking-widest text-primary"
+          className="font-pixel text-xs text-primary"
           style={{ textShadow: "0 0 12px hsl(var(--primary) / 0.8)" }}
         >
-          PODER DE PYRO · NIVEL {tier.level}
+          Poder de Pyro · NIVEL {tier.level}
         </div>
         <h2
           className="font-pixel text-base md:text-2xl text-foreground"
@@ -82,9 +82,9 @@ export default function PyroLevelUpCutscene() {
         >
           {tier.title}
         </h2>
-        <div className="flex items-center gap-2 rounded-lg border-2 border-primary/60 bg-card/80 px-4 py-2 shadow-[0_0_24px_hsl(var(--primary)/0.5)]">
+        <div className="flex items-center gap-2 rounded-full bg-card px-4 py-2 shadow-lift">
           <span className="text-2xl">{tier.emoji}</span>
-          <span className="font-pixel text-xs text-foreground">FEATURE DESBLOQUEADA</span>
+          <span className="font-pixel text-xs text-foreground">Función desbloqueada</span>
         </div>
         <p className="max-w-md text-sm text-muted-foreground">{tier.description}</p>
         <p className="font-pixel text-xs text-muted-foreground/70 mt-2">

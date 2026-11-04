@@ -7,11 +7,11 @@ import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-const SocialPanel = () => {
+const SocialPanel = ({ view }: { view: "friends" | "party" }) => {
   const { user } = useAuth();
   const { profile } = useProfile();
   const { friends, pendingRequests, searchUser, sendRequest, respondRequest, removeFriend } = useFriends();
@@ -84,36 +84,16 @@ const SocialPanel = () => {
     }
   };
 
-  const totalNotifications = pendingRequests.length + partyInvites.length;
-
   const body = (
-      <Tabs defaultValue="friends" className="mt-2">
-        <TabsList className="grid w-full grid-cols-2 bg-muted">
-          <TabsTrigger value="friends" className="font-pixel text-xs">
-            <Users className="mr-1 h-3 w-3" /> Amigos
-            {pendingRequests.length > 0 && (
-              <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[11px] text-destructive-foreground">
-                {pendingRequests.length}
-              </span>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="party" className="font-pixel text-xs">
-            <Swords className="mr-1 h-3 w-3" /> Party
-            {partyInvites.length > 0 && (
-              <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[11px] text-destructive-foreground">
-                {partyInvites.length}
-              </span>
-            )}
-          </TabsTrigger>
-        </TabsList>
+      <Tabs value={view}>
 
         {/* FRIENDS TAB */}
-        <TabsContent value="friends" className="space-y-3 mt-3">
+        <TabsContent value="friends" className="mt-0 space-y-3">
           {/* My friend code */}
           <div className="rounded-lg border border-border bg-card p-3">
             <p className="text-xs font-pixel text-muted-foreground mb-2">Tu código de amigo</p>
             <div className="flex items-center gap-2">
-              <code className="flex-1 rounded bg-muted px-3 py-1.5 text-sm font-mono tracking-wider">
+              <code className="flex-1 rounded bg-muted px-3 py-1.5 text-sm font-mono">
                 {myFriendCode}
               </code>
               <Button size="sm" variant="outline" onClick={handleCopyCode}>
@@ -269,7 +249,7 @@ const SocialPanel = () => {
         </TabsContent>
 
         {/* PARTY TAB */}
-        <TabsContent value="party" className="space-y-3 mt-3">
+        <TabsContent value="party" className="mt-0 space-y-3">
           {/* Party invites */}
           {partyInvites.length > 0 && (
             <div>

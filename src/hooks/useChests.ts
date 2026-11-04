@@ -33,8 +33,8 @@ export const useChests = () => {
   });
 
   return {
-    coins: (profile as any)?.coins ?? 0,
-    chests: (profile as any)?.unopened_chests ?? 0,
+    coins: profile?.coins ?? 0,
+    chests: profile?.unopened_chests ?? 0,
     openChest,
   };
 };

@@ -41,8 +41,8 @@ const PyroChat = lazy(() => import("@/components/PyroChat"));
 const PyroSuggestionsPanel = lazy(() => import("@/components/PyroSuggestionsPanel"));
 const ScheduleBlockDialog = lazy(() => import("@/components/ScheduleBlockDialog"));
 
-type ProgressTab = "achievements" | "leagues";
-type CommunityTab = "friends" | "clans";
+type ProgressTab = "stats" | "achievements" | "leagues";
+type CommunityTab = "friends" | "party" | "clans";
 type ProfileTab = "shop" | "style";
 
 const ONE_HOUR = 60 * 60 * 1000;
@@ -70,7 +70,7 @@ const Index = () => {
   const queryClient = useQueryClient();
 
   const [section, setSection] = useState<SectionId>("tasks");
-  const [progressTab, setProgressTab] = useState<ProgressTab>("achievements");
+  const [progressTab, setProgressTab] = useState<ProgressTab>("stats");
   const [communityTab, setCommunityTab] = useState<CommunityTab>("friends");
   const [profileTab, setProfileTab] = useState<ProfileTab>("shop");
   const [searchQuery, setSearchQuery] = useState("");
@@ -95,7 +95,9 @@ const Index = () => {
   usePyroSuggestionsBus(useCallback(() => setSuggestionsOpen(true), []));
 
   const hasPartyBonus = !!party && party.members.some((m) => m.status === "accepted");
-  const socialBadge = (pendingRequests?.length ?? 0) + (partyInvites?.length ?? 0);
+  const friendRequests = pendingRequests?.length ?? 0;
+  const partyRequests = partyInvites?.length ?? 0;
+  const socialBadge = friendRequests + partyRequests;
 
   // ---------------- Derived task lists ----------------
   const todayDow = new Date().getDay();
@@ -306,7 +308,7 @@ const Index = () => {
         />
         <div className="mx-auto w-full max-w-3xl space-y-5 px-4 md:px-8">
           <div className="surface p-4 md:hidden">
-            <PlayerHUD showStreak />
+            <PlayerHUD showStreak={dailyMissions.length === 0} />
           </div>
 
           <DailyQuestPanel
@@ -401,12 +403,12 @@ const Index = () => {
       <>
         <SectionHeader<ProgressTab>
           title="Progreso"
-          tabs={[{ id: "achievements", label: "Logros" }, { id: "leagues", label: "Ligas" }]}
+          tabs={[{ id: "stats", label: "Estadísticas" }, { id: "achievements", label: "Logros" }, { id: "leagues", label: "Ligas" }]}
           activeTab={progressTab}
           onTabChange={setProgressTab}
         />
         <div className="mx-auto w-full max-w-3xl px-4 md:px-8">
-          {progressTab === "achievements" ? <AchievementsView tasks={allTasks} /> : <Leagues />}
+          {progressTab === "leagues" ? <Leagues /> : <AchievementsView tasks={allTasks} view={progressTab} />}
         </div>
       </>
     );
@@ -415,12 +417,16 @@ const Index = () => {
       <>
         <SectionHeader<CommunityTab>
           title="Comunidad"
-          tabs={[{ id: "friends", label: socialBadge ? `Amigos (${socialBadge})` : "Amigos" }, { id: "clans", label: "Clanes" }]}
+          tabs={[
+            { id: "friends", label: friendRequests ? `Amigos (${friendRequests})` : "Amigos" },
+            { id: "party", label: partyRequests ? `Party (${partyRequests})` : "Party" },
+            { id: "clans", label: "Clanes" },
+          ]}
           activeTab={communityTab}
           onTabChange={setCommunityTab}
         />
         <div className="mx-auto w-full max-w-3xl px-4 md:px-8">
-          {communityTab === "friends" ? <SocialPanel /> : <ClansPanel />}
+          {communityTab === "clans" ? <ClansPanel /> : <SocialPanel view={communityTab} />}
         </div>
       </>
     );

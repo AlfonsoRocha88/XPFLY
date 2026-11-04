@@ -549,13 +549,13 @@ html, body {
   overflow: hidden;
 }
 
-/* Section change fade */
+/* Section change fade — opacity only: a transform here would trap the fixed FAB */
 @keyframes section-in {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 .section-enter {
-  animation: section-in 0.22s ease-out both;
+  animation: section-in 0.2s ease-out;
 }
 
 /* =====================================================
@@ -578,11 +578,6 @@ html, body {
 .sing-shimmer { animation: singularity-shimmer 3.6s ease-in-out infinite; }
 .sing-orbit { animation: singularity-orbit 9s linear infinite; transform-origin: 50% 52%; }
 .sing-twinkle { animation: singularity-twinkle 2.4s ease-in-out infinite; }
-
-/* Logo */
-.xpfly-neon {
-  color: hsl(var(--primary));
-}
 
 /* =====================================================
    Trophy bonus toast
