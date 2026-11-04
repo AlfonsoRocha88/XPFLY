@@ -227,7 +227,7 @@ export default function PyroChat({ onClose }: Props) {
     } catch (e: any) {
       console.error(e);
       if (e?.message === "RATE_LIMIT") toast.error("Demasiadas peticiones, espera un momento.");
-      else if (e?.message === "NO_CREDITS") toast.error("Sin créditos en Lovable AI.");
+      else if (e?.message === "NO_CREDITS") toast.error("La IA de Pyro no está disponible ahora.");
       else toast.error("Pyro no pudo responder");
     } finally {
       setLoading(false);

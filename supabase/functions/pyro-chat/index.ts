@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { AI_MODELS, AI_URL, aiErrorMessage, aiHeaders } from "../_shared/ai.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -115,21 +116,16 @@ Deno.serve(async (req) => {
               : m?.content,
         }))
       : [];
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY no configurado");
 
     const ctxLine = context
       ? `\n\nContexto actual del jugador: nivel ${context.level ?? "?"}, XP ${context.xp ?? "?"}, racha ${context.streak ?? 0} días, ${context.pendingTasks ?? 0} misiones pendientes${context.displayName ? `, nombre: ${context.displayName}` : ""}.\nFecha y hora actual del usuario: ${context.now ?? new Date().toISOString()} (zona ${context.tz ?? "UTC"}).`
       : "";
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch(AI_URL, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: aiHeaders(),
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: AI_MODELS.chat,
         messages: [
           { role: "system", content: SYSTEM_PROMPT + ctxLine },
           ...safeMessages,
@@ -141,22 +137,10 @@ Deno.serve(async (req) => {
     });
 
     if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Demasiadas peticiones, espera un momento." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Sin créditos en Lovable AI." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
       const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
-      return new Response(JSON.stringify({ error: "AI gateway error" }), {
-        status: 500,
+      console.error("AI error:", response.status, t);
+      return new Response(JSON.stringify({ error: aiErrorMessage(response.status) }), {
+        status: response.status === 429 ? 429 : 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

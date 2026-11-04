@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { AI_MODELS, AI_URL, aiHeaders } from "../_shared/ai.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -55,14 +56,11 @@ Deno.serve(async (req) => {
     const bytes = Uint8Array.from(atob(match[2]), (c) => c.charCodeAt(0));
     if (bytes.length > MAX_BYTES) return json({ error: "La imagen es demasiado grande" }, 413);
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY no configurado");
-
-    const ai = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const ai = await fetch(AI_URL, {
       method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+      headers: aiHeaders(),
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: AI_MODELS.fast,
         messages: [
           { role: "system", content: MODERATION_PROMPT },
           {
@@ -88,12 +86,12 @@ Deno.serve(async (req) => {
             },
           },
         }],
-        tool_choice: { type: "function", function: { name: "report" } },
+        tool_choice: "required", // single tool, so it must be report
       }),
     });
 
     if (!ai.ok) {
-      console.error("AI gateway error:", ai.status, await ai.text());
+      console.error("AI error:", ai.status, await ai.text());
       // Fail closed: nothing is published unless it was reviewed.
       return json({ allowed: false, reason: "No pudimos revisar la foto ahora. Intenta de nuevo en un momento." }, 503);
     }

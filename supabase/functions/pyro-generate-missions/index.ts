@@ -1,3 +1,5 @@
+import { AI_MODELS, AI_URL, aiErrorMessage, aiHeaders } from "../_shared/ai.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -143,8 +145,6 @@ Deno.serve(async (req) => {
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY no configurado");
 
     // Auth: require a valid JWT
     const authHeader = req.headers.get("Authorization") ?? "";
@@ -239,40 +239,25 @@ Propón EXACTAMENTE ${count} misiones nuevas, accionables, en español, alineada
 Llama a la herramienta propose_missions con el resultado. NO escribas nada fuera de la herramienta.
 `.trim();
 
-    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const aiRes = await fetch(AI_URL, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: aiHeaders(),
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: AI_MODELS.fast,
         messages: [
           { role: "system", content: PYRO_PERSONALITY },
           { role: "user", content: userPrompt },
         ],
         tools: TOOLS,
-        tool_choice: { type: "function", function: { name: "propose_missions" } },
+        tool_choice: "required", // single tool, so it must be propose_missions
       }),
     });
 
     if (!aiRes.ok) {
-      if (aiRes.status === 429) {
-        return new Response(JSON.stringify({ error: "Demasiadas peticiones, espera un momento." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (aiRes.status === 402) {
-        return new Response(JSON.stringify({ error: "Sin créditos en Lovable AI." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
       const t = await aiRes.text();
-      console.error("AI gateway error:", aiRes.status, t);
-      return new Response(JSON.stringify({ error: "AI gateway error" }), {
-        status: 500,
+      console.error("AI error:", aiRes.status, t);
+      return new Response(JSON.stringify({ error: aiErrorMessage(aiRes.status) }), {
+        status: aiRes.status === 429 ? 429 : 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

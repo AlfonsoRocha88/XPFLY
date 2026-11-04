@@ -16,8 +16,7 @@ export function isIos(): boolean {
 function isPreviewOrIframe(): boolean {
   if (typeof window === "undefined") return true;
   try { if (window.self !== window.top) return true; } catch { return true; }
-  const h = window.location.hostname;
-  return h.includes("id-preview--") || h.includes("lovableproject.com");
+  return false;
 }
 
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
