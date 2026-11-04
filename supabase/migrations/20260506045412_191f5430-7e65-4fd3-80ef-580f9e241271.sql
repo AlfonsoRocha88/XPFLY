@@ -1,0 +1,1 @@
+ALTER TABLE public.tasks ADD COLUMN daily_days integer[] NOT NULL DEFAULT '{}'::integer[];

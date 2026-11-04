@@ -1,0 +1,292 @@
+import { useEffect, useState, useMemo } from "react";
+import { ArrowLeft, Save, RotateCcw, Sparkles, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useProfile } from "@/hooks/useProfile";
+import CharacterPortrait from "@/components/CharacterPortrait";
+import StatusWindow from "@/components/StatusWindow";
+import AvatarEditor from "@/components/AvatarEditor";
+import TitlesPanel from "@/components/TitlesPanel";
+import SocialPanel from "@/components/SocialPanel";
+import { useState as useStateReact } from "react";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AvatarConfig, DEFAULT_AVATAR, DEFAULT_STATS, PlayerStats, detectClass, CLASSES } from "@/lib/avatar-presets";
+import { getTitle, DEFAULT_TITLE_PROGRESS, TitleProgress } from "@/lib/titles";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+
+const Character = () => {
+  const navigate = useNavigate();
+  const { profile, updateAvatar, allocateStat, equipTitle, buyStreakFreeze, isLoading } = useProfile();
+  const queryClient = useQueryClient();
+
+  const [draftAvatar, setDraftAvatar] = useState<AvatarConfig>(DEFAULT_AVATAR);
+  const [dirty, setDirty] = useState(false);
+  const [generating, setGenerating] = useState(false);
+
+  useEffect(() => {
+    if (profile?.avatar_config) {
+      setDraftAvatar({ ...DEFAULT_AVATAR, ...(profile.avatar_config as Partial<AvatarConfig>) });
+    }
+  }, [profile?.avatar_config]);
+
+  const stats: PlayerStats = useMemo(
+    () => ({ ...DEFAULT_STATS, ...((profile?.stats as Partial<PlayerStats>) ?? {}) }),
+    [profile?.stats]
+  );
+
+  const level = profile?.level ?? 1;
+  const equippedTitleId = (profile as any)?.equipped_title as string | null;
+  const equippedTitle = getTitle(equippedTitleId);
+  const title = equippedTitle?.name ?? "Sin título";
+  const pointsAvailable = profile?.stat_points_available ?? 0;
+  const spent = profile?.stat_points_spent ?? 0;
+  const unlockedOutfits = ((profile as any)?.unlocked_outfits as string[] | undefined) ?? ["hunter", "casual"];
+  const unlockedTitles = ((profile as any)?.unlocked_titles as string[] | undefined) ?? [];
+  const titleProgress: TitleProgress = {
+    ...DEFAULT_TITLE_PROGRESS,
+    ...(((profile as any)?.title_progress as Partial<TitleProgress>) ?? {}),
+  };
+  const streak = profile?.daily_streak ?? 0;
+  const freezes = (profile as any)?.streak_freezes ?? 0;
+  const freezeMax = (profile as any)?.streak_freeze_max ?? 3;
+  const classInfo = useMemo(() => detectClass(stats, spent), [stats, spent]);
+  const classGlow = classInfo.classId ? CLASSES[classInfo.classId].glow : null;
+
+  const handleAvatarChange = (next: AvatarConfig) => {
+    setDraftAvatar(next);
+    setDirty(true);
+  };
+
+  const handleSave = async () => {
+    try {
+      await updateAvatar.mutateAsync(draftAvatar);
+      setDirty(false);
+      await regeneratePortrait(draftAvatar);
+    } catch {
+      toast.error("Error al guardar");
+    }
+  };
+
+  const regeneratePortrait = async (cfg: AvatarConfig) => {
+    setGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-avatar", {
+        body: {
+          config: cfg,
+          className: classInfo.label,
+          title: equippedTitle?.name ?? null,
+          gender: (profile as any)?.pyro_gender ?? null,
+        },
+      });
+      if (error) throw error;
+      if ((data as any)?.avatar_url) {
+        queryClient.invalidateQueries({ queryKey: ["profile"] });
+      }
+    } catch (e: any) {
+      toast.error("No se pudo generar el retrato", { description: e?.message });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleReset = () => {
+    if (profile?.avatar_config) {
+      setDraftAvatar({ ...DEFAULT_AVATAR, ...(profile.avatar_config as Partial<AvatarConfig>) });
+    } else {
+      setDraftAvatar(DEFAULT_AVATAR);
+    }
+    setDirty(false);
+  };
+
+  const handleAllocate = async (stat: keyof PlayerStats) => {
+    try {
+      await allocateStat.mutateAsync(stat);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Error al asignar punto");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-[100dvh] overflow-y-auto bg-background">
+      {/* Header */}
+      <header className="border-b border-border px-4 md:px-8 py-4 flex items-center justify-between sticky top-0 z-50 bg-background/95 backdrop-blur-md">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="font-system text-lg text-primary tracking-wider">PERSONAJE</h1>
+            <p className="text-xs text-muted-foreground font-system tracking-wider">Personaliza tu avatar y stats</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {dirty && (
+            <Button variant="ghost" size="sm" onClick={handleReset}>
+              <RotateCcw className="h-4 w-4 mr-1.5" /> Deshacer
+            </Button>
+          )}
+          <Button size="sm" onClick={handleSave} disabled={!dirty || updateAvatar.isPending}>
+            <Save className="h-4 w-4 mr-1.5" /> Guardar
+          </Button>
+        </div>
+      </header>
+
+      <div className="container mx-auto px-4 md:px-8 py-6 grid gap-6 lg:grid-cols-[400px_1fr]">
+        {/* Avatar showcase */}
+        <div className="space-y-4">
+          <div className="character-showcase">
+            <div className="character-showcase-grid" />
+            <div className="relative z-10 flex flex-col items-center">
+              <CharacterPortrait
+                url={(profile as any)?.avatar_url}
+                size={300}
+                glow={classGlow}
+                loading={generating}
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                className="mt-3"
+                onClick={() => regeneratePortrait(draftAvatar)}
+                disabled={generating}
+              >
+                {generating ? (
+                  <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> Generando…</>
+                ) : (
+                  <><Sparkles className="h-3.5 w-3.5 mr-1.5" /> Regenerar retrato</>
+                )}
+              </Button>
+              <div className="mt-4 text-center">
+                <div className="font-system text-base text-foreground">{profile?.display_name ?? "Jugador"}</div>
+                <div className="font-system text-[11px] text-primary/80 tracking-widest mt-1">
+                  LV.{level}
+                </div>
+                {equippedTitle && (
+                  <div className="font-system text-[10px] tracking-widest mt-1" style={{ color: equippedTitle.color }}>
+                    {equippedTitle.icon} {equippedTitle.name}
+                  </div>
+                )}
+                <div className="font-system text-[11px] text-accent tracking-widest mt-1">
+                  ⚔ {classInfo.label}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Status window — visible always */}
+          <StatusWindow
+            stats={stats}
+            pointsAvailable={pointsAvailable}
+            level={level}
+            onAllocate={handleAllocate}
+          />
+        </div>
+
+        {/* Editor */}
+        <div className="rounded-xl border border-border bg-card/50 backdrop-blur-sm p-4 md:p-6">
+          <Tabs defaultValue="appearance">
+            <TabsList className="mb-4 flex-wrap h-auto">
+              <TabsTrigger value="appearance" className="font-system tracking-wider">APARIENCIA</TabsTrigger>
+              <TabsTrigger value="titles" className="font-system tracking-wider">TÍTULOS</TabsTrigger>
+              <TabsTrigger value="social" className="font-system tracking-wider">SOCIAL</TabsTrigger>
+              <TabsTrigger value="info" className="font-system tracking-wider">INFO</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="appearance">
+              <AvatarEditor config={draftAvatar} onChange={handleAvatarChange} unlockedOutfits={unlockedOutfits} />
+            </TabsContent>
+
+            <TabsContent value="titles">
+              <TitlesPanel
+                unlocked={unlockedTitles}
+                equipped={equippedTitleId}
+                progress={titleProgress}
+                streak={streak}
+                onEquip={(id) => equipTitle.mutate(id)}
+                isPending={equipTitle.isPending}
+              />
+            </TabsContent>
+
+            <TabsContent value="social">
+              <SocialTab />
+            </TabsContent>
+
+            <TabsContent value="info" className="space-y-4">
+              <div className="space-y-3 text-sm">
+                <InfoRow label="Nivel" value={String(level)} />
+                <InfoRow label="Título equipado" value={title} highlight={!!equippedTitle} />
+                <InfoRow label="Títulos desbloqueados" value={String(unlockedTitles.length)} />
+                <InfoRow label="Clase" value={classInfo.label} highlight={!!classInfo.classId} />
+                <InfoRow label="XP total" value={String(profile?.xp ?? 0)} />
+                <InfoRow label="Racha diaria" value={`${profile?.daily_streak ?? 0} días`} />
+                <InfoRow
+                  label="Congeladores 🧊"
+                  value={`${freezes}/${freezeMax}`}
+                  highlight={freezes > 0}
+                />
+                <div className="flex items-center justify-between py-2">
+                  <span className="font-system text-[11px] text-muted-foreground tracking-wider">
+                    PROTEGER RACHA
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={
+                      freezes >= freezeMax ||
+                      (profile?.xp ?? 0) < 100 ||
+                      buyStreakFreeze.isPending
+                    }
+                    onClick={() => buyStreakFreeze.mutate()}
+                  >
+                    Comprar 🧊 (100 XP)
+                  </Button>
+                </div>
+                <InfoRow label="Puntos asignados" value={String(profile?.stat_points_spent ?? 0)} />
+                <InfoRow label="Puntos disponibles" value={String(pointsAvailable)} highlight={pointsAvailable > 0} />
+                <InfoRow label="Outfits desbloqueados" value={String(unlockedOutfits.length)} />
+              </div>
+              <p className="text-xs text-muted-foreground pt-4 border-t border-border">
+                Ganas <span className="text-primary font-semibold">3 puntos de atributo</span> por cada nivel que subas.
+                Distribúyelos como quieras entre HP, MP, Fuerza, Inteligencia, Velocidad y Defensa. Cuando un stat alcance el <span className="text-primary font-semibold">60%</span> de tus puntos asignados, desbloquearás una <span className="text-accent font-semibold">clase</span> con un atuendo único. Los hitos de 6, 18 y 36 puntos suben el rango (Novato → Adepto → Maestro).
+              </p>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const InfoRow = ({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) => (
+  <div className="flex items-center justify-between py-2 border-b border-border/50">
+    <span className="font-system text-[11px] text-muted-foreground tracking-wider">{label.toUpperCase()}</span>
+    <span className={highlight ? "font-system text-primary animate-pulse" : "font-system text-foreground"}>{value}</span>
+  </div>
+);
+
+const SocialTab = () => {
+  const [open, setOpen] = useStateReact(false);
+  return (
+    <div className="space-y-3">
+      <p className="font-system text-xs text-muted-foreground tracking-wider">
+        Gestiona tus amigos, party y código de invitación.
+      </p>
+      <Button onClick={() => setOpen(true)} className="font-pixel text-[10px] w-full">
+        ABRIR SOCIAL
+      </Button>
+      <SocialPanel open={open} onOpenChange={setOpen} hideTrigger />
+    </div>
+  );
+};
+
+export default Character;

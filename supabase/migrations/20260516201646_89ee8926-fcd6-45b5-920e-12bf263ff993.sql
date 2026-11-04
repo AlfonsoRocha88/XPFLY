@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.guard_profile_privileged_columns();

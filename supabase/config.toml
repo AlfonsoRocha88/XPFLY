@@ -1,0 +1,43 @@
+project_id = "nkeknuizhlppqbjkfjpa"
+
+[functions.pyro-chat]
+verify_jwt = false
+
+[functions.resolve-username]
+verify_jwt = false
+
+[functions.pyro-decay]
+verify_jwt = false
+
+[functions.award-xp]
+verify_jwt = false
+
+[functions.claim-daily-bonus]
+verify_jwt = false
+
+[functions.open-chest]
+verify_jwt = false
+
+[functions.allocate-stat]
+verify_jwt = false
+
+[functions.buy-streak-freeze]
+verify_jwt = false
+
+[functions.reconcile-streak]
+verify_jwt = false
+
+[functions.equip-title]
+verify_jwt = false
+
+[functions.send-push]
+verify_jwt = false
+
+[functions.push-config]
+verify_jwt = false
+
+[functions.dispatch-event]
+verify_jwt = false
+
+[functions.cron-worker]
+verify_jwt = false

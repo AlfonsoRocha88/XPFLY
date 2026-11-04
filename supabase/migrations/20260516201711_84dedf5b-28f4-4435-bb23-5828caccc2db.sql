@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.is_party_member(uuid, uuid) FROM PUBLIC, anon, authenticated;

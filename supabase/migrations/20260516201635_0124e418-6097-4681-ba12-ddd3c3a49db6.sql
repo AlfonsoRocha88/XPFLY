@@ -1,0 +1,1 @@
+DROP TRIGGER IF EXISTS guard_profile_privileged_columns ON public.profiles;

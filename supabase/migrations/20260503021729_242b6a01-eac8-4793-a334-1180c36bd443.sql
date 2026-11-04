@@ -1,0 +1,1 @@
+ALTER TABLE public.tasks ADD COLUMN IF NOT EXISTS reminders integer[] NOT NULL DEFAULT '{}'::integer[];
