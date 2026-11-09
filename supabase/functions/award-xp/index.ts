@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { currentLeague } from "../_shared/leagues.ts";
+import { localDay } from "../_shared/day.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,7 +11,9 @@ const corsHeaders = {
 const XP_REWARDS = { low: 20, medium: 35, high: 50, urgent: 75 } as const;
 type Priority = keyof typeof XP_REWARDS;
 
-const DAILY_TROPHY_BONUS = 5;
+// Anti-abuse limits. Awards past a limit pay 0 XP and are flagged for review, never blocked.
+const MAX_AWARDS_PER_MINUTE = 10;
+const MAX_AWARDS_PER_DAY = 30;
 
 function calculateLevel(totalXp: number) {
   let lvl = 1, need = 0;
@@ -75,24 +78,10 @@ Deno.serve(async (req) => {
     if (tErr || !task) return j({ error: "task_not_found" }, 404);
     if (task.user_id !== userId) return j({ error: "forbidden" }, 403);
     if (task.status !== "done") return j({ error: "task_not_done" }, 409);
-    if (task.xp_awarded === true) return j({ error: "already_awarded" }, 409);
     if (!task.is_daily) {
       const ageMs = Date.now() - new Date(task.created_at).getTime();
       if (ageMs < 60 * 60 * 1000) return j({ error: "task_too_new" }, 409);
     }
-
-    // Atomically claim the XP award for this task. If another concurrent
-    // request beat us, the conditional update returns 0 rows.
-    const { data: claimed, error: cErr } = await admin
-      .from("tasks")
-      .update({ xp_awarded: true })
-      .eq("id", taskId)
-      .eq("user_id", userId)
-      .eq("xp_awarded", false)
-      .select("id")
-      .maybeSingle();
-    if (cErr) return j({ error: cErr.message }, 500);
-    if (!claimed) return j({ error: "already_awarded" }, 409);
 
     // Priority is taken from the task itself, never from client input.
     const priority: Priority = (task.is_daily ? "urgent" : task.priority) as Priority;
@@ -132,6 +121,35 @@ Deno.serve(async (req) => {
     const streakBonus = Math.ceil(reward * streakMult);
     reward = reward + streakBonus;
 
+    // --- Award ledger: the source of truth for "already paid" ---
+    // tasks.xp_awarded is client-writable, so it is only a UI hint. The unique
+    // (task_id, day) row makes the award idempotent: a habit pays once per local
+    // day, a regular task once ever (day = null).
+    const day = task.is_daily ? localDay(profile.timezone) : null;
+    const awardsSince = async (ms: number) => {
+      const { count } = await admin
+        .from("xp_awards")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .gte("created_at", new Date(Date.now() - ms).toISOString());
+      return count ?? 0;
+    };
+    const flagged =
+      (await awardsSince(60_000)) >= MAX_AWARDS_PER_MINUTE ? "burst"
+      : (await awardsSince(86_400_000)) >= MAX_AWARDS_PER_DAY ? "daily_cap"
+      : null;
+    if (flagged) reward = 0;
+
+    const { error: ledgerErr } = await admin
+      .from("xp_awards")
+      .insert({ user_id: userId, task_id: taskId, day, xp: reward, flagged });
+    if (ledgerErr) {
+      // 23505 = unique violation: this task (or this habit today) was already paid.
+      if (ledgerErr.code === "23505") return j({ error: "already_awarded" }, 409);
+      return j({ error: ledgerErr.message }, 500);
+    }
+    await admin.from("tasks").update({ xp_awarded: true }).eq("id", taskId);
+
     const currentXp = profile.xp ?? 0;
     const newXp = currentXp + reward;
     const oldLevel = profile.level ?? 1;
@@ -158,7 +176,7 @@ Deno.serve(async (req) => {
     // Trophies: 1 trophy per 2 missions_completed (spec).
     const prevMissions = profile.missions_completed_total ?? 0;
     const newMissions = prevMissions + 1;
-    const bonusTrophy = newMissions % 2 === 0;
+    const bonusTrophy = !flagged && newMissions % 2 === 0;
     const trophyDelta = bonusTrophy ? 1 : 0;
     const newTrophies = (profile.trophies ?? 0) + trophyDelta;
 

@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { currentLeague } from "../_shared/leagues.ts";
+import { localDay } from "../_shared/day.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -44,6 +45,28 @@ Deno.serve(async (req) => {
     const today = new Date().toISOString().split("T")[0];
     const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
     if (profile.daily_completed_at === today) return j({ error: "already_claimed" }, 409);
+
+    // The bonus requires today's habits to be done AND paid through award-xp,
+    // so calling this function directly without doing them earns nothing.
+    const day = localDay(profile.timezone);
+    const dow = new Date(`${day}T12:00:00Z`).getUTCDay();
+    const habitsToday = () =>
+      admin
+        .from("tasks")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .eq("is_daily", true)
+        .is("parent_task_id", null)
+        .not("tags", "cs", "{tipo:horario}")
+        .or(`daily_days.eq.{},daily_days.cs.{${dow}}`);
+    const due = (await habitsToday()).count ?? 0;
+    const pending = (await habitsToday().neq("status", "done")).count ?? 0;
+    const { count: paid } = await admin
+      .from("xp_awards")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("day", day);
+    if (due === 0 || pending > 0 || (paid ?? 0) < due) return j({ error: "dailies_incomplete" }, 409);
 
     const currentStreak = profile.daily_streak ?? 0;
     const newStreak = profile.daily_completed_at === yesterday ? currentStreak + 1 : 1;

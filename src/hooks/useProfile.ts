@@ -57,6 +57,12 @@ export const useProfile = () => {
         .eq("user_id", user!.id)
         .maybeSingle();
       if (error) throw error;
+      // The server decides "today" for habits from this zone; keep it current.
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (data && tz && data.timezone !== tz) {
+        const { error: tzError } = await supabase.from("profiles").update({ timezone: tz }).eq("user_id", user!.id);
+        if (!tzError) data.timezone = tz;
+      }
       return data;
     },
     enabled: !!user,
