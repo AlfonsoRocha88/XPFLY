@@ -3,7 +3,6 @@ import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import type { Task, TaskInsert, TaskUpdate } from "@/lib/types";
-import { pyroFeed, consumePyroSourceRect } from "./usePyro";
 
 const TASK_KEYS = [["tasks"], ["subtasks"], ["all-tasks"], ["daily-tasks"]] as const;
 
@@ -136,14 +135,6 @@ export const useTasks = () => {
     },
     onError: () => invalidateAll(),
     onSuccess: (data, vars) => {
-      if (vars.status === "done") {
-        const taskId = typeof data?.id === "string" ? data.id : vars.id;
-        pyroFeed({
-          taskId,
-          taskTitle: typeof data?.title === "string" ? data.title : undefined,
-          sourceRect: taskId ? consumePyroSourceRect(taskId) : undefined,
-        });
-      }
       invalidateAll();
     },
   });

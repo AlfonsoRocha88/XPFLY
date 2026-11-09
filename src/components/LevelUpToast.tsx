@@ -28,9 +28,9 @@ const LevelUpToast = ({ level, onComplete }: LevelUpToastProps) => {
             <Star key={i} className="h-7 w-7" fill="currentColor" />
           ))}
         </div>
-        <p className="text-base font-semibold text-primary">¡Subiste de nivel!</p>
+        <p className="text-base font-semibold text-primary">Nuevo nivel</p>
         <p className="font-serif text-7xl font-medium leading-none">{level}</p>
-        <p className="text-sm font-semibold text-muted-foreground">Sigue así 💪</p>
+        <p className="text-sm font-semibold text-muted-foreground">Buen trabajo, sigue así.</p>
       </div>
     </div>
   );

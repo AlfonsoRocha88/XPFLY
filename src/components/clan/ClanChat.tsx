@@ -11,7 +11,7 @@ import { timeAgo } from "./timeAgo";
 import { avatarSrc } from "@/lib/avatars";
 
 function activityText(a: ClanActivity): { Icon: any; line: string; tone: string } {
-  const name = a.profile?.display_name || a.profile?.username || "Un héroe";
+  const name = a.profile?.display_name || a.profile?.username || "Alguien";
   switch (a.type) {
     case "joined":
       return { Icon: LogIn, line: `${name} se unió al clan`, tone: "text-emerald-300" };
@@ -71,7 +71,7 @@ const ClanChat = ({ clanId }: { clanId: string }) => {
       <ScrollArea className="flex-1">
         <div className="space-y-3 p-3">
           {timeline.length === 0 && (
-            <p className="py-10 text-center text-xs text-muted-foreground">Sin actividad aún. ¡Saluda a tu clan!</p>
+            <p className="py-10 text-center text-xs text-muted-foreground">Aún no hay mensajes.</p>
           )}
           {timeline.map((it) => {
             if (it.kind === "act") {
@@ -89,7 +89,7 @@ const ClanChat = ({ clanId }: { clanId: string }) => {
             }
             const m = it.msg;
             const mine = m.user_id === user?.id;
-            const name = m.profile?.display_name || m.profile?.username || "Jugador";
+            const name = m.profile?.display_name || m.profile?.username || "Usuario";
             return (
               <div key={it.id} className={`flex items-end gap-2 ${mine ? "flex-row-reverse" : ""}`}>
                 <Avatar className="h-7 w-7 shrink-0 ring-1 ring-border">

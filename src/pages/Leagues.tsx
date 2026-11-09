@@ -18,12 +18,12 @@ import { cn } from "@/lib/utils";
 import { avatarSrc } from "@/lib/avatars";
 
 /** Group divisions by league family, preserving order. */
-function groupByLeague(): { league: string; divisions: LeagueDivision[]; color: string; emblem: string }[] {
-  const map = new Map<string, { league: string; divisions: LeagueDivision[]; color: string; emblem: string }>();
+function groupByLeague(): { league: string; divisions: LeagueDivision[]; color: string }[] {
+  const map = new Map<string, { league: string; divisions: LeagueDivision[]; color: string }>();
   for (const d of LEAGUES) {
     const existing = map.get(d.league);
     if (existing) existing.divisions.push(d);
-    else map.set(d.league, { league: d.league, divisions: [d], color: d.color, emblem: d.emblem });
+    else map.set(d.league, { league: d.league, divisions: [d], color: d.color });
   }
   return Array.from(map.values());
 }
@@ -67,7 +67,7 @@ const GlobalRow = ({ row, rank }: { row: LbRow; rank: number }) => (
     <div className="flex-1 min-w-0">
       <p className={cn("truncate text-sm font-semibold", row.isUser && "text-primary")}>
         {row.name}
-        {row.isUser && <span className="ml-1 font-pixel text-[11px] text-primary/80">(TÚ)</span>}
+        {row.isUser && <span className="ml-1 font-pixel text-[11px] text-primary/80">(tú)</span>}
       </p>
       <p className="truncate font-pixel text-[11px] text-muted-foreground">
         {row.league}
@@ -77,51 +77,6 @@ const GlobalRow = ({ row, rank }: { row: LbRow; rank: number }) => (
       <Trophy className="h-3 w-3" />
       {row.trophies}
     </div>
-  </div>
-);
-
-const Shield3D = ({
-  color,
-  emblem,
-  size = 96,
-  locked = false,
-  active = false,
-}: {
-  color: string;
-  emblem: string;
-  size?: number;
-  locked?: boolean;
-  active?: boolean;
-}) => (
-  <div
-    className={cn(
-      "relative flex items-center justify-center transition-transform",
-      active && "animate-pulse",
-      locked && "grayscale opacity-40",
-    )}
-    style={{ width: size, height: size }}
-  >
-    {/* Glow */}
-    <div
-      className="absolute inset-0 rounded-full blur-xl"
-      style={{ background: color, opacity: locked ? 0 : 0.45 }}
-    />
-    {/* Shield body */}
-    <div
-      className="relative flex items-center justify-center border-4 border-white/20"
-      style={{
-        width: size * 0.86,
-        height: size * 0.92,
-        background: `radial-gradient(circle at 30% 25%, rgba(255,255,255,0.45), ${color} 60%, rgba(0,0,0,0.35) 100%)`,
-        clipPath: "polygon(50% 0%, 100% 18%, 100% 65%, 50% 100%, 0% 65%, 0% 18%)",
-        boxShadow: active ? `0 0 28px ${color}` : `0 6px 18px rgba(0,0,0,0.45)`,
-      }}
-    >
-      <span style={{ fontSize: size * 0.42 }}>{emblem}</span>
-    </div>
-    {locked && (
-      <Lock className="absolute h-6 w-6 text-foreground" />
-    )}
   </div>
 );
 
@@ -149,7 +104,7 @@ const Leagues = () => {
       if (cancelled) return;
       const rows: LbRow[] = error || !data ? [] : data.map((p: any) => ({
         user_id: p.user_id,
-        name: p.display_name || p.username || "Cazador",
+        name: p.display_name || p.username || "Usuario",
         avatar_url: p.avatar_url,
         xp: p.xp ?? 0,
         trophies: p.trophies ?? 0,
@@ -271,7 +226,7 @@ const Leagues = () => {
                     )}
                     style={isCurrent ? { color: g.color } : undefined}
                   >
-                    {g.league.toUpperCase()}
+                    {g.league}
                   </span>
                 </div>
               );
@@ -316,7 +271,7 @@ const Leagues = () => {
             />
           </div>
           <p className="mt-2 text-center font-pixel text-[11px] text-muted-foreground">
-            +1 trofeo por misión · +5 al completar todas las diarias
+            +1 trofeo por tarea · +5 al completar todas las diarias
           </p>
         </Card>
 
@@ -383,7 +338,7 @@ const Leagues = () => {
                     >
                       {p.name}
                       {p.isUser && (
-                        <span className="ml-1 font-pixel text-[11px] text-primary/80">(TÚ)</span>
+                        <span className="ml-1 font-pixel text-[11px] text-primary/80">(tú)</span>
                       )}
                     </p>
                     <p className="truncate font-pixel text-[11px] text-muted-foreground">

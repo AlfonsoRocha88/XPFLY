@@ -5,9 +5,7 @@
 export const AI_URL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
 
 export const AI_MODELS = {
-  /** Chat with Pyro (streamed). */
-  chat: "gemini-2.5-flash",
-  /** Structured tasks: mission suggestions, image moderation. */
+  /** Structured tasks such as profile-photo moderation. */
   fast: "gemini-2.5-flash",
 } as const;
 

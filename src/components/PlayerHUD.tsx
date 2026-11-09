@@ -31,7 +31,6 @@ const PlayerHUD = ({ className, showStreak = false }: { className?: string; show
     };
   }, [profile]);
 
-  const points = profile?.stat_points_available ?? 0;
   const streak = profile?.daily_streak ?? 0;
 
   return (
@@ -39,20 +38,15 @@ const PlayerHUD = ({ className, showStreak = false }: { className?: string; show
       <button
         onClick={() => navigate("/character")}
         className="relative shrink-0 rounded-full transition-transform active:scale-95"
-        title="Ver personaje"
-        aria-label="Ver personaje"
+        title="Ver perfil"
+        aria-label="Ver perfil"
       >
         <CharacterPortrait url={profile?.avatar_url} seed={profile?.user_id} size={52} />
-        {points > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-card bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
-            {points > 9 ? "9+" : points}
-          </span>
-        )}
       </button>
 
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-2">
-          <p className="truncate text-[15px] font-semibold">{profile?.display_name ?? "Jugador"}</p>
+          <p className="truncate text-[15px] font-semibold">{profile?.display_name ?? "Usuario"}</p>
           {showStreak && (
             <span className={cn("flex shrink-0 items-center gap-0.5 text-sm font-semibold", streak > 0 ? "text-warning" : "text-muted-foreground")}>
               <Flame className="h-4 w-4" /> {streak}

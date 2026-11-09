@@ -177,10 +177,10 @@ const TaskDialog = ({ open, onOpenChange, task, projects, defaultProjectId, defa
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{task ? "Editar misión" : "Nueva misión"}</DialogTitle>
+          <DialogTitle>{task ? "Editar tarea" : "Nueva tarea"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <Input data-demo="task-title-input" placeholder="Título de la misión" value={title} onChange={(e) => setTitle(e.target.value)} />
+          <Input data-demo="task-title-input" placeholder="Título de la tarea" value={title} onChange={(e) => setTitle(e.target.value)} />
           <Textarea placeholder="Descripción (opcional)" value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
 
           {!isDaily && (
@@ -399,7 +399,7 @@ const TaskDialog = ({ open, onOpenChange, task, projects, defaultProjectId, defa
             <div className="flex items-center gap-2">
               <RotateCcw className="h-4 w-4 text-blue-400" />
               <div>
-                <p className="text-sm font-medium">Misión diaria</p>
+                <p className="text-sm font-medium">Tarea diaria</p>
                 <p className="text-xs text-muted-foreground">Se repite cada día automáticamente</p>
               </div>
             </div>
@@ -476,7 +476,7 @@ const TaskDialog = ({ open, onOpenChange, task, projects, defaultProjectId, defa
             </div>
           )}
 
-          <Button data-demo="task-save-btn" onClick={handleSave} className="w-full">{task ? "Guardar cambios" : "Crear misión"}</Button>
+          <Button data-demo="task-save-btn" onClick={handleSave} className="w-full">{task ? "Guardar cambios" : "Crear tarea"}</Button>
         </div>
       </DialogContent>
     </Dialog>

@@ -9,7 +9,7 @@ export interface SectionDef {
 }
 
 export const SECTIONS: SectionDef[] = [
-  { id: "tasks", label: "Misiones", icon: ListChecks },
+  { id: "tasks", label: "Tareas", icon: ListChecks },
   { id: "calendar", label: "Calendario", icon: CalendarDays },
   { id: "progress", label: "Progreso", icon: Trophy },
   { id: "community", label: "Comunidad", icon: Users },

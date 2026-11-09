@@ -27,7 +27,7 @@ export const useChests = () => {
     },
     onSuccess: (reward) => {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
-      toast.success(`${reward.icon} ¡Obtuviste ${reward.label}!`);
+      toast.success(`Obtuviste ${reward.label}`);
     },
     onError: (e: any) => toast.error(e?.message ?? "No se pudo abrir el cofre"),
   });

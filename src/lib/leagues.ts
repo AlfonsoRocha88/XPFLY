@@ -1,49 +1,50 @@
-// League system — Clash of Clans style with Roman-numeral divisions.
-// Each league (except the top one) has 3 divisions: III (entry) → II → I (top).
-// Trophies are earned: +1 per completed mission, +5 bonus when all dailies done.
+// League system: twelve tiers named after metals and stones.
+// Each tier (except the top one) has 3 divisions: III (entry) → II → I (top).
+// Trophies are earned: +1 per completed task, +5 bonus when all dailies are done.
+// Ids are mirrored in supabase/functions/_shared/leagues.ts; keep both in sync.
 
 export interface LeagueDivision {
-  /** Stable id used internally (e.g. "knight-2") */
+  /** Stable id stored in profiles.current_league_id (e.g. "plata-2") */
   id: string;
   /** League family name */
   league: string;
-  /** Division roman numeral ("III" | "II" | "I"). null for the single Singularity tier. */
+  /** Division roman numeral ("III" | "II" | "I"). null for the single top tier. */
   division: "III" | "II" | "I" | null;
   /** Minimum trophies required to enter this division */
   minTrophies: number;
-  /** Distinctive color (HSL/hex) for the shield */
+  /** Base color of the league medallion */
   color: string;
-  /** Emoji used as emblem inside the shield */
-  emblem: string;
 }
 
-const L = (
-  league: string,
-  color: string,
-  emblem: string,
-  base: [number, number, number],
-): LeagueDivision[] => [
-  { id: `${league.toLowerCase()}-3`, league, division: "III", minTrophies: base[0], color, emblem },
-  { id: `${league.toLowerCase()}-2`, league, division: "II", minTrophies: base[1], color, emblem },
-  { id: `${league.toLowerCase()}-1`, league, division: "I", minTrophies: base[2], color, emblem },
+const slug = (name: string) => name.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+
+const L = (league: string, color: string, base: [number, number, number]): LeagueDivision[] => [
+  { id: `${slug(league)}-3`, league, division: "III", minTrophies: base[0], color },
+  { id: `${slug(league)}-2`, league, division: "II", minTrophies: base[1], color },
+  { id: `${slug(league)}-1`, league, division: "I", minTrophies: base[2], color },
 ];
 
 export const LEAGUES: LeagueDivision[] = [
-  ...L("Mortal", "#94a3b8", "🪨", [0, 50, 100]),
-  ...L("Guerrero", "#a16207", "🗡️", [200, 300, 400]),
-  ...L("Caballero", "#cbd5e1", "🛡️", [550, 700, 850]),
-  ...L("Heroe", "#16a34a", "🏹", [1050, 1250, 1450]),
-  ...L("Campeon", "#0ea5e9", "🏆", [1700, 1950, 2200]),
-  ...L("Leyenda", "#a855f7", "⚜️", [2500, 2800, 3100]),
-  ...L("Rey", "#eab308", "👑", [3500, 3900, 4300]),
-  ...L("Emperador", "#f97316", "🦅", [4800, 5300, 5800]),
-  ...L("Dios", "#fde047", "✨", [6400, 7000, 7600]),
-  ...L("Titan", "#ef4444", "🔥", [8300, 9000, 9700]),
-  ...L("Primordial", "#7c3aed", "🌌", [10500, 11300, 12100]),
-  { id: "singularidad", league: "Singularidad", division: null, minTrophies: 13000, color: "#f0abfc", emblem: "♾️" },
+  ...L("Hierro", "#7d838c", [0, 50, 100]),
+  ...L("Bronce", "#b0763f", [200, 300, 400]),
+  ...L("Plata", "#a3adba", [550, 700, 850]),
+  ...L("Oro", "#c9a12e", [1050, 1250, 1450]),
+  ...L("Platino", "#6fa7b8", [1700, 1950, 2200]),
+  ...L("Zafiro", "#3a66c4", [2500, 2800, 3100]),
+  ...L("Esmeralda", "#2e8f66", [3500, 3900, 4300]),
+  ...L("Rubí", "#b8384f", [4800, 5300, 5800]),
+  ...L("Amatista", "#7f58bd", [6400, 7000, 7600]),
+  ...L("Diamante", "#4fb3d4", [8300, 9000, 9700]),
+  ...L("Ónix", "#2f3340", [10500, 11300, 12100]),
+  { id: "elite", league: "Élite", division: null, minTrophies: 13000, color: "#a8893a" },
 ];
 
-/** Display name with division: "Caballero II" / "Singularidad" */
+/** Medallion color for a league family name. */
+export function leagueColor(name: string): string {
+  return LEAGUES.find((d) => d.league === name)?.color ?? LEAGUES[0].color;
+}
+
+/** Display name with division: "Plata II" / "Élite" */
 export function leagueLabel(d: LeagueDivision): string {
   return d.division ? `${d.league} ${d.division}` : d.league;
 }
@@ -79,7 +80,7 @@ export function getDivisionProgress(trophies: number): number {
 /** Trophies awarded when claiming the daily bonus (all dailies done). */
 export const DAILY_TROPHY_BONUS = 5;
 
-/** Returns the tier as Roman numeral (I = top, II, III = entry) or null for Singularidad. */
+/** Returns the tier as Roman numeral (I = top, II, III = entry) or null for Élite. */
 export function leagueTierRoman(id: string | null | undefined): "I" | "II" | "III" | null {
   if (!id) return null;
   const m = id.match(/-(\d)$/);

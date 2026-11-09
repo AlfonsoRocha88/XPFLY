@@ -30,9 +30,7 @@ $$;
 
 revoke all on function public.xpfly_call_cron_worker(text) from public, anon, authenticated;
 
--- Mission reminders: every minute
+-- Task reminders: every minute
 select cron.schedule('xpfly-mission-reminders', '* * * * *', $$select public.xpfly_call_cron_worker('mission-reminders')$$);
--- Pyro hunger nudges: every 30 minutes
-select cron.schedule('xpfly-pyro-hunger', '*/30 * * * *', $$select public.xpfly_call_cron_worker('pyro-hunger')$$);
 -- League trophy decay: once a day (06:00 UTC)
 select cron.schedule('xpfly-trophy-decay', '0 6 * * *', $$select public.xpfly_call_cron_worker('trophy-decay')$$);

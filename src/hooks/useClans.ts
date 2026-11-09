@@ -421,7 +421,7 @@ export const useClanMutations = () => {
         clan_id: clanId, user_id: user!.id, status: "pending",
       });
       if (error) throw error;
-      const senderName = (user!.user_metadata as any)?.display_name || (user!.user_metadata as any)?.username || "Un jugador";
+      const senderName = (user!.user_metadata as any)?.display_name || (user!.user_metadata as any)?.username || "Alguien";
       await supabase.from("notifications").insert({
         user_id: clan.leader_id,
         type: "clan_request",
@@ -519,7 +519,7 @@ export const useClanMutations = () => {
       if (!term) throw new Error("Introduce un código o usuario");
       const { data: matches } = await supabase.rpc("find_profile_preview", { _query: term });
       const profile = (matches as any[] | null)?.[0];
-      if (!profile) throw new Error("Jugador no encontrado");
+      if (!profile) throw new Error("Usuario no encontrado");
       const { data: existing } = await supabase
         .from("clan_members").select("id").eq("user_id", profile.user_id).maybeSingle();
       if (existing) throw new Error("Ya pertenece a un clan");

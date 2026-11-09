@@ -6,15 +6,15 @@ import { useChests, type ChestReward } from "@/hooks/useChests";
 const RARITY_STYLES: Record<string, { label: string; className: string }> = {
   common: { label: "Común", className: "bg-muted text-muted-foreground" },
   rare: { label: "Raro", className: "bg-[hsl(210_85%_52%/0.12)] text-[hsl(210_85%_45%)]" },
-  epic: { label: "Épico", className: "bg-[hsl(275_70%_58%/0.12)] text-[hsl(275_60%_50%)]" },
+  epic: { label: "Épica", className: "bg-[hsl(275_70%_58%/0.12)] text-[hsl(275_60%_50%)]" },
   legendary: { label: "Legendario", className: "bg-xp/15 text-[hsl(38_92%_40%)]" },
 };
 
 const UPCOMING_ITEMS = [
   { id: "potion", name: "Poción de XP", icon: "🧪", price: 150 },
-  { id: "freeze", name: "Congelador de racha", icon: "🧊", price: 100 },
+  { id: "freeze", name: "Protector de racha", icon: "🧊", price: 100 },
   { id: "title-pack", name: "Pack de títulos", icon: "🏅", price: 500 },
-  { id: "wallpaper", name: "Fondo épico", icon: "🖼️", price: 300 },
+  { id: "wallpaper", name: "Fondo exclusivo", icon: "🖼️", price: 300 },
   { id: "outfit", name: "Atuendo raro", icon: "👕", price: 750 },
   { id: "boost", name: "Boost x2 XP", icon: "⚡", price: 400 },
 ];
@@ -57,7 +57,7 @@ const Shop = () => {
           className={cn(
             "relative flex h-28 w-28 items-center justify-center rounded-3xl transition-transform",
             chests > 0 ? "bg-xp/15 text-xp hover:scale-105 active:scale-95" : "cursor-not-allowed bg-muted text-muted-foreground",
-            opening && "animate-[pyro-wiggle_0.25s_ease-in-out_infinite]",
+            opening && "animate-[wiggle_0.25s_ease-in-out_infinite]",
           )}
           aria-label="Abrir cofre"
         >
@@ -74,7 +74,7 @@ const Shop = () => {
             {opening ? "Abriendo…" : chests > 0 ? `${chests} cofre${chests === 1 ? "" : "s"} disponible${chests === 1 ? "" : "s"}` : "Sin cofres por ahora"}
           </p>
           <p className="mt-0.5 text-sm text-muted-foreground">
-            {chests > 0 ? "Toca el cofre para abrirlo" : "Completa tus misiones diarias para ganar uno"}
+            {chests > 0 ? "Toca el cofre para abrirlo" : "Completa tus tareas diarias para ganar uno"}
           </p>
         </div>
 

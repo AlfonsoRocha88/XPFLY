@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { currentLeague } from "../_shared/leagues.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -41,52 +42,6 @@ function getXpBonus(equipped: string | null, ctx: { morning: boolean; night: boo
   if (t.applies === "night" && ctx.night) return t.bonus;
   if (t.applies === "urgent" && ctx.urgent) return t.bonus;
   return 1;
-}
-
-// --- Leagues (mirror of src/lib/leagues.ts) ---
-const LEAGUES: { id: string; minTrophies: number }[] = [];
-function L(name: string, base: [number, number, number]) {
-  LEAGUES.push({ id: `${name.toLowerCase()}-3`, minTrophies: base[0] });
-  LEAGUES.push({ id: `${name.toLowerCase()}-2`, minTrophies: base[1] });
-  LEAGUES.push({ id: `${name.toLowerCase()}-1`, minTrophies: base[2] });
-}
-L("Mortal", [0, 50, 100]);
-L("Guerrero", [200, 300, 400]);
-L("Caballero", [550, 700, 850]);
-L("Heroe", [1050, 1250, 1450]);
-L("Campeon", [1700, 1950, 2200]);
-L("Leyenda", [2500, 2800, 3100]);
-L("Rey", [3500, 3900, 4300]);
-L("Emperador", [4800, 5300, 5800]);
-L("Dios", [6400, 7000, 7600]);
-L("Titan", [8300, 9000, 9700]);
-L("Primordial", [10500, 11300, 12100]);
-LEAGUES.push({ id: "singularidad", minTrophies: 13000 });
-
-function currentLeague(trophies: number) {
-  let cur = LEAGUES[0];
-  for (const d of LEAGUES) {
-    if (trophies >= d.minTrophies) cur = d;
-    else break;
-  }
-  return cur.id;
-}
-
-const POINTS_PER_LEVEL = 3;
-
-// Pyro tier thresholds (mirror src/lib/pyro-progression.ts)
-const PYRO_TIERS: { level: number; threshold: number }[] = [
-  { level: 1, threshold: 1 },
-  { level: 2, threshold: 2 },
-  { level: 3, threshold: 4 },
-  { level: 4, threshold: 6 },
-];
-function computePyroPower(totalFed: number, currentLevel: number) {
-  let lvl = currentLevel;
-  for (const t of PYRO_TIERS) {
-    if (totalFed >= t.threshold && t.level > lvl) lvl = t.level;
-  }
-  return lvl;
 }
 
 Deno.serve(async (req) => {
@@ -182,8 +137,6 @@ Deno.serve(async (req) => {
     const oldLevel = profile.level ?? 1;
     const newLevel = calculateLevel(newXp);
     const levelsGained = Math.max(0, newLevel - oldLevel);
-    const pointsGained = levelsGained * POINTS_PER_LEVEL;
-    const newAvailable = (profile.stat_points_available ?? 0) + pointsGained;
 
     // Title progress
     const progress = profile.title_progress ?? { morning_missions: 0, night_missions: 0, urgent_missions: 0 };
@@ -209,14 +162,11 @@ Deno.serve(async (req) => {
     const trophyDelta = bonusTrophy ? 1 : 0;
     const newTrophies = (profile.trophies ?? 0) + trophyDelta;
 
-    const newPyroPower = computePyroPower(newMissions, profile.pyro_power_level ?? 0);
-
     const { data: updated, error: uErr } = await admin
       .from("profiles")
       .update({
         xp: newXp,
         level: newLevel,
-        stat_points_available: newAvailable,
         title_progress: nextProgress,
         unlocked_titles: allUnlocked,
         trophies: newTrophies,
@@ -224,7 +174,6 @@ Deno.serve(async (req) => {
         current_league_id: currentLeague(newTrophies),
         missions_completed_total: newMissions,
         last_mission_completed_at: new Date().toISOString(),
-        pyro_power_level: newPyroPower,
       })
       .eq("user_id", userId)
       .select()
@@ -235,7 +184,6 @@ Deno.serve(async (req) => {
       profile: updated,
       xpGained: reward,
       leveledUp: newLevel > oldLevel,
-      pointsGained,
       bonusTrophyAwarded: bonusTrophy,
       missionsCompletedTotal: newMissions,
       newlyUnlockedTitles: newlyUnlocked,

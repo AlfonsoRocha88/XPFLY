@@ -4,7 +4,6 @@ import { es } from "date-fns/locale";
 import { CalendarDays, ChevronDown, Trash2 } from "lucide-react";
 import type { Task, TaskPriority } from "@/lib/types";
 import TaskCheck from "@/components/TaskCheck";
-import { stashPyroSourceRect } from "@/hooks/usePyro";
 import { cn } from "@/lib/utils";
 
 export const XP_REWARDS: Record<TaskPriority, number> = {
@@ -15,10 +14,10 @@ export const XP_REWARDS: Record<TaskPriority, number> = {
 };
 
 export const PRIORITY_META: Record<TaskPriority, { label: string; color: string }> = {
-  low: { label: "Fácil", color: "hsl(var(--priority-low))" },
-  medium: { label: "Normal", color: "hsl(var(--priority-medium))" },
-  high: { label: "Difícil", color: "hsl(var(--priority-high))" },
-  urgent: { label: "Épico", color: "hsl(var(--priority-urgent))" },
+  low: { label: "Baja", color: "hsl(var(--priority-low))" },
+  medium: { label: "Media", color: "hsl(var(--priority-medium))" },
+  high: { label: "Alta", color: "hsl(var(--priority-high))" },
+  urgent: { label: "Urgente", color: "hsl(var(--priority-urgent))" },
 };
 
 interface TaskCardProps {
@@ -41,13 +40,7 @@ const TaskCard = ({ task, subtasks, onToggleComplete, onEdit, onDelete, onToggle
   const overdue = !!due && !isDone && isPast(due) && !isToday(due);
   const doneSubtasks = subtasks.filter((s) => s.status === "done").length;
 
-  const handleToggle = () => {
-    if (!isDone && cardRef.current) {
-      const r = cardRef.current.getBoundingClientRect();
-      stashPyroSourceRect(task.id, { x: r.left, y: r.top, width: r.width, height: r.height });
-    }
-    onToggleComplete(task);
-  };
+  const handleToggle = () => onToggleComplete(task);
 
   return (
     <div
@@ -68,7 +61,7 @@ const TaskCard = ({ task, subtasks, onToggleComplete, onEdit, onDelete, onToggle
           type="button"
           className="min-w-0 flex-1 text-left"
           onClick={() => onEdit(task)}
-          aria-label={`Editar misión ${task.title}`}
+          aria-label={`Editar tarea ${task.title}`}
         >
           <p className={cn("text-[15px] font-medium leading-snug", isDone && "text-muted-foreground line-through")}>
             {projectColor && (
@@ -102,7 +95,7 @@ const TaskCard = ({ task, subtasks, onToggleComplete, onEdit, onDelete, onToggle
           className="-mr-1 rounded-full p-1.5 text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
           onClick={() => onDelete(task.id)}
           onPointerDown={(e) => e.stopPropagation()}
-          aria-label={`Eliminar misión ${task.title}`}
+          aria-label={`Eliminar tarea ${task.title}`}
         >
           <Trash2 className="h-4 w-4" />
         </button>

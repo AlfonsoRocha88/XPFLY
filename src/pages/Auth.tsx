@@ -1,4 +1,3 @@
-import pyroImg from "@/assets/pyro-mascot.png";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -135,7 +134,7 @@ const Auth = () => {
       if (error) {
         toast.error(error.message);
       } else {
-        toast.success("¡Cuenta creada! Revisa tu correo para confirmar.");
+        toast.success("Cuenta creada. Revisa tu correo para confirmarla.");
       }
     }
     setLoading(false);
@@ -184,15 +183,14 @@ const Auth = () => {
       <Card className="w-full max-w-md rounded-3xl border-0 shadow-lift">
         <CardHeader className="text-center">
           <div className="mx-auto mb-2">
-            <img src={pyroImg} alt="" className="mx-auto mb-2 h-16 w-16 object-contain" />
             <h1 className="font-serif text-5xl font-semibold tracking-tight text-primary">XPFly</h1>
             <p className="mt-1 text-sm font-medium text-muted-foreground">Sube de nivel en tu vida real</p>
           </div>
           <CardTitle className="mt-4 font-serif text-2xl font-medium">
-            {isLogin ? "Iniciar partida" : "Nuevo jugador"}
+            {isLogin ? "Inicia sesión" : "Crea tu cuenta"}
           </CardTitle>
           <CardDescription className="text-sm">
-            {isLogin ? "Continúa tu aventura" : "Únete a la aventura"}
+            {isLogin ? "Qué bueno verte de nuevo" : "Organiza tu día y mide tu progreso"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -200,7 +198,7 @@ const Auth = () => {
             {!isLogin && (
               <>
                 <Input
-                  placeholder="Nombre de héroe"
+                  placeholder="Tu nombre"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   required
@@ -235,7 +233,7 @@ const Auth = () => {
               className="h-12 w-full text-base font-semibold"
               disabled={loading || (!isLogin && password.length > 0 && password.length < 6)}
             >
-              {loading ? "Cargando..." : isLogin ? "Ingresar" : "🛡️ Crear cuenta"}
+              {loading ? "Cargando..." : isLogin ? "Ingresar" : "Crear cuenta"}
             </Button>
             <div className="flex flex-col gap-2 text-center">
               {isLogin && (

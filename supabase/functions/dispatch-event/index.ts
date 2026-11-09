@@ -34,8 +34,6 @@ Deno.serve(async (req) => {
     // the source row, so they can stay callable with the anon key from pg_net.
     const PRIVILEGED_EVENTS = new Set([
       "mission_reminder",
-      "pyro_warning_48h",
-      "pyro_hunger_5h",
     ]);
     if (PRIVILEGED_EVENTS.has(event)) {
       const auth = req.headers.get("authorization") || "";
@@ -58,7 +56,7 @@ Deno.serve(async (req) => {
         let username = "Alguien";
         const { data: p } = await supabase.from("profiles").select("username, display_name").eq("user_id", fromId).maybeSingle();
         username = p?.username || p?.display_name || "Alguien";
-        await send(toId, "XPFly", `⚔️ ${username} te envió una solicitud de amistad`, "friend-request", { url: "/" });
+        await send(toId, "XPFly", `${username} te envió una solicitud de amistad`, "friend-request", { url: "/" });
         break;
       }
       case "clan_join_request": {
@@ -66,29 +64,19 @@ Deno.serve(async (req) => {
         const { data: r } = await supabase.from("clan_join_requests").select("clan_id, status").eq("id", row_id).maybeSingle();
         if (!r || r.status !== "pending") return new Response(JSON.stringify({ skipped: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
         const { data: c } = await supabase.from("clans").select("leader_id").eq("id", r.clan_id).maybeSingle();
-        if (c?.leader_id) await send(c.leader_id, "XPFly", "🛡️ Alguien quiere unirse a tu clan", "clan-join", { url: "/" });
+        if (c?.leader_id) await send(c.leader_id, "XPFly", "Alguien quiere unirse a tu clan", "clan-join", { url: "/" });
         break;
       }
       case "league_promotion": {
         if (!row_id) return new Response(JSON.stringify({ error: "row_id required" }), { status: 200, headers: corsHeaders });
         const { data: lc } = await supabase.from("league_changes").select("user_id, direction").eq("id", row_id).maybeSingle();
         if (!lc || lc.direction !== "promotion") return new Response(JSON.stringify({ skipped: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
-        await send(lc.user_id, "XPFly", "🏆 ¡Subiste de liga! Sigue así", "league-up", { url: "/leagues" });
-        break;
-      }
-      case "pyro_warning_48h": {
-        if (!user_id) return new Response(JSON.stringify({ error: "user_id required" }), { status: 200, headers: corsHeaders });
-        await send(user_id, "XPFly", "🔥 Pyro se está apagando... ¡completa una misión!", "pyro-48h", { url: "/" });
-        break;
-      }
-      case "pyro_hunger_5h": {
-        if (!user_id) return new Response(JSON.stringify({ error: "user_id required" }), { status: 200, headers: corsHeaders });
-        await send(user_id, "XPFly", "🔥 ¡Pyro tiene HAMBRE! Lleva horas sin comer... completa una misión antes de que se apague.", "pyro-hunger", { url: "/" });
+        await send(lc.user_id, "XPFly", "Subiste de liga. Buen trabajo.", "league-up", { url: "/leagues" });
         break;
       }
       case "mission_reminder": {
         if (!user_id) return new Response(JSON.stringify({ error: "user_id required" }), { status: 200, headers: corsHeaders });
-        await send(user_id, "XPFly", `⚔️ Misión próxima: ${payload.title || "tu misión"} — ¡no te rajes!`, `mission-${payload.task_id || ""}`, { url: "/" });
+        await send(user_id, "XPFly", `Recordatorio: ${payload.title || "tienes una tarea pendiente"}`, `mission-${payload.task_id || ""}`, { url: "/" });
         break;
       }
       default:

@@ -39,7 +39,7 @@ const TitlesPanel = ({ unlocked, equipped, progress, streak, onEquip, isPending 
         )}
       </div>
       <p className="text-xs text-muted-foreground">
-        Desbloquea títulos completando misiones según tu estilo. Equipa uno para activar su bonus de XP.
+        Desbloquea títulos completando tareas según tu estilo. Equipa uno para activar su bonus de XP.
       </p>
 
       <div className="grid gap-3 sm:grid-cols-2">

@@ -30,7 +30,7 @@ const SocialPanel = ({ view }: { view: "friends" | "party" }) => {
     navigator.clipboard.writeText(myFriendCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    toast.success("¡Código copiado!");
+    toast.success("Código copiado");
   };
 
   const handleSearch = async () => {
@@ -57,7 +57,7 @@ const SocialPanel = ({ view }: { view: "friends" | "party" }) => {
     if (!preview) return;
     try {
       await sendRequest.mutateAsync(preview.user_id);
-      toast.success("¡Solicitud enviada!");
+      toast.success("Solicitud enviada");
       setPreview(null);
       setFriendQuery("");
     } catch (e: any) {
@@ -70,7 +70,7 @@ const SocialPanel = ({ view }: { view: "friends" | "party" }) => {
     try {
       await createParty.mutateAsync(partyName.trim());
       setPartyName("");
-      toast.success("¡Party creada!");
+      toast.success("Party creada");
     } catch {
       toast.error("Error al crear party");
     }
@@ -79,7 +79,7 @@ const SocialPanel = ({ view }: { view: "friends" | "party" }) => {
   const handleInvite = async (friendUserId: string) => {
     try {
       await inviteToParty.mutateAsync(friendUserId);
-      toast.success("¡Invitación enviada!");
+      toast.success("Invitación enviada");
     } catch (e: any) {
       toast.error(e.message || "Error al invitar");
     }
@@ -133,7 +133,7 @@ const SocialPanel = ({ view }: { view: "friends" | "party" }) => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">
-                      {preview.display_name || preview.username || "Jugador"}
+                      {preview.display_name || preview.username || "Usuario"}
                     </p>
                     <p className="text-xs text-muted-foreground truncate">
                       @{preview.username || "—"} · Nv.{preview.level}
@@ -160,7 +160,7 @@ const SocialPanel = ({ view }: { view: "friends" | "party" }) => {
                 {pendingRequests.map((req) => (
                   <div key={req.id} className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2">
                     <div>
-                      <p className="text-sm font-medium">{req.friend_profile?.display_name || "Jugador"}</p>
+                      <p className="text-sm font-medium">{req.friend_profile?.display_name || "Usuario"}</p>
                       <p className="text-xs text-muted-foreground">Nv.{req.friend_profile?.level || 1}</p>
                     </div>
                     <div className="flex gap-1">
@@ -198,7 +198,7 @@ const SocialPanel = ({ view }: { view: "friends" | "party" }) => {
                         <img src={avatarSrc(fp?.avatar_url, fp?.user_id)} alt="" className="h-full w-full object-cover" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-medium truncate">{fp?.display_name || fp?.username || "Jugador"}</p>
+                        <p className="text-sm font-medium truncate">{fp?.display_name || fp?.username || "Usuario"}</p>
                         <p className="text-xs text-muted-foreground flex items-center gap-2">
                           <span>Nv.{fp?.level || 1}</span>
                           <span>· {fp?.xp || 0} XP</span>
@@ -378,7 +378,7 @@ const SocialPanel = ({ view }: { view: "friends" | "party" }) => {
                       if (alreadyInParty) return null;
                       return (
                         <div key={f.id} className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-1.5">
-                          <p className="text-sm">{f.friend_profile?.display_name || "Jugador"}</p>
+                          <p className="text-sm">{f.friend_profile?.display_name || "Usuario"}</p>
                           <Button size="sm" variant="outline" className="h-6 text-xs" onClick={() => handleInvite(friendUserId)}>
                             <Send className="h-3 w-3 mr-1" /> Invitar
                           </Button>

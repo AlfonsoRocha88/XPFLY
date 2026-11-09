@@ -32,7 +32,7 @@ const ClanWeeklyChallenge = ({ clan }: { clan: Clan }) => {
         </div>
       </div>
       <p className="mt-1 text-xs text-muted-foreground">
-        Completar <span className="font-semibold text-foreground">{clan.weekly_goal}</span> misiones esta semana
+        Completar <span className="font-semibold text-foreground">{clan.weekly_goal}</span> tareas esta semana
       </p>
       <div className="mt-3 h-3 overflow-hidden rounded-full bg-muted">
         <div
@@ -59,7 +59,7 @@ const ClanWeeklyChallenge = ({ clan }: { clan: Clan }) => {
         <ScrollArea className="max-h-[260px]">
           <ul className="space-y-1.5">
             {contributions.map((c, i) => {
-              const name = c.profile?.display_name || c.profile?.username || "Jugador";
+              const name = c.profile?.display_name || c.profile?.username || "Usuario";
               return (
                 <li key={c.user_id} className="flex items-center gap-3 rounded-lg bg-muted/30 px-2 py-2">
                   <div className="w-6 shrink-0 text-center">

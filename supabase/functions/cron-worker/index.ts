@@ -1,9 +1,10 @@
-// Called by pg_cron. Two modes via ?mode=
+// Called by pg_cron. Modes via ?mode=
 //   - "mission-reminders" (every minute): scans tasks with reminders array whose computed reminder time
 //     falls within the last minute window, fires push per task.
-//   - "pyro-hunger" (every 30 min): finds users with last_mission_completed_at > 5h ago, whose local hour is 8-23.
+//   - "trophy-decay" (daily): competitive leagues lose trophies after inactivity or overdue urgent tasks.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { leagueFamilyIndex } from "../_shared/leagues.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -51,60 +52,18 @@ async function missionReminders() {
   return { sent };
 }
 
-async function pyroHunger() {
-  // Users whose last_mission_completed_at is between 5h and 47h ago (avoid clashing with 48h pyro-decay warning)
-  const now = Date.now();
-  const upper = new Date(now - 5 * 60 * 60 * 1000).toISOString();
-  const lower = new Date(now - 47 * 60 * 60 * 1000).toISOString();
-
-  const { data: profiles, error } = await supabase
-    .from("profiles")
-    .select("user_id, timezone, last_mission_completed_at")
-    .lt("last_mission_completed_at", upper)
-    .gt("last_mission_completed_at", lower);
-  if (error) { console.error(error); return { sent: 0 }; }
-
-  let sent = 0;
-  for (const p of profiles || []) {
-    const tz = p.timezone || "UTC";
-    let localHour: number;
-    try {
-      const h = new Intl.DateTimeFormat("en-US", { hour: "numeric", hour12: false, timeZone: tz }).format(new Date());
-      localHour = parseInt(h, 10);
-    } catch {
-      localHour = new Date().getUTCHours();
-    }
-    if (localHour >= 8 && localHour < 23) {
-      await dispatch("pyro_hunger_5h", p.user_id);
-      sent++;
-    }
-  }
-  return { sent };
-}
-
-// --- League helpers (mirror src/lib/leagues.ts) ---
-const LEAGUE_FAMILIES = [
-  "mortal","guerrero","caballero","heroe","campeon","leyenda",
-  "rey","emperador","dios","titan","primordial","singularidad",
-] as const;
-function leagueFamilyIndex(id: string | null | undefined): number {
-  if (!id) return 0;
-  const fam = id.replace(/-\d$/, "");
-  const i = LEAGUE_FAMILIES.indexOf(fam as any);
-  return i < 0 ? 0 : i + 1;
-}
 function isCompetitive(id: string | null | undefined): boolean {
   return leagueFamilyIndex(id) >= 7;
 }
 
 const MAX_DAILY_TROPHY_LOSS = 14;
-const MAX_PYRO_TROPHY_LOSS_PER_DAY = 4;
+const MAX_INACTIVITY_TROPHY_LOSS_PER_DAY = 4;
 const MAX_URGENT_TROPHY_LOSS_PER_DAY = 10;
 const PER_URGENT_TROPHY_LOSS = 2;
 
 /**
  * Scan competitive users (league 7+) and apply:
- *  - Pyro hunger trophy decay: 1 trophy / 5h past 24h since last mission, max 4/day
+ *  - Inactivity decay: 1 trophy / 5h past 24h since the last completed task, max 4/day
  *  - Urgent mission decay: 2 trophies/day per unfinished urgent mission older than 24h,
  *    oldest first, max 10/day
  * Combined daily cap: 14 trophies (enforced via profiles.daily_trophy_loss / _date).
@@ -129,21 +88,21 @@ async function trophyDecay() {
 
     let trophies = Number(p.trophies ?? 0);
     let loss = 0;
-    let newPyroDecayDate = p.pyro_last_decay_date as string | null;
+    let newDecayDate = p.pyro_last_decay_date as string | null;
 
-    // 1) Pyro hunger decay (once per day)
+    // 1) Inactivity decay (once per day)
     const lastTs = p.last_mission_completed_at ? new Date(p.last_mission_completed_at).getTime() : null;
     if (lastTs != null && p.pyro_last_decay_date !== today) {
       const hoursSince = (now - lastTs) / 36e5;
       if (hoursSince >= 24) {
-        const ticks = Math.min(MAX_PYRO_TROPHY_LOSS_PER_DAY, Math.floor((hoursSince - 24) / 5) + 1);
+        const ticks = Math.min(MAX_INACTIVITY_TROPHY_LOSS_PER_DAY, Math.floor((hoursSince - 24) / 5) + 1);
         const apply = Math.min(ticks, remainingCap, trophies);
         if (apply > 0) {
           trophies -= apply;
           loss += apply;
           remainingCap -= apply;
         }
-        newPyroDecayDate = today;
+        newDecayDate = today;
       }
     }
 
@@ -176,7 +135,7 @@ async function trophyDecay() {
         .from("profiles")
         .update({
           trophies,
-          pyro_last_decay_date: newPyroDecayDate,
+          pyro_last_decay_date: newDecayDate,
           daily_trophy_loss: dailyLossUsed + loss,
           daily_trophy_loss_date: today,
         })
@@ -201,8 +160,7 @@ Deno.serve(async (req) => {
 
   try {
     let result: any;
-    if (mode === "pyro-hunger") result = await pyroHunger();
-    else if (mode === "trophy-decay") result = await trophyDecay();
+    if (mode === "trophy-decay") result = await trophyDecay();
     else result = await missionReminders();
     return new Response(JSON.stringify({ mode, ...result }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e: any) {

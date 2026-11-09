@@ -41,7 +41,7 @@ export default function IOSInstallBanner() {
           <p className="text-xs leading-relaxed text-foreground">
             <span className="font-pixel text-xs text-primary">Instala XPFly</span>
             <br />
-            toca compartir y selecciona <strong>'Añadir a pantalla de inicio'</strong> 🔥
+            toca compartir y selecciona <strong>'Añadir a pantalla de inicio'</strong>.
           </p>
         </div>
         <div className="mt-2 flex justify-end">

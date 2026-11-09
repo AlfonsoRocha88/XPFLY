@@ -3,10 +3,8 @@ import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import type { Profile } from "@/lib/types";
-import { PlayerStats, CLASSES, CLASS_TIER_NAMES, type ClassId } from "@/lib/avatar-presets";
 import { getTitle } from "@/lib/titles";
 import { toast } from "sonner";
-import { pyroSay } from "./usePyro";
 import { getCurrentLeague, leagueLabel } from "@/lib/leagues";
 
 const XP_REWARDS = {
@@ -85,15 +83,15 @@ export const useProfile = () => {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       if (data?.action === "freeze_used") {
-        toast.info(`🧊 Congelador usado (${data.gap}). Tu racha sigue: ${data.previousStreak} días`, {
-          description: `Te quedan ${data.remainingFreezes} congelador${data.remainingFreezes === 1 ? "" : "es"}.`,
+        toast.info(`Se usó un protector de racha. Tu racha sigue en ${data.previousStreak} días`, {
+          description: `Te quedan ${data.remainingFreezes} protector${data.remainingFreezes === 1 ? "" : "es"}.`,
         });
         try {
           const today = new Date().toISOString().slice(0, 10);
-          localStorage.setItem("pyroFreezeUsedDate", today);
+          localStorage.setItem("streakFreezeUsedDate", today);
           // Append to historical freeze-use log (covers the missed day = yesterday).
           // We log each consumed freeze day going back `gap` days from today (exclusive).
-          const log: string[] = JSON.parse(localStorage.getItem("pyroFreezeUsedDates") || "[]");
+          const log: string[] = JSON.parse(localStorage.getItem("streakFreezeUsedDates") || "[]");
           const gap = Number(data.gap || 1);
           const set = new Set(log);
           for (let i = 1; i <= gap; i++) {
@@ -101,11 +99,11 @@ export const useProfile = () => {
             d.setDate(d.getDate() - i);
             set.add(d.toISOString().slice(0, 10));
           }
-          localStorage.setItem("pyroFreezeUsedDates", JSON.stringify(Array.from(set)));
+          localStorage.setItem("streakFreezeUsedDates", JSON.stringify(Array.from(set)));
         } catch {}
       } else if (data?.action === "reset" && data?.previousStreak) {
         toast.error(`💔 Perdiste tu racha de ${data.previousStreak} días`, {
-          description: "No tenías suficientes congeladores.",
+          description: "No tenías suficientes protectores.",
         });
       }
       return data?.profile ?? null;
@@ -134,10 +132,10 @@ export const useProfile = () => {
     mutationFn: async () => {
       const { data, error } = await supabase.functions.invoke("buy-streak-freeze", { body: {} });
       if (error) throw error;
-      if (data?.error === "max_reached") throw new Error(`Máximo ${data.max} congeladores`);
+      if (data?.error === "max_reached") throw new Error(`Máximo ${data.max} protectores`);
       if (data?.error === "insufficient_xp") throw new Error(`Necesitas ${data.cost} XP`);
       if (data?.error) throw new Error(data.error);
-      toast.success(`🧊 Congelador comprado (-${data.cost} XP)`);
+      toast.success(`Protector de racha comprado (−${data.cost} XP)`);
       return data.profile;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["profile"] }),
@@ -162,24 +160,6 @@ export const useProfile = () => {
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["profile"] }),
   });
 
-  const allocateStat = useMutation({
-    mutationFn: async (stat: keyof PlayerStats) => {
-      const { data, error } = await supabase.functions.invoke("allocate-stat", { body: { stat } });
-      if (error) throw error;
-      if (data?.error === "no_points") throw new Error("No tienes puntos disponibles");
-      if (data?.error) throw new Error(data.error);
-      if (data?.levelUpClass && data?.classId) {
-        const cls = CLASSES[data.classId as ClassId];
-        const label = data.tier > 0 ? `${CLASS_TIER_NAMES[data.tier as 1 | 2 | 3]} ${cls?.name ?? ""}`.trim() : cls?.name ?? "";
-        toast.success(`⚔ ${label} desbloqueado`, {
-          description: data.outfitEquipped ? "Nuevo atuendo equipado" : "Has avanzado de tier",
-        });
-      }
-      return data.profile;
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["profile"] }),
-  });
-
   const addXp = useMutation({
     mutationFn: async ({ taskId, priority, partyBonus = false }: { taskId: string; priority?: keyof typeof XP_REWARDS; partyBonus?: boolean }) => {
       const previous = queryClient.getQueryData<Profile>(["profile"]);
@@ -198,29 +178,28 @@ export const useProfile = () => {
       newlyUnlocked.forEach((id: string) => {
         const t = getTitle(id);
         if (t) {
-          toast.success(`🏅 Nuevo título: ${t.name}`, { description: t.description });
-          pyroSay(`¡Nuevo título: ${t.name}! ${t.icon ?? "🏅"}`, "happy");
+          toast.success(`Nuevo título: ${t.name}`, { description: t.description });
+          toast.success(`Nuevo título: ${t.name}`);
         }
       });
 
       const prevLeague = getCurrentLeague(prevTrophies);
       const newLeague = getCurrentLeague(newTrophies);
       if (newLeague.id !== prevLeague.id) {
-        toast.success(`🛡️ ¡Ascenso de liga! ${leagueLabel(newLeague)}`, {
-          description: "Sigue completando misiones para subir más.",
+        toast.success(`Subiste a la liga ${leagueLabel(newLeague)}`, {
+          description: "Sigue completando tareas para subir más.",
         });
-        pyroSay(`¡Ascendiste a ${leagueLabel(newLeague)}! ${newLeague.emblem}`, "happy");
+        toast.success(`Subiste a la liga ${leagueLabel(newLeague)}`);
       }
 
       if (newLevel > oldLevel) {
-        pyroSay(`¡LEVEL UP! Ahora eres nivel ${newLevel} 🔥`, "happy");
+        
       }
 
       return {
         ...updated,
         xpGained: data.xpGained,
         leveledUp: data.leveledUp,
-        pointsGained: data.pointsGained,
         bonusTrophyAwarded: data.bonusTrophyAwarded,
         missionsCompletedTotal: data.missionsCompletedTotal,
       };
@@ -245,23 +224,23 @@ export const useProfile = () => {
       toast.success(`🎁 +1 Cofre de recompensa`, {
         description: "Ábrelo en la Tienda para reclamar tu botín.",
       });
-      toast.success(`🛡️ +5 trofeos por completar todas las misiones diarias`);
+      toast.success(`+5 trofeos por completar todas las tareas diarias`);
 
       const prevLeagueD = getCurrentLeague(prevTrophies);
       const newLeagueD = getCurrentLeague(newTrophies);
       if (newLeagueD.id !== prevLeagueD.id) {
-        toast.success(`🛡️ ¡Ascenso de liga! ${leagueLabel(newLeagueD)}`);
+        toast.success(`Subiste a la liga ${leagueLabel(newLeagueD)}`);
       }
 
       if (data.earnedFreeze) {
-        toast.success(`🧊 +1 Congelador de racha (${updated.streak_freezes}/${updated.streak_freeze_max})`, {
+        toast.success(`+1 protector de racha (${updated.streak_freezes} de ${updated.streak_freeze_max})`, {
           description: "Te protege si te saltas un día.",
         });
       }
 
       (data.newlyUnlockedTitles ?? []).forEach((id: string) => {
         const t = getTitle(id);
-        if (t) toast.success(`🏅 Nuevo título: ${t.name}`, { description: t.description });
+        if (t) toast.success(`Nuevo título: ${t.name}`, { description: t.description });
       });
 
       return {
@@ -269,7 +248,6 @@ export const useProfile = () => {
         xpGained: data.xpGained,
         leveledUp: data.leveledUp,
         streak: data.streak,
-        pointsGained: data.pointsGained,
       };
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["profile"] }),
@@ -289,7 +267,6 @@ export const useProfile = () => {
     profile: profileQuery.data,
     isLoading: profileQuery.isLoading,
     updateProfile,
-    allocateStat,
     addXp,
     claimDailyBonus,
     equipTitle,

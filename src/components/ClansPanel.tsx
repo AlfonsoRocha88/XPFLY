@@ -67,7 +67,7 @@ const MemberRow = ({ member, rank, onSelect }: { member: ClanMember; rank: numbe
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="truncate text-sm font-semibold text-foreground">{p?.display_name || p?.username || "Jugador"}</span>
+          <span className="truncate text-sm font-semibold text-foreground">{p?.display_name || p?.username || "Usuario"}</span>
           <span className="rounded-md bg-primary/15 px-1.5 py-0.5 text-xs font-medium text-primary ring-1 ring-primary/30">Nv {p?.level ?? 1}</span>
         </div>
         <RoleBadge role={member.role} className="mt-1" />
@@ -115,7 +115,7 @@ const MemberSheet = ({
             <AvatarFallback>{(p?.display_name ?? p?.username ?? "?").charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-base font-medium">{p?.display_name || p?.username || "Jugador"}{isMe && " (Tú)"}</p>
+            <p className="truncate text-base font-medium">{p?.display_name || p?.username || "Usuario"}{isMe && " (Tú)"}</p>
             <div className="mt-1 flex flex-wrap items-center gap-1.5">
               <RoleBadge role={member.role} />
               <span className="rounded-md bg-primary/15 px-1.5 py-0.5 text-xs font-medium text-primary ring-1 ring-primary/30">Nv {p?.level ?? 1}</span>
@@ -186,7 +186,7 @@ const CreateWizard = ({ onCreated, onCancel }: { onCreated: () => void; onCancel
   const submit = async () => {
     try {
       await createClan.mutateAsync({ name, description, join_type: joinType, emblem });
-      toast.success("¡Clan creado!");
+      toast.success("Clan creado");
       onCreated();
     } catch (e: any) {
       toast.error(e?.message ?? "Error al crear");
@@ -208,7 +208,7 @@ const CreateWizard = ({ onCreated, onCancel }: { onCreated: () => void; onCancel
       {step === 1 && (
         <div className="space-y-3">
           <label className="text-xs font-semibold tracking-wide text-muted-foreground">Nombre del clan</label>
-          <Input value={name} onChange={(e) => setName(e.target.value.slice(0, 20))} placeholder="Cazadores de Sombras" maxLength={20} className="text-base" />
+          <Input value={name} onChange={(e) => setName(e.target.value.slice(0, 20))} placeholder="Equipo Enfoque" maxLength={20} className="text-base" />
           <div className="text-xs">
             {name.trim().length < 3 ? <span className="text-muted-foreground">Mínimo 3 caracteres</span>
               : checking ? <span className="text-muted-foreground">Comprobando…</span>
@@ -339,7 +339,7 @@ const ClanBrowser = ({ onCreate }: { onCreate: () => void }) => {
   const join = async (c: Clan) => {
     try {
       const res = await requestToJoin.mutateAsync(c.id);
-      toast.success(res === "joined" ? `¡Te uniste a ${c.name}!` : "Solicitud enviada");
+      toast.success(res === "joined" ? `Te uniste a ${c.name}` : "Solicitud enviada");
     } catch (e: any) { toast.error(e?.message ?? "Error"); }
   };
 
@@ -355,7 +355,7 @@ const ClanBrowser = ({ onCreate }: { onCreate: () => void }) => {
       <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-1">
         {isLoading && <p className="py-6 text-center text-sm text-muted-foreground">Cargando…</p>}
         {!isLoading && (clans ?? []).length === 0 && (
-          <p className="py-10 text-center text-sm text-muted-foreground">Sin resultados. ¡Sé el primero en crear un clan!</p>
+          <p className="py-10 text-center text-sm text-muted-foreground">Sin resultados. Puedes crear el primero.</p>
         )}
         {(clans ?? []).map((c) => (
           <div key={c.id} className="flex items-center gap-3 rounded-xl border border-border bg-card/70 p-3">
@@ -485,7 +485,7 @@ const ClanScreen = ({ clan, viewerRole }: { clan: Clan; viewerRole: ClanRole | n
                 {incoming.map((r) => (
                   <div key={r.id} className="flex items-center gap-2 rounded-lg bg-card/60 px-2 py-1.5">
                     <Avatar className="h-7 w-7"><AvatarImage src={avatarSrc(r.profile?.avatar_url, r.user_id)} /><AvatarFallback>{(r.profile?.display_name ?? "?").charAt(0)}</AvatarFallback></Avatar>
-                    <span className="flex-1 truncate text-sm">{r.profile?.display_name || r.profile?.username || "Jugador"} <span className="text-xs text-muted-foreground">Nv.{r.profile?.level ?? 1}</span></span>
+                    <span className="flex-1 truncate text-sm">{r.profile?.display_name || r.profile?.username || "Usuario"} <span className="text-xs text-muted-foreground">Nv.{r.profile?.level ?? 1}</span></span>
                     <Button size="icon" variant="ghost" className="h-7 w-7 text-emerald-400" onClick={() => respondJoinRequest.mutate({ requestId: r.id, accept: true })}><Check className="h-4 w-4" /></Button>
                     <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => respondJoinRequest.mutate({ requestId: r.id, accept: false })}><X className="h-4 w-4" /></Button>
                   </div>
@@ -523,7 +523,7 @@ const ClanScreen = ({ clan, viewerRole }: { clan: Clan; viewerRole: ClanRole | n
               <option value="">Elegir nuevo líder…</option>
               {otherMembers.map((m) => (
                 <option key={m.user_id} value={m.user_id}>
-                  {m.profile?.display_name || m.profile?.username || "Jugador"} — {CLAN_ROLE_LABEL[m.role]}
+                  {m.profile?.display_name || m.profile?.username || "Usuario"} — {CLAN_ROLE_LABEL[m.role]}
                 </option>
               ))}
             </select>

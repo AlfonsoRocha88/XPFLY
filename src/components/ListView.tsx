@@ -65,7 +65,7 @@ const ListView = ({ tasks, subtasks, projects, onToggleComplete, onEdit, onDelet
     return (
       <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-card/70 px-6 py-10 text-center" role="status">
         <Sparkles className="h-6 w-6 text-primary" />
-        <p className="text-sm font-medium text-muted-foreground">{emptyMessage ?? "No hay misiones. ¡Crea una nueva!"}</p>
+        <p className="text-sm font-medium text-muted-foreground">{emptyMessage ?? "No tienes tareas pendientes."}</p>
       </div>
     );
   }
@@ -73,7 +73,7 @@ const ListView = ({ tasks, subtasks, projects, onToggleComplete, onEdit, onDelet
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-        <div className="space-y-2.5" role="list" aria-label={`Lista de misiones, ${tasks.length} en total`}>
+        <div className="space-y-2.5" role="list" aria-label={`Lista de tareas, ${tasks.length} en total`}>
           {tasks.map((task) => (
             <SortableTask
               key={task.id}

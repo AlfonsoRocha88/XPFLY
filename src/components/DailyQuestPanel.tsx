@@ -47,9 +47,9 @@ const DailyQuestPanel = ({
             <Sun className="h-5 w-5" />
           </div>
           <div>
-            <h2 id="daily-quest-title" className="font-serif text-lg font-medium leading-tight">Misiones diarias</h2>
+            <h2 id="daily-quest-title" className="font-serif text-lg font-medium leading-tight">Tareas diarias</h2>
             <p className="text-xs font-semibold text-muted-foreground">
-              {completedCount === totalCount ? "¡Todas completadas! 🎉" : `${completedCount} de ${totalCount} completadas`}
+              {completedCount === totalCount ? "Todas completadas" : `${completedCount} de ${totalCount} completadas`}
             </p>
           </div>
         </div>
@@ -98,7 +98,7 @@ const DailyQuestPanel = ({
                 type="button"
                 className="rounded-full p-1.5 text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/daily:opacity-100"
                 onClick={(e) => { e.stopPropagation(); playSfx("delete"); onDeleteTask(task.id); }}
-                aria-label={`Eliminar misión diaria ${task.title}`}
+                aria-label={`Eliminar tarea diaria ${task.title}`}
               >
                 <Trash2 className="h-4 w-4" />
               </button>

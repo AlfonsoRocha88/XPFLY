@@ -150,7 +150,7 @@ export const useFriends = () => {
       const senderName =
         (user.user_metadata as any)?.display_name ||
         (user.user_metadata as any)?.username ||
-        "Un jugador";
+        "Alguien";
       await supabase
         .from("notifications")
         .insert({

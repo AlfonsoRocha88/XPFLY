@@ -351,180 +351,9 @@ html, body {
   pointer-events: none;
 }
 
-/* =====================================================
-   Pyro — the blue fire companion
-   ===================================================== */
-.pyro-sprite {
-  position: relative;
-  display: inline-block;
-  filter: drop-shadow(0 4px 6px hsl(var(--shadow-color) / 0.15));
-  cursor: pointer;
-}
-
-.pyro-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  user-select: none;
-  -webkit-user-drag: none;
-  pointer-events: none;
-  transition: transform 0.3s ease-out;
-}
-
-.pyro-glow {
-  position: absolute;
-  inset: 10%;
-  border-radius: 50%;
-  background: radial-gradient(circle, hsl(205 100% 60% / 0.35) 0%, transparent 70%);
-  filter: blur(8px);
-  animation: pyro-glow-pulse 2.4s ease-in-out infinite;
-  pointer-events: none;
-  z-index: 0;
-}
-
-@keyframes pyro-glow-pulse {
-  0%, 100% { opacity: 0.55; transform: scale(1); }
-  50% { opacity: 0.9; transform: scale(1.08); }
-}
-
-@keyframes pyro-wiggle {
+@keyframes wiggle {
   0%, 100% { transform: rotate(-4deg); }
   50% { transform: rotate(4deg); }
-}
-
-@keyframes pyro-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
-}
-
-@keyframes pyro-bounce {
-  0% { transform: translateY(0) scale(1); }
-  35% { transform: translateY(-12px) scale(1.1); }
-  70% { transform: translateY(2px) scale(0.95); }
-  100% { transform: translateY(0) scale(1); }
-}
-
-@keyframes pyro-eating {
-  0%   { transform: scale(1); }
-  20%  { transform: scale(1.2) translateY(-2px); }
-  45%  { transform: scale(1.18) translateY(0); }
-  60%  { transform: scale(1.25); }
-  80%  { transform: scale(1.05); }
-  100% { transform: scale(1); }
-}
-
-.pyro-mood-eating .pyro-glow {
-  background: radial-gradient(circle, hsl(35 95% 60% / 0.6) 0%, transparent 70%);
-  animation: pyro-glow-pulse 0.4s ease-in-out infinite;
-}
-
-.pyro-mouth {
-  position: absolute;
-  left: 50%;
-  top: 58%;
-  width: 28%;
-  height: 18%;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(ellipse at center, hsl(0 0% 4%) 0%, hsl(0 0% 4%) 55%, transparent 80%);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 2;
-  animation: pyro-mouth-open 1.2s ease-in-out;
-}
-@keyframes pyro-mouth-open {
-  0%, 100% { transform: translate(-50%, -50%) scaleY(0.1); opacity: 0; }
-  20%, 70% { transform: translate(-50%, -50%) scaleY(1); opacity: 1; }
-  85%      { transform: translate(-50%, -50%) scaleY(0.3); opacity: 0.6; }
-}
-
-.pyro-flame-burst {
-  position: absolute;
-  inset: -20%;
-  border-radius: 50%;
-  background: radial-gradient(circle, hsl(35 100% 65% / 0.9) 0%, hsl(15 100% 55% / 0.5) 35%, transparent 70%);
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0;
-  animation: pyro-flame-burst 0.6s ease-out 0.7s;
-}
-.pyro-flame-burst--celebrate { animation: pyro-flame-burst 0.5s ease-out infinite; }
-@keyframes pyro-flame-burst {
-  0%   { opacity: 0; transform: scale(0.6); }
-  40%  { opacity: 1; transform: scale(1.2); }
-  100% { opacity: 0; transform: scale(1.5); }
-}
-
-@keyframes pyro-tremble {
-  0%, 100% { transform: scale(0.7) translate(0, 0); }
-  20%      { transform: scale(0.7) translate(-1px, 0); }
-  40%      { transform: scale(0.7) translate(1px, -1px); }
-  60%      { transform: scale(0.7) translate(-1px, 1px); }
-  80%      { transform: scale(0.7) translate(1px, 0); }
-}
-.pyro-mood-dying { filter: grayscale(0.7) opacity(0.6); }
-.pyro-mood-dying .pyro-glow { opacity: 0.05 !important; animation: none; }
-
-@keyframes pyro-revival {
-  0%   { transform: scale(0.7); filter: brightness(0.4) saturate(0.5); }
-  25%  { transform: scale(1.4); filter: brightness(1.6) saturate(1.4); }
-  60%  { transform: scale(0.95); filter: brightness(1.2) saturate(1.2); }
-  100% { transform: scale(1); filter: brightness(1) saturate(1); }
-}
-.pyro-mood-revival .pyro-glow {
-  animation: pyro-glow-revival 1.8s ease-out;
-}
-@keyframes pyro-glow-revival {
-  0%   { opacity: 0; transform: scale(0.5); }
-  30%  { opacity: 1; transform: scale(1.6); }
-  100% { opacity: 0.85; transform: scale(1); }
-}
-.pyro-revival-flash {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 1px;
-  height: 1px;
-  pointer-events: none;
-  z-index: 0;
-  background: radial-gradient(circle, hsl(35 100% 70% / 0.9) 0%, hsl(var(--primary) / 0.3) 30%, transparent 70%);
-  border-radius: 50%;
-  animation: pyro-revival-flash 1.8s ease-out forwards;
-}
-@keyframes pyro-revival-flash {
-  0%   { width: 1px; height: 1px; opacity: 1; }
-  60%  { width: 200vmax; height: 200vmax; opacity: 0.9; }
-  100% { width: 220vmax; height: 220vmax; opacity: 0; }
-}
-
-@keyframes pyro-celebrate {
-  0%   { transform: translateY(0) rotate(0deg) scale(1); }
-  15%  { transform: translateY(-14px) rotate(-15deg) scale(1.1); }
-  30%  { transform: translateY(0) rotate(15deg) scale(1.05); }
-  45%  { transform: translateY(-12px) rotate(-15deg) scale(1.1); }
-  60%  { transform: translateY(0) rotate(15deg) scale(1.05); }
-  80%  { transform: translateY(-6px) rotate(0deg) scale(1.02); }
-  100% { transform: translateY(0) rotate(0deg) scale(1); }
-}
-.pyro-mood-celebrating .pyro-glow {
-  animation: pyro-glow-celebrate 0.4s ease-in-out 3;
-}
-@keyframes pyro-glow-celebrate {
-  0%   { background: radial-gradient(circle, hsl(35 100% 60% / 0.8) 0%, transparent 70%); }
-  50%  { background: radial-gradient(circle, hsl(55 100% 65% / 0.9) 0%, transparent 70%); transform: scale(1.2); }
-  100% { background: radial-gradient(circle, hsl(35 100% 60% / 0.8) 0%, transparent 70%); }
-}
-
-@keyframes pyro-sleep {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-3px); }
-}
-.pyro-mood-sleeping { filter: saturate(0.7) opacity(0.85); }
-.pyro-mood-sleeping .pyro-glow { opacity: 0.3; animation: pyro-glow-pulse 6s ease-in-out infinite; }
-
-@keyframes pyro-ghost-fly {
-  0%   { transform: translate(0, 0) scale(1); opacity: 1; }
-  60%  { opacity: 0.9; }
-  100% { transform: translate(var(--ghost-dx, 0), var(--ghost-dy, 0)) scale(0); opacity: 0; }
 }
 
 /* =====================================================
@@ -591,17 +420,17 @@ html, body {
 /* =====================================================
    Trophy bonus toast
    ===================================================== */
-@keyframes pyro-trophy-pop {
+@keyframes trophy-pop {
   0%   { transform: scale(0.7); opacity: 0; }
   40%  { transform: scale(1.1); opacity: 1; }
   100% { transform: scale(1); opacity: 1; }
 }
-.pyro-trophy-toast {
+.trophy-toast {
   background: hsl(var(--xp) / 0.15) !important;
   border: 1px solid hsl(var(--xp) / 0.4) !important;
   color: hsl(var(--foreground)) !important;
   font-weight: 600 !important;
-  animation: pyro-trophy-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation: trophy-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {

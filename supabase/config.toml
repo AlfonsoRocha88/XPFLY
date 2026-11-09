@@ -1,13 +1,9 @@
 project_id = "krjtzumgvoxxrnbpncqw"
 
-[functions.pyro-chat]
-verify_jwt = false
 
 [functions.resolve-username]
 verify_jwt = false
 
-[functions.pyro-decay]
-verify_jwt = false
 
 [functions.award-xp]
 verify_jwt = false
@@ -18,8 +14,6 @@ verify_jwt = false
 [functions.open-chest]
 verify_jwt = false
 
-[functions.allocate-stat]
-verify_jwt = false
 
 [functions.buy-streak-freeze]
 verify_jwt = false

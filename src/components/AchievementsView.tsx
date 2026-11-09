@@ -14,9 +14,8 @@ import {
   format,
 } from "date-fns";
 import { es } from "date-fns/locale";
-import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, Minus } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, Flame, Minus, Snowflake } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
-import PyroSprite from "@/components/PyroSprite";
 import { cn } from "@/lib/utils";
 import type { Task } from "@/lib/types";
 
@@ -59,7 +58,7 @@ const AchievementsView = ({ tasks, view: tab }: Props) => {
   // completed the daily yet today.
   const frozen = useMemo(() => {
     try {
-      const flag = localStorage.getItem("pyroFreezeUsedDate");
+      const flag = localStorage.getItem("streakFreezeUsedDate");
       if (!flag) return false;
       const today = new Date().toISOString().slice(0, 10);
       if (flag !== today) return false;
@@ -125,10 +124,10 @@ const AchievementsView = ({ tasks, view: tab }: Props) => {
         </AchievementsErrorBoundary>
       ) : (
         <>
-          {/* Streak + Pyro */}
+          {/* Current streak */}
           <div className="surface flex items-center justify-center gap-6 py-5">
             <div className="flex flex-col items-start">
-              <span className="eyebrow">Racha actual</span>
+              <span className="eyebrow">{frozen ? "Racha protegida hoy" : "Racha actual"}</span>
               <span className="font-serif text-6xl font-medium leading-none text-foreground tabular-nums">
                 {streak}
               </span>
@@ -136,9 +135,13 @@ const AchievementsView = ({ tasks, view: tab }: Props) => {
                 {streak === 1 ? "día" : "días"}
               </span>
             </div>
-            <div className={cn("relative", frozen && "pyro-frozen-wrap")}>
-              <PyroSprite size={96} mood={frozen ? "sleeping" : "idle"} />
-              {frozen && <FrozenIce />}
+            <div
+              className={cn(
+                "flex h-20 w-20 items-center justify-center rounded-full",
+                frozen ? "bg-[hsl(205_80%_55%/0.12)] text-[hsl(205_70%_45%)]" : "bg-warning/10 text-warning",
+              )}
+            >
+              {frozen ? <Snowflake className="h-9 w-9" strokeWidth={1.75} /> : <Flame className="h-9 w-9" strokeWidth={1.75} />}
             </div>
           </div>
 
@@ -164,7 +167,7 @@ const AchievementsView = ({ tasks, view: tab }: Props) => {
               </span>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              Misiones/día · últimos 7 días vs. 7 anteriores
+              Tareas/día · últimos 7 días vs. 7 anteriores
             </p>
           </div>
 
@@ -204,7 +207,7 @@ const AchievementsView = ({ tasks, view: tab }: Props) => {
                             background: color,
                             opacity: d.count === 0 ? 0.35 : 1,
                           }}
-                          title={`${d.count} misiones`}
+                          title={`${d.count} tareas`}
                         />
                       </div>
                       <span className="text-xs text-muted-foreground">
@@ -224,29 +227,6 @@ const AchievementsView = ({ tasks, view: tab }: Props) => {
     </div>
   );
 };
-
-// Spiky ice block around Pyro using SVG.
-const FrozenIce = () => (
-  <svg
-    viewBox="0 0 120 120"
-    className="pointer-events-none absolute inset-0 h-full w-full"
-    aria-hidden="true"
-  >
-    <defs>
-      <linearGradient id="ice-grad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#bae6fd" stopOpacity="0.85" />
-        <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.7" />
-      </linearGradient>
-    </defs>
-    <polygon
-      points="60,4 78,18 96,12 92,34 112,42 96,58 116,72 92,80 100,104 76,96 60,116 44,96 20,104 28,80 4,72 24,58 8,42 28,34 24,12 42,18"
-      fill="url(#ice-grad)"
-      stroke="#e0f2fe"
-      strokeWidth="2"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 export default AchievementsView;
 
@@ -392,15 +372,6 @@ const Icon = {
     </svg>
   ),
   // Flame with two small hearts floating above.
-  PyroFriend: ({ className }: { className?: string }) => (
-    <svg {...svgProps} className={className}>
-      <path d="M32 22 C 37 30 44 35 44 44 C 44 51 39 56 32 56 C 25 56 20 51 20 44 C 20 39 23 37 26 34 C 27 37 28 39 30 39 C 30 34 28 30 32 22 Z" />
-      {/* Left heart */}
-      <path d="M19 12 c-2 -2 -5 -1 -5 2 c0 3 5 6 5 6 c0 0 5 -3 5 -6 c0 -3 -3 -4 -5 -2 z" />
-      {/* Right heart */}
-      <path d="M45 6 c-1.5 -1.5 -4 -0.8 -4 1.5 c0 2.3 4 4.5 4 4.5 c0 0 4 -2.2 4 -4.5 c0 -2.3 -2.5 -3 -4 -1.5 z" />
-    </svg>
-  ),
   // Trophy cup with arrow above the opening.
   Ascenso: ({ className }: { className?: string }) => (
     <svg {...svgProps} className={className}>
@@ -605,16 +576,6 @@ const Icon = {
     </svg>
   ),
   // Flame rising from scattered ash dots.
-  Resucitador: ({ className }: { className?: string }) => (
-    <svg {...svgProps} className={className}>
-      <path d="M32 14 c6 8 12 14 12 24 c0 8 -6 14 -12 14 s-12 -6 -12 -14 c0 -10 6 -16 12 -24 z" />
-      <circle cx="20" cy="52" r="1.5" />
-      <circle cx="26" cy="56" r="1.5" />
-      <circle cx="38" cy="55" r="1.5" />
-      <circle cx="44" cy="51" r="1.5" />
-      <circle cx="32" cy="58" r="1.5" />
-    </svg>
-  ),
   // Stylised lotus flower with symmetrical petals.
   Monje: ({ className }: { className?: string }) => (
     <svg {...svgProps} className={className}>
@@ -748,12 +709,6 @@ const Icon = {
     </svg>
   ),
   // Flame outline with a small heart centered inside.
-  PyrosFavorite: ({ className }: { className?: string }) => (
-    <svg {...svgProps} className={className}>
-      <path d="M32 10 c6 8 12 14 12 24 c0 8 -6 14 -12 14 s-12 -6 -12 -14 c0 -10 6 -16 12 -24 z" />
-      <path d="M32 30 c-3 -3 -7 -2 -7 2 c0 3 7 7 7 7 c0 0 7 -4 7 -7 c0 -4 -4 -5 -7 -2 z" />
-    </svg>
-  ),
   // Sunrise with a small clock face showing 5 AM.
   ElTempraneroExtremo: ({ className }: { className?: string }) => (
     <svg {...svgProps} className={className}>
@@ -783,9 +738,9 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 18,
     thresholds: [10, 50, 200],
     descriptions: [
-      "Completa 10 misiones antes de las 9 AM",
-      "Completa 50 misiones antes de las 9 AM",
-      "Completa 200 misiones antes de las 9 AM",
+      "Completa 10 tareas antes de las 9 AM",
+      "Completa 50 tareas antes de las 9 AM",
+      "Completa 200 tareas antes de las 9 AM",
     ],
     perks: ["+×0.05 XP matutino", "+×0.10 XP matutino", "+×0.20 XP matutino"],
   },
@@ -797,9 +752,9 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 4,
     thresholds: [10, 50, 200],
     descriptions: [
-      "Completa 10 misiones después de las 10 PM",
-      "Completa 50 misiones después de las 10 PM",
-      "Completa 200 misiones después de las 10 PM",
+      "Completa 10 tareas después de las 10 PM",
+      "Completa 50 tareas después de las 10 PM",
+      "Completa 200 tareas después de las 10 PM",
     ],
     perks: ["+×0.05 XP nocturno", "+×0.10 XP nocturno", "+×0.20 XP nocturno"],
   },
@@ -811,7 +766,7 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 42,
     thresholds: [7, 30, 100],
     descriptions: ["Racha de 7 días", "Racha de 30 días", "Racha de 100 días"],
-    perks: ["+×0.1 XP por misión", "+×0.2 XP por misión", "+×0.3 XP por misión"],
+    perks: ["+×0.1 XP por tarea", "+×0.2 XP por tarea", "+×0.3 XP por tarea"],
   },
   {
     id: "centurion",
@@ -820,7 +775,7 @@ const ACHIEVEMENTS: Achievement[] = [
     level: 3,
     progress: 312,
     thresholds: [10, 50, 100],
-    descriptions: ["Completa 10 misiones", "Completa 50 misiones", "Completa 100 misiones"],
+    descriptions: ["Completa 10 tareas", "Completa 50 tareas", "Completa 100 tareas"],
     perks: ["+10 XP bonus", "+50 XP bonus", "+150 XP bonus"],
   },
   {
@@ -831,7 +786,7 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 3,
     thresholds: [1, 7, 30],
     descriptions: [
-      "Completa todas tus misiones en 1 día",
+      "Completa todas tus tareas en 1 día",
       "7 días perfectos",
       "30 días perfectos",
     ],
@@ -845,9 +800,9 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 2,
     thresholds: [5, 25, 100],
     descriptions: [
-      "Completa 5 misiones de ejercicio",
-      "Completa 25 misiones de ejercicio",
-      "Completa 100 misiones de ejercicio",
+      "Completa 5 tareas de ejercicio",
+      "Completa 25 tareas de ejercicio",
+      "Completa 100 tareas de ejercicio",
     ],
     perks: ["+×0.05 XP físico", "+×0.10 XP físico", "+×0.20 XP físico"],
   },
@@ -859,25 +814,11 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 31,
     thresholds: [5, 25, 100],
     descriptions: [
-      "Completa 5 misiones de estudio",
-      "Completa 25 misiones de estudio",
-      "Completa 100 misiones de estudio",
+      "Completa 5 tareas de estudio",
+      "Completa 25 tareas de estudio",
+      "Completa 100 tareas de estudio",
     ],
     perks: ["+×0.05 XP mental", "+×0.10 XP mental", "+×0.20 XP mental"],
-  },
-  {
-    id: "pyro-friend",
-    name: "Mejor Amigo de Pyro",
-    icon: Icon.PyroFriend,
-    level: 1,
-    progress: 12,
-    thresholds: [10, 50, 200],
-    descriptions: [
-      "Alimenta a Pyro 10 veces",
-      "Alimenta a Pyro 50 veces",
-      "Alimenta a Pyro 200 veces",
-    ],
-    perks: ["+1 hambre máx.", "+2 hambre máx.", "Pyro nunca tiene hambre"],
   },
   {
     id: "ascenso",
@@ -911,9 +852,9 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     thresholds: [1, 3, 5],
     descriptions: [
-      "Completa 1 misión entre las 2–4 AM",
-      "Completa 3 misiones entre las 2–4 AM",
-      "Completa 5 misiones entre las 2–4 AM",
+      "Completa 1 tarea entre las 2–4 AM",
+      "Completa 3 tareas entre las 2–4 AM",
+      "Completa 5 tareas entre las 2–4 AM",
     ],
     perks: ["+×0.05 XP nocturno", "+×0.10 XP nocturno", "+×0.20 XP nocturno"],
   },
@@ -925,9 +866,9 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     thresholds: [10, 50, 100],
     descriptions: [
-      "Completa 10 misiones entre las 12–2 PM",
-      "Completa 50 misiones entre las 12–2 PM",
-      "Completa 100 misiones entre las 12–2 PM",
+      "Completa 10 tareas entre las 12–2 PM",
+      "Completa 50 tareas entre las 12–2 PM",
+      "Completa 100 tareas entre las 12–2 PM",
     ],
     perks: ["+×0.05 XP diurno", "+×0.10 XP diurno", "+×0.20 XP diurno"],
   },
@@ -939,9 +880,9 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     thresholds: [1, 3, 5],
     descriptions: [
-      "Completa misiones a la misma hora 7 días",
-      "Completa misiones a la misma hora 14 días",
-      "Completa misiones a la misma hora 30 días",
+      "Completa tareas a la misma hora 7 días",
+      "Completa tareas a la misma hora 14 días",
+      "Completa tareas a la misma hora 30 días",
     ],
     perks: ["+×0.05 XP regularidad", "+×0.10 XP regularidad", "+×0.20 XP regularidad"],
   },
@@ -953,9 +894,9 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     thresholds: [5, 20, 50],
     descriptions: [
-      "Completa 5 misiones urgentes el mismo día",
-      "Completa 20 misiones urgentes el mismo día",
-      "Completa 50 misiones urgentes el mismo día",
+      "Completa 5 tareas urgentes el mismo día",
+      "Completa 20 tareas urgentes el mismo día",
+      "Completa 50 tareas urgentes el mismo día",
     ],
     perks: ["+5 XP urgente", "+10 XP urgente", "+20 XP urgente"],
   },
@@ -967,9 +908,9 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     thresholds: [1, 10, 25],
     descriptions: [
-      "Completa 3 misiones en menos de 1 hora",
-      "Completa 10 ráfagas de 3 misiones en 1 hora",
-      "Completa 25 ráfagas de 3 misiones en 1 hora",
+      "Completa 3 tareas en menos de 1 hora",
+      "Completa 10 ráfagas de 3 tareas en 1 hora",
+      "Completa 25 ráfagas de 3 tareas en 1 hora",
     ],
     perks: ["+×0.05 XP velocidad", "+×0.10 XP velocidad", "+×0.20 XP velocidad"],
   },
@@ -1002,18 +943,18 @@ const ACHIEVEMENTS: Achievement[] = [
     perks: ["+10 XP recuperación", "+20 XP recuperación", "+50 XP recuperación"],
   },
   {
-    id: "congelador-pro",
-    name: "Congelador Pro",
+    id: "protector-pro",
+    name: "Previsor",
     icon: Icon.CongeladorPro,
     level: 0,
     progress: 0,
     thresholds: [1, 5, 10],
     descriptions: [
-      "Usa 1 congelador de racha",
-      "Usa 5 congeladores de racha",
-      "Usa 10 congeladores de racha",
+      "Usa 1 protector de racha",
+      "Usa 5 protectores de racha",
+      "Usa 10 protectores de racha",
     ],
-    perks: ["+1 congelador extra", "+2 congeladores extra", "+5 congeladores extra"],
+    perks: ["+1 protector extra", "+2 protectores extra", "+5 protectores extra"],
   },
   {
     id: "semana-perfecta",
@@ -1023,7 +964,7 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     thresholds: [1, 4, 12],
     descriptions: [
-      "7 días seguidos sin usar congelador",
+      "7 días seguidos sin usar protector",
       "4 semanas perfectas",
       "12 semanas perfectas",
     ],
@@ -1051,9 +992,9 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     thresholds: [10, 50, 150],
     descriptions: [
-      "Completa 10 misiones urgentes",
-      "Completa 50 misiones urgentes",
-      "Completa 150 misiones urgentes",
+      "Completa 10 tareas urgentes",
+      "Completa 50 tareas urgentes",
+      "Completa 150 tareas urgentes",
     ],
     perks: ["+×0.05 XP urgente", "+×0.10 XP urgente", "+×0.20 XP urgente"],
   },
@@ -1065,9 +1006,9 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     thresholds: [10, 50, 150],
     descriptions: [
-      "Completa 10 misiones de alta prioridad",
-      "Completa 50 misiones de alta prioridad",
-      "Completa 150 misiones de alta prioridad",
+      "Completa 10 tareas de alta prioridad",
+      "Completa 50 tareas de alta prioridad",
+      "Completa 150 tareas de alta prioridad",
     ],
     perks: ["+×0.05 XP prioridad", "+×0.10 XP prioridad", "+×0.20 XP prioridad"],
   },
@@ -1191,25 +1132,11 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     thresholds: [3, 7, 14],
     descriptions: [
-      "3 días seguidos completando misiones",
-      "7 días seguidos completando misiones",
-      "14 días seguidos completando misiones",
+      "3 días seguidos completando tareas",
+      "7 días seguidos completando tareas",
+      "14 días seguidos completando tareas",
     ],
     perks: ["+×0.05 XP constancia", "+×0.10 XP constancia", "+×0.20 XP constancia"],
-  },
-  {
-    id: "resucitador",
-    name: "Resucitador",
-    icon: Icon.Resucitador,
-    level: 0,
-    progress: 0,
-    thresholds: [1, 5, 10],
-    descriptions: [
-      "Completa una misión con Pyro en agonía",
-      "5 veces salvando a Pyro",
-      "10 veces salvando a Pyro",
-    ],
-    perks: ["+10 XP rescate", "+20 XP rescate", "+50 XP rescate"],
   },
   {
     id: "monje",
@@ -1219,9 +1146,9 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     thresholds: [10, 50, 150],
     descriptions: [
-      "Completa 10 misiones de salud mental",
-      "Completa 50 misiones de salud mental",
-      "Completa 150 misiones de salud mental",
+      "Completa 10 tareas de salud mental",
+      "Completa 50 tareas de salud mental",
+      "Completa 150 tareas de salud mental",
     ],
     perks: ["+×0.05 XP mental", "+×0.10 XP mental", "+×0.20 XP mental"],
   },
@@ -1233,9 +1160,9 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     thresholds: [10, 50, 150],
     descriptions: [
-      "Completa 10 misiones de finanzas",
-      "Completa 50 misiones de finanzas",
-      "Completa 150 misiones de finanzas",
+      "Completa 10 tareas de finanzas",
+      "Completa 50 tareas de finanzas",
+      "Completa 150 tareas de finanzas",
     ],
     perks: ["+×0.05 XP finanzas", "+×0.10 XP finanzas", "+×0.20 XP finanzas"],
   },
@@ -1247,9 +1174,9 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     thresholds: [10, 50, 150],
     descriptions: [
-      "Completa 10 misiones de lectura",
-      "Completa 50 misiones de lectura",
-      "Completa 150 misiones de lectura",
+      "Completa 10 tareas de lectura",
+      "Completa 50 tareas de lectura",
+      "Completa 150 tareas de lectura",
     ],
     perks: ["+×0.05 XP lectura", "+×0.10 XP lectura", "+×0.20 XP lectura"],
   },
@@ -1261,9 +1188,9 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     thresholds: [10, 50, 150],
     descriptions: [
-      "Completa 10 misiones de reducción de redes",
-      "Completa 50 misiones de reducción de redes",
-      "Completa 150 misiones de reducción de redes",
+      "Completa 10 tareas de reducción de redes",
+      "Completa 50 tareas de reducción de redes",
+      "Completa 150 tareas de reducción de redes",
     ],
     perks: ["+×0.05 XP enfoque", "+×0.10 XP enfoque", "+×0.20 XP enfoque"],
   },
@@ -1275,9 +1202,9 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     thresholds: [10, 50, 150],
     descriptions: [
-      "Completa 10 misiones de nutrición",
-      "Completa 50 misiones de nutrición",
-      "Completa 150 misiones de nutrición",
+      "Completa 10 tareas de nutrición",
+      "Completa 50 tareas de nutrición",
+      "Completa 150 tareas de nutrición",
     ],
     perks: ["+×0.05 XP nutrición", "+×0.10 XP nutrición", "+×0.20 XP nutrición"],
   },
@@ -1289,9 +1216,9 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     thresholds: [10, 50, 150],
     descriptions: [
-      "Completa 10 misiones de sueño",
-      "Completa 50 misiones de sueño",
-      "Completa 150 misiones de sueño",
+      "Completa 10 tareas de sueño",
+      "Completa 50 tareas de sueño",
+      "Completa 150 tareas de sueño",
     ],
     perks: ["+×0.05 XP descanso", "+×0.10 XP descanso", "+×0.20 XP descanso"],
   },
@@ -1317,9 +1244,9 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     thresholds: [1, 3, 5],
     descriptions: [
-      "Obtén 1 congelador de un cofre",
-      "Obtén 3 congeladores de cofres",
-      "Obtén 5 congeladores de cofres",
+      "Obtén 1 protector de un cofre",
+      "Obtén 3 protectores de cofres",
+      "Obtén 5 protectores de cofres",
     ],
     perks: ["+1% suerte cofre", "+3% suerte cofre", "+5% suerte cofre"],
   },
@@ -1331,7 +1258,7 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     thresholds: [1, 10, 30],
     descriptions: [
-      "1 día con todas las misiones diarias hechas",
+      "1 día con todas las tareas diarias hechas",
       "10 días perfectos",
       "30 días perfectos",
     ],
@@ -1345,7 +1272,7 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     thresholds: [1, 3, 6],
     descriptions: [
-      "1 mes con todas las misiones diarias hechas",
+      "1 mes con todas las tareas diarias hechas",
       "3 meses perfectos",
       "6 meses perfectos",
     ],
@@ -1359,9 +1286,9 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     thresholds: [7, 30, 100],
     descriptions: [
-      "7 días seguidos con 1+ misión",
-      "30 días seguidos con 1+ misión",
-      "100 días seguidos con 1+ misión",
+      "7 días seguidos con 1+ tarea",
+      "30 días seguidos con 1+ tarea",
+      "100 días seguidos con 1+ tarea",
     ],
     perks: ["+×0.05 XP cadena", "+×0.10 XP cadena", "+×0.20 XP cadena"],
   },
@@ -1373,9 +1300,9 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     thresholds: [1, 5, 10],
     descriptions: [
-      "Completa 1 misión entre las 2–5 AM",
-      "Completa 5 misiones entre las 2–5 AM",
-      "Completa 10 misiones entre las 2–5 AM",
+      "Completa 1 tarea entre las 2–5 AM",
+      "Completa 5 tareas entre las 2–5 AM",
+      "Completa 10 tareas entre las 2–5 AM",
     ],
     perks: ["+×0.05 XP insomne", "+×0.10 XP insomne", "+×0.20 XP insomne"],
   },
@@ -1401,7 +1328,7 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     thresholds: [1, 5, 10],
     descriptions: [
-      "5 misiones en menos de 30 minutos",
+      "5 tareas en menos de 30 minutos",
       "5 veces la proeza Speed Run",
       "10 veces la proeza Speed Run",
     ],
@@ -1422,20 +1349,6 @@ const ACHIEVEMENTS: Achievement[] = [
     perks: ["+50 XP regreso", "+100 XP regreso", "+200 XP regreso"],
   },
   {
-    id: "pyros-favorite",
-    name: "Pyro's Favorite",
-    icon: Icon.PyrosFavorite,
-    level: 0,
-    progress: 0,
-    thresholds: [1, 1, 1],
-    descriptions: [
-      "30 días de racha sin usar congelador",
-      "30 días de racha sin usar congelador",
-      "30 días de racha sin usar congelador",
-    ],
-    perks: ["Título Favorito", "Emblema de Pyro", "+×0.20 XP Pyro"],
-  },
-  {
     id: "el-tempranero-extremo",
     name: "El Tempranero Extremo",
     icon: Icon.ElTempraneroExtremo,
@@ -1443,9 +1356,9 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     thresholds: [1, 5, 15],
     descriptions: [
-      "Completa 1 misión antes de las 6 AM",
-      "Completa 5 misiones antes de las 6 AM",
-      "Completa 15 misiones antes de las 6 AM",
+      "Completa 1 tarea antes de las 6 AM",
+      "Completa 5 tareas antes de las 6 AM",
+      "Completa 15 tareas antes de las 6 AM",
     ],
     perks: ["+×0.05 XP madrugador", "+×0.10 XP madrugador", "+×0.20 XP madrugador"],
   },
@@ -1457,9 +1370,9 @@ const ACHIEVEMENTS: Achievement[] = [
     progress: 0,
     thresholds: [1, 10, 50],
     descriptions: [
-      "Completa tu primera misión",
-      "Completa 10 misiones",
-      "Completa 50 misiones",
+      "Completa tu primera tarea",
+      "Completa 10 tareas",
+      "Completa 50 tareas",
     ],
     perks: ["+10 XP bienvenida", "+25 XP progreso", "+50 XP veterano"],
   },
@@ -1827,9 +1740,9 @@ const WEEKDAYS = ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"];
 
 function loadFreezeDates(): Set<string> {
   try {
-    const raw = localStorage.getItem("pyroFreezeUsedDates");
+    const raw = localStorage.getItem("streakFreezeUsedDates");
     if (raw) return new Set(JSON.parse(raw));
-    const single = localStorage.getItem("pyroFreezeUsedDate");
+    const single = localStorage.getItem("streakFreezeUsedDate");
     return single ? new Set([single]) : new Set();
   } catch {
     return new Set();
@@ -1915,7 +1828,7 @@ function StreakCalendar({ completionByDay }: StreakCalendarProps) {
           🔥 {completedThisMonth} días
         </div>
         <div className="inline-flex items-center gap-1.5 rounded-full border border-[#93C5FD]/40 bg-[#93C5FD]/15 px-3 py-1 text-xs font-semibold text-[#60A5FA]">
-          🧊 {freezesThisMonth} congeladores
+          {freezesThisMonth} protectores usados
         </div>
       </div>
 

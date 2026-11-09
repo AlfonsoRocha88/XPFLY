@@ -8,7 +8,6 @@ import { useTasks } from "@/hooks/useTasks";
 import { useParty } from "@/hooks/useParty";
 import { useFriends } from "@/hooks/useFriends";
 import { useChests, type ChestReward } from "@/hooks/useChests";
-import { usePyroSuggestionsBus } from "@/hooks/usePyro";
 import SideNav from "@/components/layout/SideNav";
 import BottomNav from "@/components/layout/BottomNav";
 import SectionHeader from "@/components/layout/SectionHeader";
@@ -20,8 +19,6 @@ import DailyQuestPanel from "@/components/DailyQuestPanel";
 import XpPopup from "@/components/XpPopup";
 import LevelUpToast from "@/components/LevelUpToast";
 import ChestOpenOverlay from "@/components/ChestOpenOverlay";
-import PyroLevelUpCutscene from "@/components/PyroLevelUpCutscene";
-import PyroSprite from "@/components/PyroSprite";
 import { WALLPAPERS } from "@/lib/wallpapers";
 import type { Task } from "@/lib/types";
 import { playSfx } from "@/lib/sfx";
@@ -36,8 +33,6 @@ const ClansPanel = lazy(() => import("@/components/ClansPanel"));
 const Shop = lazy(() => import("@/pages/Shop"));
 const WallpaperSelector = lazy(() => import("@/components/WallpaperSelector"));
 const ProfileOverview = lazy(() => import("@/components/ProfileOverview"));
-const PyroChat = lazy(() => import("@/components/PyroChat"));
-const PyroSuggestionsPanel = lazy(() => import("@/components/PyroSuggestionsPanel"));
 const ScheduleBlockDialog = lazy(() => import("@/components/ScheduleBlockDialog"));
 
 type ProgressTab = "stats" | "achievements" | "leagues";
@@ -80,8 +75,6 @@ const Index = () => {
   const [calendarDefaultDate, setCalendarDefaultDate] = useState<Date | null>(null);
   const [createChoiceOpen, setCreateChoiceOpen] = useState(false);
   const [scheduleOpen, setScheduleOpen] = useState(false);
-  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
-  const [pyroChatOpen, setPyroChatOpen] = useState(false);
 
   const [xpPopup, setXpPopup] = useState<number | null>(null);
   const [levelUp, setLevelUp] = useState<number | null>(null);
@@ -90,8 +83,6 @@ const Index = () => {
     reward: null,
     opening: false,
   });
-
-  usePyroSuggestionsBus(useCallback(() => setSuggestionsOpen(true), []));
 
   const hasPartyBonus = !!party && party.members.some((m) => m.status === "accepted");
   const friendRequests = pendingRequests?.length ?? 0;
@@ -153,7 +144,7 @@ const Index = () => {
       const ageMs = Date.now() - new Date(task.created_at).getTime();
       if (ageMs < ONE_HOUR) {
         playSfx("error");
-        toast.error(`Espera ${Math.ceil((ONE_HOUR - ageMs) / 60000)} min para completar esta misión recién creada.`);
+        toast.error(`Espera ${Math.ceil((ONE_HOUR - ageMs) / 60000)} min para completar esta tarea recién creada.`);
         return;
       }
     }
@@ -175,15 +166,14 @@ const Index = () => {
       playSfx("xp");
       setXpPopup(result.xpGained);
       if (result.bonusTrophyAwarded) {
-        toast("+1 Trofeo 🏆", { duration: 2500, className: "pyro-trophy-toast" });
+        toast("+1 trofeo", { duration: 2500, className: "trophy-toast" });
       }
       if (result.leveledUp) {
         setTimeout(() => playSfx("levelUp"), 600);
         setTimeout(() => setLevelUp(result.level), 800);
-        if (result.pointsGained > 0) toast.success(`¡+${result.pointsGained} puntos de atributo!`);
       }
     } catch {
-      toast.error("No se pudo actualizar la misión");
+      toast.error("No se pudo actualizar la tarea");
     }
   }, [updateTask, addXp, hasPartyBonus]);
 
@@ -192,7 +182,7 @@ const Index = () => {
       const result = await claimDailyBonus.mutateAsync();
       setXpPopup(result.xpGained);
       if (result.leveledUp) setTimeout(() => setLevelUp(result.level), 800);
-      toast.success(`¡Racha de ${result.streak} días! +${result.xpGained} XP`);
+      toast.success(`Racha de ${result.streak} días · +${result.xpGained} XP`);
       // The claim grants a chest; refresh before opening it.
       await queryClient.refetchQueries({ queryKey: ["profile"] });
       setTimeout(triggerOpenChest, 600);
@@ -205,15 +195,15 @@ const Index = () => {
     try {
       if (editingTask) {
         await updateTask.mutateAsync({ id: editingTask.id, ...data });
-        toast.success("Misión actualizada");
+        toast.success("Tarea actualizada");
       } else {
         await createTask.mutateAsync({ ...data, title: data.title ?? "", position: tasks.length });
         playSfx("create");
-        toast.success("Misión creada");
+        toast.success("Tarea creada");
       }
       setEditingTask(null);
     } catch {
-      toast.error("No se pudo guardar la misión");
+      toast.error("No se pudo guardar la tarea");
     }
   };
 
@@ -222,7 +212,7 @@ const Index = () => {
       playSfx("delete");
       await deleteTask.mutateAsync(id);
     } catch {
-      toast.error("No se pudo eliminar la misión");
+      toast.error("No se pudo eliminar la tarea");
     }
   }, [deleteTask]);
 
@@ -284,18 +274,6 @@ const Index = () => {
     </button>
   );
 
-  const pyroButton = (
-    <button
-      type="button"
-      onClick={() => { playSfx("open"); setPyroChatOpen(true); }}
-      className="rounded-full p-1 transition-transform active:scale-90"
-      title="Hablar con Pyro"
-      aria-label="Hablar con Pyro"
-    >
-      <PyroSprite size={40} mood="idle" />
-    </button>
-  );
-
   let content: React.ReactNode;
   if (section === "tasks") {
     content = (
@@ -303,7 +281,6 @@ const Index = () => {
         <SectionHeader
           title={`${greeting()}${profile?.display_name ? `, ${profile.display_name.split(" ")[0]}` : ""}`}
           subtitle={new Date().toLocaleDateString("es", { weekday: "long", day: "numeric", month: "long" })}
-          actions={pyroButton}
         />
         <div className="mx-auto w-full max-w-3xl space-y-5 px-4 md:px-8">
           <div className="surface p-4 md:hidden">
@@ -332,7 +309,7 @@ const Index = () => {
                     autoFocus
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Buscar misiones…"
+                    placeholder="Buscar tareas…"
                     className="h-10 w-full rounded-full border border-border bg-card pl-9 pr-9 text-sm font-semibold outline-none focus:border-primary"
                   />
                   <button
@@ -346,19 +323,13 @@ const Index = () => {
               ) : (
                 <>
                   <h2 className="section-title">
-                    Mis misiones <span className="text-muted-foreground">{visibleTasks.length || ""}</span>
+                    Mis tareas <span className="text-muted-foreground">{visibleTasks.length || ""}</span>
                   </h2>
                   <div className="flex items-center gap-1">
                     <button
-                      onClick={() => { playSfx("open"); setSuggestionsOpen(true); }}
-                      className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/15"
-                    >
-                      <Sparkles className="h-3.5 w-3.5" /> Ideas de Pyro
-                    </button>
-                    <button
                       onClick={() => setSearchOpen(true)}
                       className="rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
-                      aria-label="Buscar misiones"
+                      aria-label="Buscar tareas"
                     >
                       <Search className="h-5 w-5" />
                     </button>
@@ -375,11 +346,11 @@ const Index = () => {
               onDelete={handleDeleteTask}
               onToggleSubtask={handleToggleComplete}
               onReorder={handleReorder}
-              emptyMessage={searchQuery ? "Ninguna misión coincide con tu búsqueda." : undefined}
+              emptyMessage={searchQuery ? "Ninguna tarea coincide con tu búsqueda." : undefined}
             />
           </section>
         </div>
-        {fab(() => openNewTask(), "Nueva misión")}
+        {fab(() => openNewTask(), "Nueva tarea")}
       </>
     );
   } else if (section === "calendar") {
@@ -480,11 +451,8 @@ const Index = () => {
       {/* ---------------- Overlays ---------------- */}
       {xpPopup !== null && <XpPopup amount={xpPopup} onComplete={() => setXpPopup(null)} />}
       {levelUp !== null && <LevelUpToast level={levelUp} onComplete={() => setLevelUp(null)} />}
-      <PyroLevelUpCutscene />
 
       <Suspense fallback={null}>
-        {suggestionsOpen && <PyroSuggestionsPanel open={suggestionsOpen} onOpenChange={setSuggestionsOpen} />}
-        {pyroChatOpen && <PyroChat onClose={() => setPyroChatOpen(false)} />}
         {scheduleOpen && <ScheduleBlockDialog open={scheduleOpen} onOpenChange={setScheduleOpen} />}
       </Suspense>
 
@@ -502,7 +470,7 @@ const Index = () => {
             <p className="mb-3 text-center text-base font-semibold">¿Qué quieres crear?</p>
             <div className="flex flex-col gap-2">
               {[
-                { icon: Swords, title: "Nueva misión", desc: "Gana XP al completarla", onClick: () => openNewTask() },
+                { icon: Swords, title: "Nueva tarea", desc: "Gana XP al completarla", onClick: () => openNewTask() },
                 { icon: CalendarClock, title: "Bloque de horario", desc: "Solo en el calendario, sin XP", onClick: () => { playSfx("open"); setScheduleOpen(true); } },
               ].map(({ icon: Icon, title, desc, onClick }) => (
                 <button

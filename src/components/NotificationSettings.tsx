@@ -23,11 +23,17 @@ function detectStatus(subscribed: boolean): PushStatus {
  * Each status needs a short, friendly line (es-MX) that says what happened and what to do.
  */
 function describeStatus(status: Exclude<PushStatus, "on" | "off">): string {
-  // TODO(human): return a message for "denied", "unsupported" and "needs-install".
-  return "No se pueden activar las notificaciones en este dispositivo.";
+  switch (status) {
+    case "denied":
+      return "Bloqueaste las notificaciones. Actívalas en la configuración de tu navegador para este sitio.";
+    case "needs-install":
+      return "En iPhone, primero agrega XPFly a tu pantalla de inicio (Compartir → Agregar a inicio) y ábrela desde ahí.";
+    case "unsupported":
+      return "Este navegador no admite notificaciones. Prueba con Chrome, Edge o Safari actualizado.";
+  }
 }
 
-/** Opt-in for mission reminders and Pyro / friend / clan alerts. */
+/** Opt-in for task reminders and friend / clan alerts. */
 const NotificationSettings = () => {
   const { user } = useAuth();
   const [status, setStatus] = useState<PushStatus>("off");
@@ -59,7 +65,7 @@ const NotificationSettings = () => {
     <section className="surface p-4">
       <h2 className="section-title">Notificaciones</h2>
       <p className="mb-3 text-sm text-muted-foreground">
-        Recordatorios de misiones, avisos de Pyro y solicitudes de amigos o de tu clan.
+        Recordatorios de tareas y solicitudes de amigos o de tu clan.
       </p>
       {status === "on" ? (
         <div className="flex items-center gap-2 rounded-xl bg-success/10 px-3 py-2.5 text-sm font-semibold text-success">
