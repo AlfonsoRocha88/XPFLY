@@ -21,7 +21,6 @@ import XpPopup from "@/components/XpPopup";
 import LevelUpToast from "@/components/LevelUpToast";
 import ChestOpenOverlay from "@/components/ChestOpenOverlay";
 import PyroLevelUpCutscene from "@/components/PyroLevelUpCutscene";
-import PyroOnboarding from "@/components/PyroOnboarding";
 import PyroSprite from "@/components/PyroSprite";
 import { WALLPAPERS } from "@/lib/wallpapers";
 import type { Task } from "@/lib/types";
@@ -482,7 +481,6 @@ const Index = () => {
       {xpPopup !== null && <XpPopup amount={xpPopup} onComplete={() => setXpPopup(null)} />}
       {levelUp !== null && <LevelUpToast level={levelUp} onComplete={() => setLevelUp(null)} />}
       <PyroLevelUpCutscene />
-      <PyroOnboarding />
 
       <Suspense fallback={null}>
         {suggestionsOpen && <PyroSuggestionsPanel open={suggestionsOpen} onOpenChange={setSuggestionsOpen} />}

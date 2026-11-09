@@ -46,7 +46,6 @@ export default function PyroSuggestionsPanel({
   const { createTask } = useTasks();
   const { loading, suggestions, error, hunger, generate, clear, removeAt } = usePyroMissionSuggestions();
   const [hint, setHint] = useState("");
-  const onboardingDone = profile?.pyro_onboarding_completed === true;
 
   const handleGenerate = async () => {
     try { playSfx("open"); } catch { /* ignore */ }
@@ -92,11 +91,9 @@ export default function PyroSuggestionsPanel({
         <div className="flex items-start gap-3 rounded-lg border border-primary/30 bg-card/50 p-3">
           <PyroSprite size={48} mood={hunger === "dying" || hunger === "critical" ? "dying" : "thinking"} />
           <p className="text-sm text-foreground/90 leading-relaxed">
-            {!onboardingDone
-              ? "Aún no me contaste de ti, así que voy a improvisar. Completa el onboarding para que ajuste mejor."
-              : hunger === "critical" || hunger === "dying"
+            {hunger === "critical" || hunger === "dying"
                 ? "Estoy débil. Te paso micro-misiones rápidas. ¡Aliméntame ya!"
-                : "Mira lo que armé pensando en tus áreas y tu objetivo. Acepta las que te sirvan."}
+                : "Te armé unas ideas. Si me das una pista abajo, las ajusto a lo que necesitas."}
           </p>
         </div>
 

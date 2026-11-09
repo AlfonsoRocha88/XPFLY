@@ -4,9 +4,10 @@ import { useColorMode } from "@/hooks/useAppTheme";
 import { WALLPAPERS } from "@/lib/wallpapers";
 import { APP_THEMES } from "@/lib/themes";
 import { Switch } from "@/components/ui/switch";
+import NotificationSettings from "@/components/NotificationSettings";
 import { cn } from "@/lib/utils";
 
-/** Appearance settings: accent color, background and light/dark mode. */
+/** Appearance and device settings: color mode, accent, background and notifications. */
 const WallpaperSelector = () => {
   const { profile, updateProfile } = useProfile();
   const { mode, setMode } = useColorMode();
@@ -36,6 +37,8 @@ const WallpaperSelector = () => {
           ))}
         </div>
       </section>
+
+      <NotificationSettings />
 
       <section className="surface p-4">
         <h2 className="section-title">Color</h2>
