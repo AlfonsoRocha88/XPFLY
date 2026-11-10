@@ -35,6 +35,7 @@ import ClanHeader, { ClanHeaderCompact } from "@/components/clan/ClanHeader";
 import ClanWeeklyChallenge from "@/components/clan/ClanWeeklyChallenge";
 import ClanChat from "@/components/clan/ClanChat";
 import { avatarSrc } from "@/lib/avatars";
+import { Flame as StreakFlame } from "@/components/icons/GameIcons";
 
 
 /* ───────────────────────────── Member row ───────────────────────────── */
@@ -74,7 +75,7 @@ const MemberRow = ({ member, rank, onSelect }: { member: ClanMember; rank: numbe
       </div>
       <div className={cn("flex shrink-0 items-center gap-1 text-sm font-medium tabular-nums", streakCls)}>
         <span>{streak}</span>
-        <span aria-hidden>🔥</span>
+        <StreakFlame size={15} />
       </div>
     </button>
   );
@@ -125,7 +126,7 @@ const MemberSheet = ({
         <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
           <div className="rounded-lg border border-border bg-muted/40 p-2"><div className="font-medium text-foreground">{p?.trophies ?? 0}</div><div className="text-xs text-muted-foreground">Trofeos</div></div>
           <div className="rounded-lg border border-border bg-muted/40 p-2"><div className="font-medium text-foreground">{p?.xp ?? 0}</div><div className="text-xs text-muted-foreground">XP</div></div>
-          <div className="rounded-lg border border-border bg-muted/40 p-2"><div className="font-medium text-foreground">{p?.daily_streak ?? 0} 🔥</div><div className="text-xs text-muted-foreground">Racha</div></div>
+          <div className="rounded-lg border border-border bg-muted/40 p-2"><div className="font-medium text-foreground"><span className="inline-flex items-center gap-0.5">{p?.daily_streak ?? 0} <StreakFlame size={13} className="text-warning" /></span></div><div className="text-xs text-muted-foreground">Racha</div></div>
         </div>
 
         {!isMe && viewerRole && (
@@ -212,8 +213,8 @@ const CreateWizard = ({ onCreated, onCancel }: { onCreated: () => void; onCancel
           <div className="text-xs">
             {name.trim().length < 3 ? <span className="text-muted-foreground">Mínimo 3 caracteres</span>
               : checking ? <span className="text-muted-foreground">Comprobando…</span>
-              : available === true ? <span className="text-emerald-400">✓ Disponible</span>
-              : available === false ? <span className="text-rose-400">✗ Ya en uso</span>
+              : available === true ? <span className="inline-flex items-center gap-1 text-success"><Check className="h-3.5 w-3.5" aria-hidden /> Disponible</span>
+              : available === false ? <span className="inline-flex items-center gap-1 text-destructive"><X className="h-3.5 w-3.5" aria-hidden /> Ya en uso</span>
               : null}
           </div>
           <Button className="w-full" disabled={!available} onClick={() => setStep(2)}>Continuar</Button>

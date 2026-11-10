@@ -1,24 +1,11 @@
 import { useRef, useState } from "react";
-import { format, isPast, isToday } from "date-fns";
+import { format, isPast, isToday, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { CalendarDays, ChevronDown, Trash2 } from "lucide-react";
 import type { Task, TaskPriority } from "@/lib/types";
 import TaskCheck from "@/components/TaskCheck";
 import { cn } from "@/lib/utils";
-
-export const XP_REWARDS: Record<TaskPriority, number> = {
-  low: 10,
-  medium: 20,
-  high: 35,
-  urgent: 50,
-};
-
-export const PRIORITY_META: Record<TaskPriority, { label: string; color: string }> = {
-  low: { label: "Baja", color: "hsl(var(--priority-low))" },
-  medium: { label: "Media", color: "hsl(var(--priority-medium))" },
-  high: { label: "Alta", color: "hsl(var(--priority-high))" },
-  urgent: { label: "Urgente", color: "hsl(var(--priority-urgent))" },
-};
+import { XP_REWARDS, PRIORITY_META } from "@/lib/xp";
 
 interface TaskCardProps {
   task: Task;
@@ -36,7 +23,7 @@ const TaskCard = ({ task, subtasks, onToggleComplete, onEdit, onDelete, onToggle
   const isDone = task.status === "done";
   const cardRef = useRef<HTMLDivElement | null>(null);
   const priority = PRIORITY_META[task.priority];
-  const due = task.due_date ? new Date(task.due_date) : null;
+  const due = task.due_date ? parseISO(task.due_date) : null; // local date, not UTC midnight
   const overdue = !!due && !isDone && isPast(due) && !isToday(due);
   const doneSubtasks = subtasks.filter((s) => s.status === "done").length;
 

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { TITLES } from "@/lib/titles";
 import { cn } from "@/lib/utils";
+import { GameIcon } from "@/components/icons/GameIcons";
 
 interface TitlesPanelProps {
   unlocked: string[];
@@ -57,7 +58,7 @@ const TitlesPanel = ({ unlocked, equipped, progress, streak, onEquip, isPending 
           >
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2">
-                <span className="text-xl" style={{ color: t.color }}>{t.icon}</span>
+                <GameIcon name={t.icon} size={22} style={{ color: t.color }} />
                 <div>
                   <div className="font-system text-sm text-foreground">{t.name}</div>
                   <div className="text-xs text-muted-foreground">{t.description}</div>

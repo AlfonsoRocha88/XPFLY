@@ -5,6 +5,7 @@ import { Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
 import CharacterPortrait from "@/components/CharacterPortrait";
 import { getTitle } from "@/lib/titles";
+import { GameIcon } from "@/components/icons/GameIcons";
 
 /** XP needed to go from level `lvl` to `lvl + 1`. */
 const xpStep = (lvl: number) => 50 + (lvl - 1) * 25;
@@ -55,7 +56,7 @@ const PlayerHUD = ({ className, showStreak = false }: { className?: string; show
         </div>
         <p className="truncate text-xs font-medium text-muted-foreground">
           <span className="text-primary">Nivel {level}</span>
-          {title && <> · {titleIcon} {title}</>}
+          {title && <> · <GameIcon name={titleIcon} size={12} className="inline -mt-0.5" /> {title}</>}
         </p>
         <div className="mt-1.5 flex items-center gap-2">
           <div className="xp-bar-bg flex-1">

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Gift, Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ChestReward } from "@/hooks/useChests";
+import { GameIcon } from "@/components/icons/GameIcons";
 
 const RARITY_COLORS: Record<string, string> = {
   common: "border-slate-400 shadow-[0_0_30px_hsl(210_20%_60%/0.6)]",
@@ -64,7 +65,7 @@ const ChestOpenOverlay = ({ open, reward, opening, onClose }: Props) => {
                 RARITY_COLORS[reward.rarity]
               )}
             >
-              <div className="text-7xl animate-bounce">{reward.icon}</div>
+              <GameIcon name={reward.icon} size={72} className="animate-bounce text-xp" />
               <p className="text-xl font-semibold">{reward.label}</p>
               <p className="text-sm font-medium capitalize text-muted-foreground">
                 {reward.rarity}

@@ -19,21 +19,21 @@ function rollReward() {
   const r = Math.random();
   if (r < 0.6) {
     const amount = 10 + Math.floor(Math.random() * 21);
-    return { type: "coins", amount, label: `${amount} Monedas`, icon: "🪙", rarity: "common" };
+    return { type: "coins", amount, label: `${amount} Monedas`, icon: "coin", rarity: "common" };
   }
   if (r < 0.8) {
     const amount = 15 + Math.floor(Math.random() * 21);
-    return { type: "xp", amount, label: `${amount} XP`, icon: "✨", rarity: "rare" };
+    return { type: "xp", amount, label: `${amount} XP`, icon: "sparkle", rarity: "rare" };
   }
   if (r < 0.94) {
     const amount = 50 + Math.floor(Math.random() * 51);
-    return { type: "coins_big", amount, label: `${amount} Monedas`, icon: "💰", rarity: "rare" };
+    return { type: "coins_big", amount, label: `${amount} Monedas`, icon: "coins", rarity: "rare" };
   }
   if (r < 0.99) {
-    return { type: "freeze", amount: 1, label: "Congelador de Racha", icon: "🧊", rarity: "epic" };
+    return { type: "freeze", amount: 1, label: "Congelador de Racha", icon: "frost", rarity: "epic" };
   }
   const amount = 200 + Math.floor(Math.random() * 101);
-  return { type: "coins_big", amount, label: `${amount} Monedas`, icon: "💎", rarity: "legendary" };
+  return { type: "coins_big", amount, label: `${amount} Monedas`, icon: "gem", rarity: "legendary" };
 }
 
 function j(b: unknown, s = 200) {

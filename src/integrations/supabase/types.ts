@@ -227,6 +227,39 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_logs: {
+        Row: {
+          created_at: string
+          day: string
+          id: number
+          sleep_minutes: number | null
+          slept_at: string | null
+          updated_at: string
+          user_id: string
+          woke_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          id?: never
+          sleep_minutes?: number | null
+          slept_at?: string | null
+          updated_at?: string
+          user_id?: string
+          woke_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          id?: never
+          sleep_minutes?: number | null
+          slept_at?: string | null
+          updated_at?: string
+          user_id?: string
+          woke_at?: string | null
+        }
+        Relationships: []
+      }
       friendships: {
         Row: {
           created_at: string
@@ -718,6 +751,18 @@ export type Database = {
       }
       generate_friend_code: { Args: never; Returns: string }
       get_global_trophy_rank: { Args: { _user_id: string }; Returns: number }
+      get_my_activity: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          awarded_at: string
+          day: string
+          is_daily: boolean
+          priority: string
+          task_id: string
+          title: string
+          xp: number
+        }[]
+      }
       get_leaderboard: {
         Args: { _limit?: number }
         Returns: {

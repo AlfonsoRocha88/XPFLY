@@ -1,4 +1,4 @@
-import { addHours, addDays, addWeeks, addMonths, isBefore, isSameDay, startOfDay, endOfDay } from "date-fns";
+import { addHours, addDays, addWeeks, addMonths, isBefore, isSameDay, parseISO, startOfDay, endOfDay } from "date-fns";
 import type { Task } from "@/lib/types";
 
 export type RecurrenceUnit = "hour" | "day" | "week" | "month";
@@ -30,7 +30,7 @@ export const expandTask = (task: Task, rangeStart: Date, rangeEnd: Date): TaskOc
   const baseStart = task.start_time
     ? new Date(task.start_time)
     : task.due_date
-      ? startOfDay(new Date(task.due_date))
+      ? startOfDay(parseISO(task.due_date)) // date-only string: parse as local, not UTC
       : null;
 
   if (!baseStart) return out;

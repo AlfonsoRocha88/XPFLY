@@ -433,6 +433,39 @@ html, body {
   animation: trophy-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
+/* ---------- Task editor motion ---------- */
+@keyframes chip-in {
+  from { opacity: 0; transform: translateY(3px) scale(0.92); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes detail-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: none; }
+}
+/* The one authored moment: XP value springs when the reward changes. */
+@keyframes xp-tick {
+  0%   { transform: translateY(6px) scale(0.9); opacity: 0.2; }
+  60%  { transform: translateY(-1px) scale(1.08); opacity: 1; }
+  100% { transform: none; opacity: 1; }
+}
+@keyframes task-in {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+/* ---------- Stats motion ---------- */
+@keyframes bar-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes bar-x { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes cell-in { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: none; } }
+/* SVG bars grow from their own baseline. */
+.animate-bar-grow { transform-box: fill-box; transform-origin: bottom; animation: bar-grow 520ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-bar-x    { transform-origin: left; animation: bar-x 600ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-cell-in  { transform-box: fill-box; transform-origin: center; animation: cell-in 360ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+.animate-chip-in   { animation: chip-in 180ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-detail-in { animation: detail-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-xp-tick   { display: inline-block; animation: xp-tick 360ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-task-in   { animation: task-in 420ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

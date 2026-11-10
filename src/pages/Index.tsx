@@ -13,7 +13,8 @@ import BottomNav from "@/components/layout/BottomNav";
 import SectionHeader from "@/components/layout/SectionHeader";
 import { SECTIONS, type SectionId } from "@/components/layout/sections";
 import PlayerHUD from "@/components/PlayerHUD";
-import TaskDialog from "@/components/TaskDialog";
+import TaskEditor from "@/components/task-editor/TaskEditor";
+import SleepCheckIn from "@/components/SleepCheckIn";
 import ListView from "@/components/ListView";
 import DailyQuestPanel from "@/components/DailyQuestPanel";
 import XpPopup from "@/components/XpPopup";
@@ -27,6 +28,7 @@ import { cn } from "@/lib/utils";
 // Heavier sections load on first visit to keep startup fast.
 const CalendarView = lazy(() => import("@/components/CalendarView"));
 const AchievementsView = lazy(() => import("@/components/AchievementsView"));
+const StatsView = lazy(() => import("@/components/stats/StatsView"));
 const Leagues = lazy(() => import("@/pages/Leagues"));
 const SocialPanel = lazy(() => import("@/components/SocialPanel"));
 const ClansPanel = lazy(() => import("@/components/ClansPanel"));
@@ -287,6 +289,8 @@ const Index = () => {
             <PlayerHUD showStreak={dailyMissions.length === 0} />
           </div>
 
+          <SleepCheckIn />
+
           <DailyQuestPanel
             dailyTasks={dailyMissions}
             onToggleComplete={handleToggleComplete}
@@ -378,7 +382,7 @@ const Index = () => {
           onTabChange={setProgressTab}
         />
         <div className="mx-auto w-full max-w-3xl px-4 md:px-8">
-          {progressTab === "leagues" ? <Leagues /> : <AchievementsView tasks={allTasks} view={progressTab} />}
+          {progressTab === "leagues" ? <Leagues /> : progressTab === "stats" ? <StatsView habits={dailyTasks} /> : <AchievementsView />}
         </div>
       </>
     );
@@ -493,7 +497,7 @@ const Index = () => {
         </div>
       )}
 
-      <TaskDialog
+      <TaskEditor
         key={editingTask?.id ?? (dialogOpen ? "new" : "closed")}
         open={dialogOpen}
         onOpenChange={(open) => {

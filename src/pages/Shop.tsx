@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Coins, Gift } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useChests, type ChestReward } from "@/hooks/useChests";
+import { GameIcon } from "@/components/icons/GameIcons";
 
 const RARITY_STYLES: Record<string, { label: string; className: string }> = {
   common: { label: "Común", className: "bg-muted text-muted-foreground" },
@@ -11,12 +12,12 @@ const RARITY_STYLES: Record<string, { label: string; className: string }> = {
 };
 
 const UPCOMING_ITEMS = [
-  { id: "potion", name: "Poción de XP", icon: "🧪", price: 150 },
-  { id: "freeze", name: "Protector de racha", icon: "🧊", price: 100 },
-  { id: "title-pack", name: "Pack de títulos", icon: "🏅", price: 500 },
-  { id: "wallpaper", name: "Fondo exclusivo", icon: "🖼️", price: 300 },
-  { id: "outfit", name: "Atuendo raro", icon: "👕", price: 750 },
-  { id: "boost", name: "Boost x2 XP", icon: "⚡", price: 400 },
+  { id: "potion", name: "Poción de XP", icon: "potion", price: 150 },
+  { id: "freeze", name: "Protector de racha", icon: "frost", price: 100 },
+  { id: "title-pack", name: "Pack de títulos", icon: "medal", price: 500 },
+  { id: "wallpaper", name: "Fondo exclusivo", icon: "frame", price: 300 },
+  { id: "outfit", name: "Atuendo raro", icon: "shirt", price: 750 },
+  { id: "boost", name: "Boost x2 XP", icon: "bolt", price: 400 },
 ];
 
 const Shop = () => {
@@ -80,7 +81,7 @@ const Shop = () => {
 
         {reward && rarity && (
           <div className="flex w-full max-w-xs flex-col items-center gap-1.5 rounded-2xl border border-border p-4 animate-in zoom-in-90 duration-300">
-            <div className="text-5xl">{reward.icon}</div>
+            <GameIcon name={reward.icon} size={48} className="text-xp" />
             <p className="text-[15px] font-semibold">{reward.label}</p>
             <span className={cn("rounded-full px-2.5 py-0.5 text-xs font-semibold", rarity.className)}>{rarity.label}</span>
           </div>
@@ -95,7 +96,7 @@ const Shop = () => {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {UPCOMING_ITEMS.map((item) => (
             <div key={item.id} className="surface flex flex-col items-center gap-1.5 p-4 text-center opacity-75">
-              <div className="text-3xl">{item.icon}</div>
+              <GameIcon name={item.icon} size={32} className="text-primary" />
               <p className="text-sm font-medium leading-tight">{item.name}</p>
               <span className="flex items-center gap-1 text-xs font-semibold text-muted-foreground">
                 <Coins className="h-3.5 w-3.5" /> {item.price}

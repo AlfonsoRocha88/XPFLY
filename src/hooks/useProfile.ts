@@ -6,13 +6,9 @@ import type { Profile } from "@/lib/types";
 import { getTitle } from "@/lib/titles";
 import { toast } from "sonner";
 import { getCurrentLeague, leagueLabel } from "@/lib/leagues";
-
-const XP_REWARDS = {
-  low: 10,
-  medium: 20,
-  high: 35,
-  urgent: 50,
-};
+import { XP_REWARDS } from "@/lib/xp";
+import { createElement } from "react";
+import { Gift, HeartCrack } from "@/components/icons/GameIcons";
 
 let reconciledFor: string | null = null;
 
@@ -108,7 +104,8 @@ export const useProfile = () => {
           localStorage.setItem("streakFreezeUsedDates", JSON.stringify(Array.from(set)));
         } catch {}
       } else if (data?.action === "reset" && data?.previousStreak) {
-        toast.error(`💔 Perdiste tu racha de ${data.previousStreak} días`, {
+        toast.error(`Perdiste tu racha de ${data.previousStreak} días`, {
+          icon: createElement(HeartCrack, { size: 18 }),
           description: "No tenías suficientes protectores.",
         });
       }
@@ -227,7 +224,8 @@ export const useProfile = () => {
       const updated = data.profile;
       const newTrophies = updated.trophies ?? prevTrophies;
 
-      toast.success(`🎁 +1 Cofre de recompensa`, {
+      toast.success("+1 Cofre de recompensa", {
+        icon: createElement(Gift, { size: 18 }),
         description: "Ábrelo en la Tienda para reclamar tu botín.",
       });
       toast.success(`+5 trofeos por completar todas las tareas diarias`);

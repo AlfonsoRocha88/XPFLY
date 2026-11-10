@@ -1,4 +1,4 @@
-import { Flame, Gift, Trash2, Sun } from "lucide-react";
+import { Check, Flame, Gift, Trash2, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Task } from "@/lib/types";
 import TaskCheck from "@/components/TaskCheck";
@@ -134,7 +134,7 @@ const DailyQuestPanel = ({
             )}
           </button>
         ) : bonusClaimed ? (
-          <span className="text-xs font-semibold text-success">Reclamada ✓</span>
+          <span className="inline-flex items-center gap-1 text-xs font-semibold text-success"><Check className="h-3.5 w-3.5" aria-hidden /> Reclamada</span>
         ) : (
           <span className="text-xs font-medium text-muted-foreground">{totalCount - completedCount} por hacer</span>
         )}
