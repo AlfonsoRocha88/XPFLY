@@ -42,7 +42,7 @@ const PlayerHUD = ({ className, showStreak = false }: { className?: string; show
         title="Ver perfil"
         aria-label="Ver perfil"
       >
-        <CharacterPortrait url={profile?.avatar_url} seed={profile?.user_id} size={52} />
+        <CharacterPortrait url={profile?.avatar_url} seed={profile?.user_id} frame={profile?.equipped_frame} size={52} />
       </button>
 
       <div className="min-w-0 flex-1">

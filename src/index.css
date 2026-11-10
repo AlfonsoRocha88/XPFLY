@@ -452,6 +452,14 @@ html, body {
   from { opacity: 0; transform: translateY(-8px) scale(0.98); }
   to   { opacity: 1; transform: none; }
 }
+/* ---------- Achievements ---------- */
+@keyframes emblem-shine { 0%, 55% { transform: translateX(0) skewX(-20deg); } 100% { transform: translateX(220px) skewX(-20deg); } }
+.emblem-shine { animation: emblem-shine 3.6s cubic-bezier(0.45, 0, 0.2, 1) infinite; }
+@keyframes twinkle-star { 0%, 100% { opacity: .25; } 50% { opacity: .9; } }
+.sky-star { animation: twinkle-star var(--tw, 4s) ease-in-out infinite; animation-delay: var(--td, 0s); }
+@keyframes claim-halo { 0% { transform: scale(.9); opacity: .7; } 100% { transform: scale(1.6); opacity: 0; } }
+.claim-halo { animation: claim-halo 1.8s cubic-bezier(0.16, 1, 0.3, 1) infinite; }
+
 /* ---------- Stats motion ---------- */
 @keyframes bar-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
 @keyframes bar-x { from { transform: scaleX(0); } to { transform: scaleX(1); } }

@@ -48,7 +48,7 @@ const Character = () => {
         <div className="character-showcase">
           <div className="character-showcase-grid" />
           <div className="relative z-10 flex flex-col items-center">
-            <CharacterPortrait url={profile?.avatar_url} seed={profile?.user_id} size={180} className="shadow-lift ring-4 ring-card" />
+            <CharacterPortrait url={profile?.avatar_url} seed={profile?.user_id} frame={profile?.equipped_frame} size={180} className="shadow-lift ring-4 ring-card" />
             <div className="mt-4 text-center">
               <div className="font-serif text-2xl font-medium">{profile?.display_name ?? profile?.username}</div>
               {profile?.username && <div className="text-sm text-muted-foreground">@{profile.username}</div>}

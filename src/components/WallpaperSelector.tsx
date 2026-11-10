@@ -5,6 +5,7 @@ import { WALLPAPERS } from "@/lib/wallpapers";
 import { APP_THEMES } from "@/lib/themes";
 import { Switch } from "@/components/ui/switch";
 import NotificationSettings from "@/components/NotificationSettings";
+import FramePicker from "@/components/FramePicker";
 import { cn } from "@/lib/utils";
 
 /** Appearance and device settings: color mode, accent, background and notifications. */
@@ -37,6 +38,8 @@ const WallpaperSelector = () => {
           ))}
         </div>
       </section>
+
+      <FramePicker />
 
       <NotificationSettings />
 

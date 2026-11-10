@@ -182,7 +182,6 @@ export const useProfile = () => {
         const t = getTitle(id);
         if (t) {
           toast.success(`Nuevo título: ${t.name}`, { description: t.description });
-          toast.success(`Nuevo título: ${t.name}`);
         }
       });
 

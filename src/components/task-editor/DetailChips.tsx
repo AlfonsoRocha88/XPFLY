@@ -11,6 +11,7 @@ import { dayLabel } from "./labels";
 import type { DetailKey, RecurrenceUnit, TaskForm } from "./useTaskForm";
 
 const REMINDER_PRESETS = [5, 10, 30, 60, 1440];
+const SUGGESTED_TAGS = ["ejercicio", "meditar", "nutricion", "estudio", "lectura", "finanzas", "creativo"];
 const reminderLabel = (m: number) => (m < 60 ? `${m} min` : m % 1440 === 0 ? `${m / 1440} d` : m % 60 === 0 ? `${m / 60} h` : `${m} min`);
 
 const fieldCls = "h-9 rounded-lg border border-input bg-background px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring";
@@ -176,6 +177,14 @@ type Chip = { key: DetailKey; icon: LucideIcon; label: string };
                 aria-label="Nueva etiqueta"
                 className="h-7 min-w-[8rem] flex-1 bg-transparent text-sm focus:outline-none"
               />
+            </div>
+            {/* Suggested tags feed the Bienestar and Conocimiento achievements */}
+            <div className="flex flex-wrap gap-1">
+              {SUGGESTED_TAGS.filter((t) => !form.tags.includes(t)).map((t) => (
+                <button key={t} type="button" onClick={() => form.addTag(t)} className="rounded-full border border-dashed border-border px-2 py-0.5 text-[11px] text-muted-foreground hover:border-primary/40 hover:text-foreground">
+                  #{t}
+                </button>
+              ))}
             </div>
           </Row>
         )}

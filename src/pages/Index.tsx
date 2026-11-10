@@ -24,10 +24,11 @@ import { WALLPAPERS } from "@/lib/wallpapers";
 import type { Task } from "@/lib/types";
 import { playSfx } from "@/lib/sfx";
 import { cn } from "@/lib/utils";
+import { useAchievements } from "@/hooks/useAchievements";
 
 // Heavier sections load on first visit to keep startup fast.
 const CalendarView = lazy(() => import("@/components/CalendarView"));
-const AchievementsView = lazy(() => import("@/components/AchievementsView"));
+const AchievementsView = lazy(() => import("@/components/achievements/AchievementsView"));
 const StatsView = lazy(() => import("@/components/stats/StatsView"));
 const Leagues = lazy(() => import("@/pages/Leagues"));
 const SocialPanel = lazy(() => import("@/components/SocialPanel"));
@@ -90,6 +91,7 @@ const Index = () => {
   const friendRequests = pendingRequests?.length ?? 0;
   const partyRequests = partyInvites?.length ?? 0;
   const socialBadge = friendRequests + partyRequests;
+  const { claimableCount } = useAchievements();
 
   // ---------------- Derived task lists ----------------
   const todayDow = new Date().getDay();
@@ -377,7 +379,7 @@ const Index = () => {
       <>
         <SectionHeader<ProgressTab>
           title="Progreso"
-          tabs={[{ id: "stats", label: "Estadísticas" }, { id: "achievements", label: "Logros" }, { id: "leagues", label: "Ligas" }]}
+          tabs={[{ id: "stats", label: "Estadísticas" }, { id: "achievements", label: claimableCount ? `Logros (${claimableCount})` : "Logros" }, { id: "leagues", label: "Ligas" }]}
           activeTab={progressTab}
           onTabChange={setProgressTab}
         />
@@ -435,7 +437,7 @@ const Index = () => {
       className={cn("flex h-full overflow-hidden", wallpaperAnimated && "wp-animated")}
       style={wallpaper?.background ? { background: wallpaper.background } : undefined}
     >
-      <SideNav current={section} onChange={setSection} badges={{ community: socialBadge }} />
+      <SideNav current={section} onChange={setSection} badges={{ community: socialBadge, progress: claimableCount }} />
 
       <main
         className="relative flex-1 overflow-y-auto overscroll-contain"
@@ -450,7 +452,7 @@ const Index = () => {
         </div>
       </main>
 
-      <BottomNav current={section} onChange={setSection} badges={{ community: socialBadge }} />
+      <BottomNav current={section} onChange={setSection} badges={{ community: socialBadge, progress: claimableCount }} />
 
       {/* ---------------- Overlays ---------------- */}
       {xpPopup !== null && <XpPopup amount={xpPopup} onComplete={() => setXpPopup(null)} />}

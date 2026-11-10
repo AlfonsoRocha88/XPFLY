@@ -14,6 +14,12 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievement_unlocks: {
+        Row: { achievement_id: string; claimed_at: string; coins: number; id: number; tier: number; user_id: string }
+        Insert: { achievement_id: string; claimed_at?: string; coins?: number; id?: never; tier: number; user_id: string }
+        Update: { achievement_id?: string; claimed_at?: string; coins?: number; id?: never; tier?: number; user_id?: string }
+        Relationships: []
+      }
       clan_activity: {
         Row: {
           clan_id: string
@@ -422,6 +428,7 @@ export type Database = {
           daily_trophy_loss_date: string | null
           demo_sequence: Json | null
           display_name: string | null
+          equipped_frame: string | null
           equipped_title: string | null
           friend_code: string | null
           highest_trophies: number
@@ -449,6 +456,7 @@ export type Database = {
           timezone: string
           title_progress: Json
           trophies: number
+          unlocked_frames: string[]
           unlocked_outfits: string[]
           unlocked_titles: string[]
           unopened_chests: number
@@ -473,6 +481,7 @@ export type Database = {
           daily_trophy_loss_date?: string | null
           demo_sequence?: Json | null
           display_name?: string | null
+          equipped_frame?: string | null
           equipped_title?: string | null
           friend_code?: string | null
           highest_trophies?: number
@@ -500,6 +509,7 @@ export type Database = {
           timezone?: string
           title_progress?: Json
           trophies?: number
+          unlocked_frames?: string[]
           unlocked_outfits?: string[]
           unlocked_titles?: string[]
           unopened_chests?: number
@@ -524,6 +534,7 @@ export type Database = {
           daily_trophy_loss_date?: string | null
           demo_sequence?: Json | null
           display_name?: string | null
+          equipped_frame?: string | null
           equipped_title?: string | null
           friend_code?: string | null
           highest_trophies?: number
@@ -551,6 +562,7 @@ export type Database = {
           timezone?: string
           title_progress?: Json
           trophies?: number
+          unlocked_frames?: string[]
           unlocked_outfits?: string[]
           unlocked_titles?: string[]
           unopened_chests?: number
@@ -751,6 +763,7 @@ export type Database = {
       }
       generate_friend_code: { Args: never; Returns: string }
       get_global_trophy_rank: { Args: { _user_id: string }; Returns: number }
+      get_my_achievement_metrics: { Args: never; Returns: Json }
       get_my_activity: {
         Args: { p_from: string; p_to: string }
         Returns: {
