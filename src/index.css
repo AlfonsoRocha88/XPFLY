@@ -192,11 +192,100 @@ html, body {
   letter-spacing: -0.01em;
 }
 
+/* =========== Liquid Glass =========== */
+:root {
+  --glass-bg: 0 0% 100%;
+  --glass-alpha: 0.6;
+  --glass-border: 0 0% 100%;
+  --glass-border-alpha: 0.65;
+  --glass-highlight: 0.8;
+  --glass-shadow: 0.1;
+}
+.dark {
+  --glass-bg: 230 24% 17%;
+  --glass-alpha: 0.5;
+  --glass-border: 0 0% 100%;
+  --glass-border-alpha: 0.09;
+  --glass-highlight: 0.09;
+  --glass-shadow: 0.45;
+}
+
+/* Soft colored light behind the glass, tinted by the accent theme. */
+.ambient-bg {
+  background:
+    radial-gradient(60% 40% at 10% 0%, hsl(var(--primary) / 0.16), transparent 70%),
+    radial-gradient(50% 35% at 100% 30%, hsl(268 80% 65% / 0.12), transparent 70%),
+    radial-gradient(55% 40% at 0% 85%, hsl(172 70% 50% / 0.1), transparent 70%),
+    radial-gradient(45% 30% at 90% 100%, hsl(var(--primary-glow) / 0.12), transparent 70%),
+    hsl(var(--background));
+}
+/* Faint grain over the gradients so the blurred glass above them shows no color banding. */
+.ambient-bg::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Press feedback for every control: a quick springy dip. `scale` composes with transforms. */
+button, [role="button"], a {
+  transition-property: scale, background-color, border-color, color, box-shadow, opacity;
+  transition-duration: 180ms;
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+button:not(:disabled):active, [role="button"]:active {
+  scale: 0.96;
+  transition-duration: 90ms;
+}
+
 @layer components {
+  /* Frosted glass: translucent fill, blur + saturation, hairline border and a top highlight. */
+  .glass {
+    background: hsl(var(--glass-bg) / var(--glass-alpha));
+    -webkit-backdrop-filter: blur(22px) saturate(170%);
+    backdrop-filter: blur(22px) saturate(170%);
+    border: 1px solid hsl(var(--glass-border) / var(--glass-border-alpha));
+    /* Lit top-left rim, dim bottom-right shade, then the float shadow: reads as curved glass.
+       Done with inset shadows instead of a masked ::before so no extra layer or positioning is needed. */
+    box-shadow:
+      inset 1px 1px 0 hsl(0 0% 100% / var(--glass-highlight)),
+      inset -1px -1px 0 hsl(var(--shadow-color) / 0.06),
+      0 1px 2px hsl(var(--shadow-color) / 0.04),
+      0 10px 32px hsl(var(--shadow-color) / var(--glass-shadow));
+  }
+
+  /* Denser glass for dialogs, sheets and menus: text over busy content must stay readable. */
+  .glass-strong {
+    @apply glass;
+    background: hsl(var(--glass-bg) / calc(var(--glass-alpha) + 0.28));
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    backdrop-filter: blur(30px) saturate(180%);
+  }
+
   /* Generic surface used across screens */
   .surface {
-    @apply rounded-2xl border border-border bg-card;
-    box-shadow: 0 1px 2px hsl(var(--shadow-color) / 0.04), 0 4px 16px hsl(var(--shadow-color) / 0.05);
+    @apply glass rounded-2xl;
+  }
+
+  /* Accessibility: users who ask for less transparency get solid panels. */
+  @media (prefers-reduced-transparency: reduce) {
+    .glass,
+    .glass-strong {
+      background: hsl(var(--card));
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+  /* Browsers without backdrop-filter: an opaque-enough fill keeps text readable. */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass,
+    .glass-strong {
+      background: hsl(var(--card) / 0.94);
+    }
   }
 
   .section-title {
@@ -281,7 +370,7 @@ html, body {
 
 .daily-quest-item {
   @apply flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors;
-  background: hsl(var(--muted) / 0.6);
+  background: hsl(var(--foreground) / 0.045);
 }
 
 @media (hover: hover) {
@@ -296,7 +385,8 @@ html, body {
 
 .daily-quest-reward {
   @apply mx-4 mb-4 mt-2 rounded-xl p-3;
-  background: hsl(var(--xp) / 0.1);
+  background: hsl(var(--xp) / 0.12);
+  border: 1px solid hsl(var(--xp) / 0.18);
 }
 
 .daily-claim-btn {

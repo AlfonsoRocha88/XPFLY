@@ -1,3 +1,4 @@
+import { motion } from "motion/react";
 import { LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import PlayerHUD from "@/components/PlayerHUD";
@@ -15,7 +16,7 @@ const SideNav = ({ current, onChange, badges = {} }: SideNavProps) => {
   const { signOut } = useAuth();
 
   return (
-    <aside className="hidden h-full w-64 shrink-0 flex-col border-r border-border bg-sidebar p-4 md:flex">
+    <aside className="glass relative z-20 hidden h-full w-64 shrink-0 flex-col rounded-none border-y-0 border-l-0 p-4 md:flex">
       <div className="mb-5 px-2 font-serif text-3xl font-semibold tracking-tight text-primary">XPFly</div>
 
       <div className="surface mb-5 p-3">
@@ -32,14 +33,17 @@ const SideNav = ({ current, onChange, badges = {} }: SideNavProps) => {
               onClick={() => { if (!active) { playSfx("nav"); onChange(id); } }}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium transition-colors",
-                active ? "bg-primary/10 text-primary" : "text-sidebar-foreground hover:bg-sidebar-accent",
+                "relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium transition-colors",
+                active ? "text-primary" : "text-sidebar-foreground hover:bg-foreground/5",
               )}
             >
-              <Icon className="h-5 w-5" strokeWidth={active ? 2.4 : 2} />
-              <span className="flex-1 text-left">{label}</span>
+              {active && (
+                <motion.span layoutId="sidenav-pill" className="absolute inset-0 rounded-xl bg-primary/10" transition={{ type: "spring", stiffness: 450, damping: 36 }} />
+              )}
+              <Icon className="relative h-5 w-5" strokeWidth={active ? 2.4 : 2} />
+              <span className="relative flex-1 text-left">{label}</span>
               {badge > 0 && (
-                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[11px] font-semibold text-destructive-foreground">
+                <span className="relative flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[11px] font-semibold text-destructive-foreground">
                   {badge}
                 </span>
               )}

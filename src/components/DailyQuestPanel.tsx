@@ -1,4 +1,5 @@
 import { Check, Flame, Gift, Trash2, Sun } from "lucide-react";
+import { SwipeToDelete } from "@/components/SwipeToDelete";
 import { cn } from "@/lib/utils";
 import type { Task } from "@/lib/types";
 import TaskCheck from "@/components/TaskCheck";
@@ -81,8 +82,9 @@ const DailyQuestPanel = ({
         {dailyTasks.map((task) => {
           const isDone = task.status === "done";
           return (
-            <li
-              key={task.id}
+            <li key={task.id}>
+            <SwipeToDelete onDelete={() => onDeleteTask(task.id)} className="rounded-2xl">
+            <div
               className={cn("daily-quest-item group/daily cursor-pointer", isDone && "daily-quest-item-done")}
               onClick={() => onEditTask?.(task)}
             >
@@ -96,12 +98,14 @@ const DailyQuestPanel = ({
               </span>
               <button
                 type="button"
-                className="rounded-full p-1.5 text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/daily:opacity-100"
-                onClick={(e) => { e.stopPropagation(); playSfx("delete"); onDeleteTask(task.id); }}
+                className="rounded-full p-1.5 text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/daily:opacity-100 [@media(hover:none)]:sr-only"
+                onClick={(e) => { e.stopPropagation(); onDeleteTask(task.id); }}
                 aria-label={`Eliminar tarea diaria ${task.title}`}
               >
                 <Trash2 className="h-4 w-4" />
               </button>
+            </div>
+            </SwipeToDelete>
             </li>
           );
         })}

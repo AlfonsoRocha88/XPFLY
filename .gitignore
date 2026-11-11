@@ -30,3 +30,7 @@ dist-ssr
 # Supabase CLI
 supabase/.temp
 .branches
+
+# Generated brand kit (screens and assets for animation tools)
+/brand-kit/
+/brand-kit.zip

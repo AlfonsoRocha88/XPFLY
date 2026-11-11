@@ -1,5 +1,5 @@
-import { lazy, Suspense, useCallback, useMemo, useRef, useState } from "react";
-import { CalendarClock, Plus, Search, Sparkles, Swords, X } from "lucide-react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CalendarClock, Plus, Search, Sparkles, Swords } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useProfile } from "@/hooks/useProfile";
@@ -25,6 +25,8 @@ import type { Task } from "@/lib/types";
 import { playSfx } from "@/lib/sfx";
 import { cn } from "@/lib/utils";
 import { useAchievements } from "@/hooks/useAchievements";
+import { motion } from "motion/react";
+import { PageTransition, TabTransition, useDirection } from "@/components/layout/Transitions";
 
 // Heavier sections load on first visit to keep startup fast.
 const CalendarView = lazy(() => import("@/components/CalendarView"));
@@ -36,6 +38,7 @@ const ClansPanel = lazy(() => import("@/components/ClansPanel"));
 const Shop = lazy(() => import("@/pages/Shop"));
 const WallpaperSelector = lazy(() => import("@/components/WallpaperSelector"));
 const ProfileOverview = lazy(() => import("@/components/ProfileOverview"));
+const SignOutLink = lazy(() => import("@/components/ProfileOverview").then((m) => ({ default: m.SignOutLink })));
 const ScheduleBlockDialog = lazy(() => import("@/components/ScheduleBlockDialog"));
 
 type ProgressTab = "stats" | "achievements" | "leagues";
@@ -43,6 +46,7 @@ type CommunityTab = "friends" | "party" | "clans";
 type ProfileTab = "shop" | "style";
 
 const ONE_HOUR = 60 * 60 * 1000;
+const UNDO_MS = 4500;
 
 const SectionFallback = () => (
   <div className="flex justify-center py-16">
@@ -72,6 +76,15 @@ const Index = () => {
   const [profileTab, setProfileTab] = useState<ProfileTab>("shop");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
+  const sectionDir = useDirection(section, SECTIONS.map((s) => s.id));
+  const progressDir = useDirection<ProgressTab>(progressTab, ["stats", "achievements", "leagues"]);
+  const communityDir = useDirection<CommunityTab>(communityTab, ["friends", "party", "clans"]);
+  const profileDir = useDirection<ProfileTab>(profileTab, ["shop", "style"]);
+  // Logros is a full-screen scene behind the page: the page lets touches through to it.
+  const galaxyMode = section === "progress" && progressTab === "achievements";
+
+  const [pendingDelete, setPendingDelete] = useState<ReadonlySet<string>>(new Set());
+  const deleteTimers = useRef(new Map<string, { timer: number; commit: () => Promise<void> }>());
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -96,15 +109,15 @@ const Index = () => {
   // ---------------- Derived task lists ----------------
   const todayDow = new Date().getDay();
   const dailyMissions = useMemo(
-    () => dailyTasks.filter((t) => !t.daily_days?.length || t.daily_days.includes(todayDow)),
-    [dailyTasks, todayDow],
+    () => dailyTasks.filter((t) => !pendingDelete.has(t.id) && (!t.daily_days?.length || t.daily_days.includes(todayDow))),
+    [dailyTasks, todayDow, pendingDelete],
   );
   const allDailyCompleted = dailyMissions.length > 0 && dailyMissions.every((t) => t.status === "done");
   const today = new Date().toISOString().split("T")[0];
   const dailyBonusClaimed = profile?.daily_completed_at === today;
 
   const visibleTasks = useMemo(() => {
-    const pending = tasks.filter((t) => t.status !== "done");
+    const pending = tasks.filter((t) => t.status !== "done" && !pendingDelete.has(t.id));
     const q = searchQuery.trim().toLowerCase();
     if (!q) return pending;
     return pending.filter(
@@ -113,9 +126,9 @@ const Index = () => {
         t.description?.toLowerCase().includes(q) ||
         t.tags?.some((tag) => tag.toLowerCase().includes(q)),
     );
-  }, [tasks, searchQuery]);
+  }, [tasks, searchQuery, pendingDelete]);
 
-  const calendarTasks = useMemo(() => allTasks.filter((t) => !t.is_daily && !t.parent_task_id), [allTasks]);
+  const calendarTasks = useMemo(() => allTasks.filter((t) => !t.is_daily && !t.parent_task_id && !pendingDelete.has(t.id)), [allTasks, pendingDelete]);
 
   // ---------------- Actions ----------------
   const openNewTask = (date: Date | null = null) => {
@@ -211,14 +224,45 @@ const Index = () => {
     }
   };
 
-  const handleDeleteTask = useCallback(async (id: string) => {
-    try {
-      playSfx("delete");
-      await deleteTask.mutateAsync(id);
-    } catch {
-      toast.error("No se pudo eliminar la tarea");
-    }
+  // Deleting hides the task at once and commits after a grace period, so there is
+  // no "are you sure?" step: a mistaken swipe is undone from the toast instead.
+  const handleDeleteTask = useCallback((id: string) => {
+    playSfx("delete");
+    setPendingDelete((s) => new Set(s).add(id));
+    const restore = () => setPendingDelete((s) => { const n = new Set(s); n.delete(id); return n; });
+    const commit = async () => {
+      deleteTimers.current.delete(id);
+      try {
+        await deleteTask.mutateAsync(id);
+      } catch {
+        restore();
+        toast.error("No se pudo eliminar la tarea");
+      }
+    };
+    deleteTimers.current.set(id, { timer: window.setTimeout(commit, UNDO_MS), commit });
+    toast("Tarea eliminada", {
+      duration: UNDO_MS,
+      action: {
+        label: "Deshacer",
+        onClick: () => {
+          const pending = deleteTimers.current.get(id);
+          if (!pending) return;
+          window.clearTimeout(pending.timer);
+          deleteTimers.current.delete(id);
+          restore();
+        },
+      },
+    });
   }, [deleteTask]);
+
+  // Leaving the app inside the undo window still deletes what was swiped away.
+  useEffect(() => {
+    const flush = () => {
+      for (const { timer, commit } of deleteTimers.current.values()) { window.clearTimeout(timer); void commit(); }
+    };
+    window.addEventListener("pagehide", flush);
+    return () => { window.removeEventListener("pagehide", flush); flush(); };
+  }, []);
 
   const handleReorder = useCallback(async (taskId: string, newPosition: number) => {
     try {
@@ -271,7 +315,7 @@ const Index = () => {
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="fixed bottom-[calc(env(safe-area-inset-bottom)+5.5rem)] right-4 z-30 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lift transition-transform active:scale-90 md:bottom-8 md:right-8 md:h-auto md:w-auto md:gap-2 md:px-5 md:py-3.5"
+      className="fixed bottom-[calc(env(safe-area-inset-bottom)+5.75rem)] right-4 z-30 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lift ring-1 ring-inset ring-white/25 animate-in zoom-in-75 fade-in duration-300 md:bottom-8 md:right-8 md:h-auto md:w-auto md:gap-2 md:px-5 md:py-3.5"
     >
       <Plus className="h-7 w-7 md:h-5 md:w-5" strokeWidth={2.75} />
       <span className="hidden text-[15px] font-semibold md:inline">{label}</span>
@@ -311,20 +355,18 @@ const Index = () => {
               {searchOpen ? (
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  {/* No close button: an empty field closes itself when it loses focus. */}
                   <input
                     autoFocus
+                    type="search"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onBlur={() => { if (!searchQuery.trim()) setSearchOpen(false); }}
+                    onKeyDown={(e) => { if (e.key === "Escape") { setSearchQuery(""); setSearchOpen(false); } }}
                     placeholder="Buscar tareas…"
-                    className="h-10 w-full rounded-full border border-border bg-card pl-9 pr-9 text-sm font-semibold outline-none focus:border-primary"
+                    aria-label="Buscar tareas"
+                    className="glass h-10 w-full rounded-full pl-9 pr-4 text-sm font-semibold outline-none focus:border-primary"
                   />
-                  <button
-                    onClick={() => { setSearchQuery(""); setSearchOpen(false); }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:text-foreground"
-                    aria-label="Cerrar búsqueda"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
                 </div>
               ) : (
                 <>
@@ -356,7 +398,6 @@ const Index = () => {
             />
           </section>
         </div>
-        {fab(() => openNewTask(), "Nueva tarea")}
       </>
     );
   } else if (section === "calendar") {
@@ -371,7 +412,6 @@ const Index = () => {
             onDeleteTask={handleDeleteTask}
           />
         </div>
-        {fab(() => { playSfx("open"); setCreateChoiceOpen(true); }, "Crear")}
       </>
     );
   } else if (section === "progress") {
@@ -382,10 +422,11 @@ const Index = () => {
           tabs={[{ id: "stats", label: "Estadísticas" }, { id: "achievements", label: claimableCount ? `Logros (${claimableCount})` : "Logros" }, { id: "leagues", label: "Ligas" }]}
           activeTab={progressTab}
           onTabChange={setProgressTab}
+          overlay={galaxyMode}
         />
-        <div className="mx-auto w-full max-w-3xl px-4 md:px-8">
+        <TabTransition id={progressTab} dir={progressDir} className="mx-auto w-full max-w-3xl px-4 md:px-8">
           {progressTab === "leagues" ? <Leagues /> : progressTab === "stats" ? <StatsView habits={dailyTasks} /> : <AchievementsView />}
-        </div>
+        </TabTransition>
       </>
     );
   } else if (section === "community") {
@@ -401,9 +442,9 @@ const Index = () => {
           activeTab={communityTab}
           onTabChange={setCommunityTab}
         />
-        <div className="mx-auto w-full max-w-3xl px-4 md:px-8">
+        <TabTransition id={communityTab} dir={communityDir} className="mx-auto w-full max-w-3xl px-4 md:px-8">
           {communityTab === "clans" ? <ClansPanel /> : <SocialPanel view={communityTab} />}
-        </div>
+        </TabTransition>
       </>
     );
   } else {
@@ -412,21 +453,25 @@ const Index = () => {
         <SectionHeader title="Perfil" />
         <div className="mx-auto w-full max-w-3xl space-y-5 px-4 md:px-8">
           <ProfileOverview />
-          <div className="flex rounded-full bg-muted p-1">
+          <div className="glass flex rounded-full p-1" role="tablist">
             {([["shop", "Tienda"], ["style", "Estilo"]] as const).map(([id, label]) => (
               <button
                 key={id}
-                onClick={() => { playSfx("nav"); setProfileTab(id); }}
-                className={cn(
-                  "flex-1 rounded-full py-1.5 text-sm font-medium transition-all",
-                  profileTab === id ? "bg-card shadow-soft" : "text-muted-foreground",
-                )}
+                role="tab"
+                aria-selected={profileTab === id}
+                onClick={() => { if (profileTab !== id) { playSfx("nav"); setProfileTab(id); } }}
+                className={cn("relative flex-1 rounded-full py-1.5 text-sm font-medium transition-colors", profileTab === id ? "text-foreground" : "text-muted-foreground")}
               >
-                {label}
+                {profileTab === id && (
+                  <motion.span layoutId="profile-pill" className="absolute inset-0 rounded-full bg-card shadow-soft" transition={{ type: "spring", stiffness: 420, damping: 34 }} />
+                )}
+                <span className="relative">{label}</span>
               </button>
             ))}
           </div>
-          {profileTab === "shop" ? <Shop /> : <WallpaperSelector />}
+          <TabTransition id={profileTab} dir={profileDir}>
+            {profileTab === "shop" ? <Shop /> : <><WallpaperSelector /><SignOutLink /></>}
+          </TabTransition>
         </div>
       </>
     );
@@ -434,7 +479,7 @@ const Index = () => {
 
   return (
     <div
-      className={cn("flex h-full overflow-hidden", wallpaperAnimated && "wp-animated")}
+      className={cn("flex h-full overflow-hidden", wallpaperAnimated && "wp-animated", !wallpaper?.background && "ambient-bg")}
       style={wallpaper?.background ? { background: wallpaper.background } : undefined}
     >
       <SideNav current={section} onChange={setSection} badges={{ community: socialBadge, progress: claimableCount }} />
@@ -444,13 +489,22 @@ const Index = () => {
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        <div
-          key={section}
-          className={cn("section-enter min-h-full", section === "calendar" ? "pb-20 md:pb-0" : "pb-32 md:pb-12")}
+        <PageTransition
+          id={section}
+          dir={sectionDir}
+          className={cn(
+            "relative z-10 min-h-full",
+            section === "calendar" ? "pb-24 md:pb-0" : "pb-32 md:pb-12",
+            galaxyMode && "pointer-events-none",
+          )}
         >
           <Suspense fallback={<SectionFallback />}>{content}</Suspense>
-        </div>
+        </PageTransition>
       </main>
+
+      {/* The add button sits outside the animated page so its fixed position never shifts mid-transition. */}
+      {section === "tasks" && fab(() => openNewTask(), "Nueva tarea")}
+      {section === "calendar" && fab(() => { playSfx("open"); setCreateChoiceOpen(true); }, "Crear")}
 
       <BottomNav current={section} onChange={setSection} badges={{ community: socialBadge, progress: claimableCount }} />
 
@@ -469,7 +523,7 @@ const Index = () => {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md rounded-t-3xl bg-card p-5 shadow-lift animate-in slide-in-from-bottom-4 md:rounded-3xl"
+            className="glass-strong w-full max-w-md rounded-t-3xl p-5 shadow-lift animate-in slide-in-from-bottom-4 md:rounded-3xl"
             style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 1.25rem)" }}
           >
             <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-muted md:hidden" />

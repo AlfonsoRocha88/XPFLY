@@ -1,0 +1,191 @@
+{
+  "version": 2,
+  "skills": {
+    "accessibility": {
+      "source": "addyosmani/web-quality-skills",
+      "sourceType": "github",
+      "skillPath": "skills/accessibility/SKILL.md",
+      "computedHash": "c668809f5df57feb87cc06f1bc37fb340d1d92e26bacb6edbeab9258d22e76a5"
+    },
+    "drive-motivation": {
+      "source": "wondelai/skills",
+      "sourceType": "github",
+      "skillPath": "drive-motivation/SKILL.md",
+      "computedHash": ""
+    },
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/find-skills/SKILL.md",
+      "computedHash": "7bc223e2aafbdbf6e50ea243ba6ef67fe432bb069ab439fea0390795dac0bf7f"
+    },
+    "glassmorphism": {
+      "source": "iart-ai/web-animation-skills",
+      "sourceType": "github",
+      "skillPath": "skills/glassmorphism/SKILL.md",
+      "computedHash": "52c31c76c1ce3c52485ed43c3dc36796c833972a0f916215392c2b611209a2dc"
+    },
+    "higgsfield-brandkit": {
+      "source": "higgsfield-ai/skills",
+      "sourceType": "github",
+      "skillPath": "higgsfield-brandkit/SKILL.md",
+      "computedHash": "e7647cd6f6e20426eeafc11b737c0ff4bbcc33776efc29131b2e728500845c33"
+    },
+    "higgsfield-faceless-video": {
+      "source": "higgsfield-ai/skills",
+      "sourceType": "github",
+      "skillPath": "higgsfield-faceless-video/SKILL.md",
+      "computedHash": "95c4288e64c35e561f8bf6afea57ff52289b8da4c71a519144d9de8a4e2fa125"
+    },
+    "higgsfield-generate": {
+      "source": "higgsfield-ai/skills",
+      "sourceType": "github",
+      "skillPath": "higgsfield-generate/SKILL.md",
+      "computedHash": "20fb9cdafbea6900609e4a7f5e0091ed439ba65131dd59b915ff8202a008ca57"
+    },
+    "higgsfield-marketplace-cards": {
+      "source": "higgsfield-ai/skills",
+      "sourceType": "github",
+      "skillPath": "higgsfield-marketplace-cards/SKILL.md",
+      "computedHash": ""
+    },
+    "higgsfield-product-photoshoot": {
+      "source": "higgsfield-ai/skills",
+      "sourceType": "github",
+      "skillPath": "higgsfield-product-photoshoot/SKILL.md",
+      "computedHash": "cd9bf8f795be535a96852b6d5c5207ddf7238fe4ada06bb226086cac721f741a"
+    },
+    "higgsfield-soul-id": {
+      "source": "higgsfield-ai/skills",
+      "sourceType": "github",
+      "skillPath": "higgsfield-soul-id/SKILL.md",
+      "computedHash": ""
+    },
+    "higgsfield-video-explainer": {
+      "source": "higgsfield-ai/skills",
+      "sourceType": "github",
+      "skillPath": "higgsfield-video-explainer/SKILL.md",
+      "computedHash": "22e3132222b7120768530d385d1513bf678be59677f9363a5177adbbe323a518"
+    },
+    "higgsfield-websites": {
+      "source": "higgsfield-ai/skills",
+      "sourceType": "github",
+      "skillPath": "higgsfield-websites/SKILL.md",
+      "computedHash": "03f247a262133675f6a573fb6c66f1be8950f4addde18c5fa3499c39dd32ea64"
+    },
+    "higgsfield-youtube-thumbnail": {
+      "source": "higgsfield-ai/skills",
+      "sourceType": "github",
+      "skillPath": "higgsfield-youtube-thumbnail/SKILL.md",
+      "computedHash": ""
+    },
+    "microinteractions": {
+      "source": "wondelai/skills",
+      "sourceType": "github",
+      "skillPath": "microinteractions/SKILL.md",
+      "computedHash": ""
+    },
+    "mobile-touch": {
+      "source": "dylantarre/animation-principles",
+      "sourceType": "github",
+      "skillPath": "skills/01-by-domain/mobile-touch/SKILL.md",
+      "computedHash": "64a685d3140bbd2db100c103da0d99b66dcfa7ad6cc8c89aa4c47fa198cd43b6"
+    },
+    "motion-framer": {
+      "source": "freshtechbro/claudedesignskills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/motion-framer/SKILL.md",
+      "computedHash": ""
+    },
+    "performance": {
+      "source": "addyosmani/web-quality-skills",
+      "sourceType": "github",
+      "skillPath": "skills/performance/SKILL.md",
+      "computedHash": "06902ebc4a8b91bfb8d1a99a03f186f0535b03d1a776ef751206104ef9b86c4c"
+    },
+    "pixijs": {
+      "source": "pixijs/pixijs-skills",
+      "sourceType": "github",
+      "skillPath": "skills/pixijs/SKILL.md",
+      "computedHash": "82bc6fc13be3ec47cb6aff822ba03da778d0687dd379fbf01375db66b9ad4b2a"
+    },
+    "pixijs-accessibility": {
+      "source": "pixijs/pixijs-skills",
+      "sourceType": "github",
+      "skillPath": "skills/pixijs-accessibility/SKILL.md",
+      "computedHash": "06e40f8cce7a79f87d29ae043f3b63eb2a2666db36aeb660701818de90581274"
+    },
+    "pixijs-application": {
+      "source": "pixijs/pixijs-skills",
+      "sourceType": "github",
+      "skillPath": "skills/pixijs-application/SKILL.md",
+      "computedHash": "82b8467a9b88b3a58faba425b77abb77d51629558cd29a189479d33e8c2e6503"
+    },
+    "pixijs-assets": {
+      "source": "pixijs/pixijs-skills",
+      "sourceType": "github",
+      "skillPath": "skills/pixijs-assets/SKILL.md",
+      "computedHash": "5a330e48f664ccf37a5dfec318663d9b9f4441fe42beec540dc3e733a8267cc6"
+    },
+    "pixijs-blend-modes": {
+      "source": "pixijs/pixijs-skills",
+      "sourceType": "github",
+      "skillPath": "skills/pixijs-blend-modes/SKILL.md",
+      "computedHash": "4674dad0b8b89923403981ead1553fd6a283918ba345ce4bf0842dc3a45aba9e"
+    },
+    "pixijs-events": {
+      "source": "pixijs/pixijs-skills",
+      "sourceType": "github",
+      "skillPath": "skills/pixijs-events/SKILL.md",
+      "computedHash": "8e125bc73f860ee1d07b037f6fd91d4396d985b1f31aec1ec4eb3a07c33128d5"
+    },
+    "pixijs-filters": {
+      "source": "pixijs/pixijs-skills",
+      "sourceType": "github",
+      "skillPath": "skills/pixijs-filters/SKILL.md",
+      "computedHash": "d66454857d4a4efb8b5a1becdfc068e6a06677597a03a9fc06966a62653e5dc4"
+    },
+    "pixijs-math": {
+      "source": "pixijs/pixijs-skills",
+      "sourceType": "github",
+      "skillPath": "skills/pixijs-math/SKILL.md",
+      "computedHash": "d0e7b2d4e331b7d3594c08acef0299c551b8676876336931b5085cf2d3df0eaa"
+    },
+    "pixijs-performance": {
+      "source": "pixijs/pixijs-skills",
+      "sourceType": "github",
+      "skillPath": "skills/pixijs-performance/SKILL.md",
+      "computedHash": "8bc1579306295a912bfa7cdbf4d6d2799139474d9ee7f04b0f748b1adf8142f9"
+    },
+    "pixijs-scene-container": {
+      "source": "pixijs/pixijs-skills",
+      "sourceType": "github",
+      "skillPath": "skills/pixijs-scene-container/SKILL.md",
+      "computedHash": "b02f16e40b67160d67ec2f0b25d0b7e260b98266874c5b3c680456f999a356ad"
+    },
+    "pixijs-scene-graphics": {
+      "source": "pixijs/pixijs-skills",
+      "sourceType": "github",
+      "skillPath": "skills/pixijs-scene-graphics/SKILL.md",
+      "computedHash": "f0e788bc9c4d609bbf1a749da3d03e8838728d9286ff8664746f4f78ae18100d"
+    },
+    "pixijs-scene-particle-container": {
+      "source": "pixijs/pixijs-skills",
+      "sourceType": "github",
+      "skillPath": "skills/pixijs-scene-particle-container/SKILL.md",
+      "computedHash": "01934d3b3108aa4b602784a8a658af0bc333251d7116b3d9f8142fc7d3f42a64"
+    },
+    "pixijs-scene-sprite": {
+      "source": "pixijs/pixijs-skills",
+      "sourceType": "github",
+      "skillPath": "skills/pixijs-scene-sprite/SKILL.md",
+      "computedHash": "3865f6660d3d0c5b939b6e5529bc9e5b26bda069bef9a640ae26cbec5888cbc6"
+    },
+    "pixijs-ticker": {
+      "source": "pixijs/pixijs-skills",
+      "sourceType": "github",
+      "skillPath": "skills/pixijs-ticker/SKILL.md",
+      "computedHash": "49abaa1d3073329d8ac67df7693feac405fd1b1025508de6234287413ce7a67d"
+    }
+  }
+}

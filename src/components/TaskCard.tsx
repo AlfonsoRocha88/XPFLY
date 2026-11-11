@@ -4,6 +4,7 @@ import { es } from "date-fns/locale";
 import { CalendarDays, ChevronDown, Trash2 } from "lucide-react";
 import type { Task, TaskPriority } from "@/lib/types";
 import TaskCheck from "@/components/TaskCheck";
+import { SwipeToDelete } from "@/components/SwipeToDelete";
 import { cn } from "@/lib/utils";
 import { XP_REWARDS, PRIORITY_META } from "@/lib/xp";
 
@@ -30,6 +31,7 @@ const TaskCard = ({ task, subtasks, onToggleComplete, onEdit, onDelete, onToggle
   const handleToggle = () => onToggleComplete(task);
 
   return (
+    <SwipeToDelete onDelete={() => onDelete(task.id)} className="rounded-2xl">
     <div
       ref={cardRef}
       className={cn("task-card-game group task-card-enter", isDone && "completed", exiting && "task-card-exit")}
@@ -79,7 +81,7 @@ const TaskCard = ({ task, subtasks, onToggleComplete, onEdit, onDelete, onToggle
 
         <button
           type="button"
-          className="-mr-1 rounded-full p-1.5 text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
+          className="-mr-1 rounded-full p-1.5 text-muted-foreground transition-opacity hover:bg-destructive/10 hover:text-destructive [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:none)]:sr-only"
           onClick={() => onDelete(task.id)}
           onPointerDown={(e) => e.stopPropagation()}
           aria-label={`Eliminar tarea ${task.title}`}
@@ -117,6 +119,7 @@ const TaskCard = ({ task, subtasks, onToggleComplete, onEdit, onDelete, onToggle
         </div>
       )}
     </div>
+    </SwipeToDelete>
   );
 };
 

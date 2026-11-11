@@ -89,7 +89,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   { id: "finanzas", constellation: "conocimiento", name: "Finanzas", unit: "tareas con #finanzas", thresholds: [5, 25, 100], value: tag("finanzas") },
   { id: "creativo", constellation: "conocimiento", name: "Creativo", unit: "tareas con #creativo", thresholds: [5, 25, 100], value: tag("creativo") },
   // Ascenso y comunidad
-  { id: "ascenso", constellation: "ascenso", name: "Ascenso", unit: "nivel alcanzado", thresholds: [5, 15, 30], value: (m) => m.level },
+  { id: "ascenso", constellation: "ascenso", name: "Ascenso", unit: "niveles", thresholds: [5, 15, 30], value: (m) => m.level },
   { id: "coleccionista", constellation: "ascenso", name: "Coleccionista", unit: "trofeos (máximo)", thresholds: [50, 200, 500], value: (m) => m.highestTrophies },
   { id: "liga", constellation: "ascenso", name: "Liga", unit: "liga alcanzada", thresholds: [3, 4, 10], tierLabels: ["Liga Plata", "Liga Oro", "Liga Diamante"], value: (m) => leagueFamilyFor(m.highestTrophies) },
   { id: "amigos", constellation: "ascenso", name: "Amigos", unit: "amigos", thresholds: [1, 5, 10], value: (m) => m.friends },
