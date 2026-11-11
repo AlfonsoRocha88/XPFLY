@@ -1,10 +1,12 @@
 /* XPFly service worker - app shell cache + Web Push handlers */
-const CACHE_VERSION = "xpfly-v1";
+const CACHE_VERSION = "xpfly-v2";
 const APP_SHELL = [
   "/",
   "/manifest.json",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
+  "/icons/icon-maskable-192.png",
+  "/icons/icon-maskable-512.png",
   "/icons/apple-touch-icon.png",
   "/favicon.png",
 ];
