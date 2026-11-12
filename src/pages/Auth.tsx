@@ -53,6 +53,19 @@ function PasswordStrength({ value, showError }: { value: string; showError?: boo
   );
 }
 
+/** Supabase auth errors in plain Spanish (the API returns English). */
+function authErrorEs(error: { code?: string; message: string }): string {
+  switch (error.code) {
+    case "email_not_confirmed": return "Confirma tu correo antes de entrar: abre el correo más reciente de XPFly.";
+    case "invalid_credentials": return "Correo o contraseña incorrectos.";
+    case "user_already_exists":
+    case "email_exists": return "Ya existe una cuenta con ese correo. Inicia sesión.";
+    case "over_email_send_rate_limit": return "Ya te enviamos un correo hace un momento. Espera un minuto antes de pedir otro.";
+    case "weak_password": return "Elige una contraseña más segura.";
+    default: return error.message;
+  }
+}
+
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [useEmailLogin, setUseEmailLogin] = useState(false);
@@ -63,7 +76,37 @@ const Auth = () => {
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
   const [showReset, setShowReset] = useState(false);
+  // Set after sign-up (or a login on an unconfirmed account): replaces the form with "check your email".
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const [resendIn, setResendIn] = useState(0);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const t = window.setTimeout(() => setResendIn((n) => n - 1), 1000);
+    return () => window.clearTimeout(t);
+  }, [resendIn]);
+
+  // Came back from an email link that no longer works.
+  useEffect(() => {
+    let code: string | null = null;
+    try { code = sessionStorage.getItem("authLinkError"); sessionStorage.removeItem("authLinkError"); } catch { /* ignore */ }
+    if (code) {
+      toast.error(
+        code === "otp_expired"
+          ? "Ese enlace ya no sirve. Si pediste varios correos, solo funciona el más reciente. Inicia sesión y te enviamos uno nuevo."
+          : "No se pudo confirmar con ese enlace. Inicia sesión para recibir uno nuevo.",
+        { duration: 8000 },
+      );
+    }
+  }, []);
+
+  const resendConfirmation = async () => {
+    if (!pendingEmail || resendIn > 0) return;
+    const { error } = await supabase.auth.resend({ type: "signup", email: pendingEmail, options: { emailRedirectTo: window.location.origin } });
+    if (error) toast.error(authErrorEs(error));
+    else { toast.success("Te enviamos un correo nuevo. Usa ese y no los anteriores."); setResendIn(60); }
+  };
 
   // Apply user's last-saved theme, mode and wallpaper (cached on previous logged-in session)
   const lastWallpaperId = (typeof window !== "undefined" && localStorage.getItem("lastWallpaper")) || "default";
@@ -90,12 +133,17 @@ const Auth = () => {
     setLoading(true);
 
     if (isLogin) {
-      let loginEmail = email;
+      const loginEmail = email;
       if (!useEmailLogin) {
         // Sign in through the backend so usernames never expose account emails.
         const { data, error: fnError } = await supabase.functions.invoke("resolve-username", {
           body: { username: identifier.trim(), password },
         });
+        if (data?.code === "email_not_confirmed" && data.email) {
+          setPendingEmail(data.email as string);
+          setLoading(false);
+          return;
+        }
         if (fnError || !data?.access_token || !data?.refresh_token) {
           toast.error(data?.error ?? "Usuario o contraseña inválidos");
           setLoading(false);
@@ -111,8 +159,10 @@ const Auth = () => {
         return;
       }
       const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password });
-      if (error) {
-        toast.error(error.message);
+      if (error?.code === "email_not_confirmed") {
+        setPendingEmail(loginEmail);
+      } else if (error) {
+        toast.error(authErrorEs(error));
       } else {
         navigate("/");
       }
@@ -132,9 +182,12 @@ const Auth = () => {
         },
       });
       if (error) {
-        toast.error(error.message);
+        toast.error(authErrorEs(error));
       } else {
-        toast.success("Cuenta creada. Revisa tu correo para confirmarla.");
+        // Show the "check your email" screen instead of leaving the form up: tapping
+        // "Crear cuenta" again would send a new email and void the first link.
+        setPendingEmail(email);
+        setResendIn(60);
       }
     }
     setLoading(false);
@@ -153,6 +206,32 @@ const Auth = () => {
     }
     setLoading(false);
   };
+
+  if (pendingEmail) {
+    return (
+      <div className={`flex h-full flex-col overflow-y-auto overscroll-contain p-4 [&>*]:m-auto ${wallpaperAnimated ? "wp-animated" : ""}`} style={wallpaperStyle}>
+        <Card className="w-full max-w-md rounded-3xl border-0 shadow-lift">
+          <CardHeader className="text-center">
+            <CardTitle className="font-serif text-2xl font-medium">Confirma tu correo</CardTitle>
+            <CardDescription className="text-sm">
+              Te enviamos un enlace a <span className="font-semibold text-foreground">{pendingEmail}</span>. Ábrelo para activar tu cuenta y luego vuelve aquí para entrar.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3 text-center">
+            <p className="text-sm text-muted-foreground">
+              Si no lo ves, revisa Spam o Promociones. Si pides otro, usa solo el más reciente.
+            </p>
+            <Button type="button" variant="outline" className="h-11 w-full" disabled={resendIn > 0} onClick={resendConfirmation}>
+              {resendIn > 0 ? `Reenviar correo (${resendIn} s)` : "Reenviar correo"}
+            </Button>
+            <Button type="button" className="h-11 w-full" onClick={() => { setPendingEmail(null); setIsLogin(true); }}>
+              Ya lo confirmé, entrar
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (showReset) {
     return (
