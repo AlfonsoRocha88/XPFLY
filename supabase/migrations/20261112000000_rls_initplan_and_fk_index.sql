@@ -9,6 +9,8 @@ begin
     from pg_policies
     where schemaname = 'public'
       and (coalesce(qual, '') || coalesce(with_check, '')) ~ 'auth\.uid\(\)'
+      -- Idempotent: Postgres stores the wrapped form as "( SELECT auth.uid() AS uid)"; skip those.
+      and (coalesce(qual, '') || coalesce(with_check, '')) !~ 'SELECT auth\.uid\(\)'
   loop
     q := replace(p.qual, 'auth.uid()', '(select auth.uid())');
     c := replace(p.with_check, 'auth.uid()', '(select auth.uid())');
