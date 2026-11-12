@@ -218,7 +218,6 @@ export default function ScheduleBlockDialog({ open, onOpenChange }: Props) {
       if (error) throw error;
       toast.success(`${rows.length} bloque(s) creado(s)`);
       queryClient.invalidateQueries({ queryKey: ["all-tasks"] });
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
       onOpenChange(false);
     } catch (e: any) {
       toast.error(e?.message ?? "Error al crear horario");

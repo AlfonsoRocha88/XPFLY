@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { m, useReducedMotion } from "motion/react";
 import { ACHIEVEMENT_BY_ID, TIER_NAMES, type ConstellationId } from "@shared/achievements";
 import { Coin } from "@/components/icons/GameIcons";
 import { EMBLEM_ART } from "./emblems";
@@ -49,7 +49,7 @@ const UnlockCelebration = ({ data, onDone }: { data: Celebration; onDone: () => 
   );
 
   return (
-    <motion.div
+    <m.div
       className="fixed inset-0 z-[60] flex cursor-pointer flex-col items-center justify-center overflow-hidden"
       style={{ background: "radial-gradient(70% 55% at 50% 45%, #1F2A55 0%, #0B0F24 70%, #05070F 100%)" }}
       initial={{ opacity: 0 }}
@@ -63,7 +63,7 @@ const UnlockCelebration = ({ data, onDone }: { data: Celebration; onDone: () => 
       {!reduce && (
         <>
           {/* Rotating light rays */}
-          <motion.div
+          <m.div
             className="absolute h-[620px] w-[620px]"
             style={{ background: `repeating-conic-gradient(from 0deg, ${style.glow} 0deg 6deg, transparent 6deg 22deg)`, maskImage: "radial-gradient(circle, black 15%, transparent 65%)", WebkitMaskImage: "radial-gradient(circle, black 15%, transparent 65%)" }}
             initial={{ opacity: 0, scale: 0.6, rotate: 0 }}
@@ -71,7 +71,7 @@ const UnlockCelebration = ({ data, onDone }: { data: Celebration; onDone: () => 
             transition={{ opacity: { duration: 0.6, delay: 0.3 }, scale: { duration: 0.8, delay: 0.3 }, rotate: { duration: 6, ease: "linear" } }}
           />
           {/* Ignition flash */}
-          <motion.div
+          <m.div
             className="absolute h-40 w-40 rounded-full"
             style={{ background: `radial-gradient(circle, #fff 0%, ${style.glow} 40%, transparent 70%)` }}
             initial={{ scale: 0, opacity: 1 }}
@@ -79,7 +79,7 @@ const UnlockCelebration = ({ data, onDone }: { data: Celebration; onDone: () => 
             transition={{ duration: 0.9, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
           />
           {sparks.map((p, i) => (
-            <motion.span
+            <m.span
               key={i}
               className="absolute rounded-full bg-white"
               style={{ width: p.s, height: p.s }}
@@ -94,7 +94,7 @@ const UnlockCelebration = ({ data, onDone }: { data: Celebration; onDone: () => 
       {/* Star → medallion: a point of light ignites, then the medallion flips in on a spring */}
       <div className="relative" style={{ perspective: 900 }}>
         {!reduce && (
-          <motion.div
+          <m.div
             className="absolute left-1/2 top-1/2 -ml-1.5 -mt-1.5 h-3 w-3 rounded-full bg-white"
             style={{ boxShadow: "0 0 30px 10px rgba(255,255,255,.7)" }}
             initial={{ scale: 0, opacity: 0 }}
@@ -102,7 +102,7 @@ const UnlockCelebration = ({ data, onDone }: { data: Celebration; onDone: () => 
             transition={{ duration: 0.55, times: [0, 0.6, 1] }}
           />
         )}
-        <motion.div
+        <m.div
           initial={reduce ? { opacity: 0 } : { scale: 0.2, rotateY: 200, opacity: 0 }}
           animate={reduce ? { opacity: 1 } : { scale: 1, rotateY: 0, opacity: 1 }}
           transition={reduce ? { duration: 0.3 } : { type: "spring", stiffness: 140, damping: 13, delay: 0.35 }}
@@ -110,11 +110,11 @@ const UnlockCelebration = ({ data, onDone }: { data: Celebration; onDone: () => 
           <TierMedallion tier={data.tier} size={168} shine>
             {Art && <Art className="h-full w-full" />}
           </TierMedallion>
-        </motion.div>
+        </m.div>
 
         {!reduce &&
           coins.map((c, i) => (
-            <motion.span
+            <m.span
               key={i}
               className="absolute left-1/2 top-1/2 -ml-3 -mt-3 text-xp"
               initial={{ x: 0, y: 0, scale: 0, rotate: 0, opacity: 0 }}
@@ -122,11 +122,11 @@ const UnlockCelebration = ({ data, onDone }: { data: Celebration; onDone: () => 
               transition={{ duration: 1.4, delay: c.delay, ease: [0.16, 1, 0.3, 1] }}
             >
               <Coin size={24} />
-            </motion.span>
+            </m.span>
           ))}
       </div>
 
-      <motion.div
+      <m.div
         className="relative mt-8 flex flex-col items-center px-6 text-center"
         initial={{ y: reduce ? 0 : 16, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -136,14 +136,14 @@ const UnlockCelebration = ({ data, onDone }: { data: Celebration; onDone: () => 
           {TIER_NAMES[data.tier - 1]} desbloqueado
         </span>
         <h2 className="mt-1 font-serif text-4xl font-medium text-white">{def?.name}</h2>
-        <motion.span
+        <m.span
           className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-1.5 text-base font-semibold text-[#FDE7A6]"
           initial={{ scale: reduce ? 1 : 0.6 }}
           animate={{ scale: 1 }}
           transition={{ delay: reduce ? 0 : 1.1, type: "spring", stiffness: 300, damping: 14 }}
         >
           <Coin size={18} /> +{data.coins} monedas
-        </motion.span>
+        </m.span>
         {data.extra > 0 && <span className="mt-2 text-sm text-white/60">y {data.extra} {data.extra === 1 ? "nivel más" : "niveles más"}</span>}
         {data.frames.map((f) => (
           <span key={f} className="mt-3 text-sm font-medium text-white">
@@ -151,8 +151,8 @@ const UnlockCelebration = ({ data, onDone }: { data: Celebration; onDone: () => 
           </span>
         ))}
         <span className="mt-6 text-xs text-white/40">Toca para continuar</span>
-      </motion.div>
-    </motion.div>
+      </m.div>
+    </m.div>
   );
 };
 

@@ -1,5 +1,5 @@
 import { useRef, type ReactNode } from "react";
-import { AnimatePresence, motion, useReducedMotion, type Variants } from "motion/react";
+import { AnimatePresence, m, useReducedMotion, type Variants } from "motion/react";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -23,9 +23,9 @@ export function PageTransition({ id, dir, className, children }: { id: string; d
   const reduce = useReducedMotion();
   return (
     <AnimatePresence mode="wait" initial={false} custom={dir}>
-      <motion.div key={id} custom={dir} variants={reduce ? fade : page} initial="enter" animate="center" exit="exit" className={className}>
+      <m.div key={id} custom={dir} variants={reduce ? fade : page} initial="enter" animate="center" exit="exit" className={className}>
         {children}
-      </motion.div>
+      </m.div>
     </AnimatePresence>
   );
 }
@@ -41,9 +41,9 @@ export function TabTransition({ id, dir, className, children }: { id: string; di
   const reduce = useReducedMotion();
   return (
     <AnimatePresence mode="wait" initial={false} custom={dir}>
-      <motion.div key={id} custom={dir} variants={reduce ? fade : tab} initial="enter" animate="center" exit="exit" className={className}>
+      <m.div key={id} custom={dir} variants={reduce ? fade : tab} initial="enter" animate="center" exit="exit" className={className}>
         {children}
-      </motion.div>
+      </m.div>
     </AnimatePresence>
   );
 }

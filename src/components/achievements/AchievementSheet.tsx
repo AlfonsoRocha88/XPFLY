@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { Check, Loader2, Lock, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CONSTELLATIONS, TIER_COINS, TIER_NAMES } from "@shared/achievements";
@@ -33,9 +33,9 @@ const AchievementSheet = ({ state: s, claiming, onClaim, onClose }: Props) => {
   const pendingCoins = TIER_COINS.slice(s.claimed, s.reached).reduce((a, b) => a + b, 0);
 
   return (
-    <motion.div className="fixed inset-0 z-50 flex items-end justify-center md:items-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+    <m.div className="fixed inset-0 z-50 flex items-end justify-center md:items-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
       <div className="absolute inset-0 bg-[#03040c]/55 backdrop-blur-[3px]" onClick={onClose} aria-hidden />
-      <motion.div
+      <m.div
         role="dialog"
         aria-modal="true"
         aria-labelledby="ach-title"
@@ -50,11 +50,11 @@ const AchievementSheet = ({ state: s, claiming, onClaim, onClose }: Props) => {
         </button>
 
         <div className="flex flex-col items-center text-center">
-          <motion.div layoutId={`emblem-${s.def.id}`} className="-mt-16 mb-3">
+          <m.div layoutId={`emblem-${s.def.id}`} className="-mt-16 mb-3">
             <TierMedallion tier={shownTier} size={120} shine={shownTier > 0} onDark>
               {Art && <Art className="h-full w-full" />}
             </TierMedallion>
-          </motion.div>
+          </m.div>
           <p className="text-xs font-medium uppercase tracking-wide text-white/60">{constellation?.name}</p>
           <h2 id="ach-title" className="font-serif text-2xl font-medium text-white">{s.def.name}</h2>
           <p className="mt-1 text-sm text-white/60">
@@ -79,7 +79,7 @@ const AchievementSheet = ({ state: s, claiming, onClaim, onClose }: Props) => {
                   <p className="truncate text-xs text-white/60">{label(i)}</p>
                   {current && (
                     <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/10" role="progressbar" aria-valuenow={Math.round(s.progress * 100)} aria-valuemin={0} aria-valuemax={100}>
-                      <motion.div className="h-full rounded-full bg-gradient-to-r from-[#F0B07A] to-[#FFE07A]" initial={{ width: 0 }} animate={{ width: `${s.progress * 100}%` }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }} />
+                      <m.div className="h-full rounded-full bg-gradient-to-r from-[#F0B07A] to-[#FFE07A]" initial={{ width: 0 }} animate={{ width: `${s.progress * 100}%` }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }} />
                     </div>
                   )}
                 </div>
@@ -93,7 +93,7 @@ const AchievementSheet = ({ state: s, claiming, onClaim, onClose }: Props) => {
         </ol>
 
         {s.claimable > 0 ? (
-          <motion.button
+          <m.button
             type="button"
             onClick={onClaim}
             disabled={claiming}
@@ -102,7 +102,7 @@ const AchievementSheet = ({ state: s, claiming, onClaim, onClose }: Props) => {
           >
             {claiming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Coin size={18} />}
             Reclamar +{pendingCoins} monedas
-          </motion.button>
+          </m.button>
         ) : s.reached === 3 ? (
           <p className="mt-5 text-center text-sm font-medium text-[#FFE07A]">Completado en oro</p>
         ) : (
@@ -110,8 +110,8 @@ const AchievementSheet = ({ state: s, claiming, onClaim, onClose }: Props) => {
             Te faltan <span className="font-semibold tabular-nums text-white">{(s.next ?? 0) - s.value}</span> para {TIER_NAMES[s.reached as 0 | 1 | 2]}
           </p>
         )}
-      </motion.div>
-    </motion.div>
+      </m.div>
+    </m.div>
   );
 };
 

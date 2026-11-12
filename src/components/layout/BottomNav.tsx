@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { cn } from "@/lib/utils";
 import { playSfx } from "@/lib/sfx";
 import { SECTIONS, type SectionId } from "./sections";
@@ -27,13 +27,13 @@ const BottomNav = ({ current, onChange, badges = {} }: BottomNavProps) => (
             className="relative flex flex-col items-center gap-0.5 rounded-[1.35rem] py-1.5"
           >
             {active && (
-              <motion.span
+              <m.span
                 layoutId="bottomnav-pill"
                 className="absolute inset-0 rounded-[1.35rem] bg-primary/10 shadow-[inset_0_1px_0_hsl(0_0%_100%/0.35)]"
                 transition={{ type: "spring", stiffness: 450, damping: 34 }}
               />
             )}
-            <motion.span
+            <m.span
               key={active ? "on" : "off"}
               initial={active ? { scale: 0.7, y: 2 } : false}
               animate={{ scale: 1, y: 0 }}
@@ -46,7 +46,7 @@ const BottomNav = ({ current, onChange, badges = {} }: BottomNavProps) => (
                   {badge > 9 ? "9+" : badge}
                 </span>
               )}
-            </motion.span>
+            </m.span>
             <span className={cn("relative text-[10.5px] font-medium", active ? "text-primary" : "text-muted-foreground")}>{label}</span>
           </button>
         );

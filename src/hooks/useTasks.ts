@@ -1,10 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import type { Task, TaskInsert, TaskUpdate } from "@/lib/types";
 
-const TASK_KEYS = [["tasks"], ["subtasks"], ["all-tasks"], ["daily-tasks"]] as const;
+export const TASKS_KEY = ["all-tasks"] as const;
+const TASK_KEYS = [TASKS_KEY] as const;
 
 export const useTasks = () => {
   const { user } = useAuth();
@@ -25,18 +26,18 @@ export const useTasks = () => {
       .eq("status", "done")
       .lt("completed_at", todayStart.toISOString())
       .then(() => {
-        queryClient.invalidateQueries({ queryKey: ["daily-tasks"] });
+        queryClient.invalidateQueries({ queryKey: TASKS_KEY });
       });
   }, [user, queryClient]);
 
-  const tasksQuery = useQuery({
-    queryKey: ["tasks"],
+  // One request for every task: the lists below are derived from it in memory.
+  // (Before, four overlapping queries hit the same table on every load and after every change.)
+  const allQuery = useQuery({
+    queryKey: TASKS_KEY,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tasks")
         .select("*")
-        .is("parent_task_id", null)
-        .eq("is_daily", false)
         .not("tags", "cs", '{tipo:horario}')
         .order("position", { ascending: true });
       if (error) throw error;
@@ -45,50 +46,16 @@ export const useTasks = () => {
     enabled: !!user,
   });
 
-  const dailyTasksQuery = useQuery({
-    queryKey: ["daily-tasks"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("tasks")
-        .select("*")
-        .is("parent_task_id", null)
-        .eq("is_daily", true)
-        .not("tags", "cs", '{tipo:horario}')
-        .order("position", { ascending: true });
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user,
-  });
-
-  const subtasksQuery = useQuery({
-    queryKey: ["subtasks"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("tasks")
-        .select("*")
-        .not("parent_task_id", "is", null)
-        .not("tags", "cs", '{tipo:horario}')
-        .order("position", { ascending: true });
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user,
-  });
-
-  const allTasksQuery = useQuery({
-    queryKey: ["all-tasks"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("tasks")
-        .select("*")
-        .not("tags", "cs", '{tipo:horario}')
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user,
-  });
+  const lists = useMemo(() => {
+    const all = allQuery.data ?? [];
+    return {
+      tasks: all.filter((t) => !t.parent_task_id && !t.is_daily),
+      dailyTasks: all.filter((t) => !t.parent_task_id && t.is_daily),
+      subtasks: all.filter((t) => !!t.parent_task_id),
+      // Newest first, as the calendar expects.
+      allTasks: [...all].sort((x, y) => (y.created_at ?? "").localeCompare(x.created_at ?? "")),
+    };
+  }, [allQuery.data]);
 
   const invalidateAll = () => {
     TASK_KEYS.forEach((queryKey) => queryClient.invalidateQueries({ queryKey }));
@@ -154,11 +121,8 @@ export const useTasks = () => {
   });
 
   return {
-    tasks: tasksQuery.data ?? [],
-    dailyTasks: dailyTasksQuery.data ?? [],
-    subtasks: subtasksQuery.data ?? [],
-    allTasks: allTasksQuery.data ?? [],
-    isLoading: tasksQuery.isLoading,
+    ...lists,
+    isLoading: allQuery.isLoading,
     createTask,
     updateTask,
     deleteTask,

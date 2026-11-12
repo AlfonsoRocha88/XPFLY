@@ -1,5 +1,5 @@
 import { useRef, type ReactNode } from "react";
-import { animate, motion, useMotionValue, useTransform } from "motion/react";
+import { animate, m, useMotionValue, useTransform } from "motion/react";
 import { Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -25,16 +25,16 @@ export function SwipeToDelete({ onDelete, className, children }: { onDelete: () 
 
   return (
     <div className={cn("relative", className)} data-no-swipe>
-      <motion.div
+      <m.div
         aria-hidden
         style={{ opacity: reveal }}
         className="absolute inset-0 flex items-center justify-end rounded-[inherit] bg-destructive pr-5 text-destructive-foreground"
       >
-        <motion.span style={{ scale: iconScale }}>
+        <m.span style={{ scale: iconScale }}>
           <Trash2 className="h-5 w-5" />
-        </motion.span>
-      </motion.div>
-      <motion.div
+        </m.span>
+      </m.div>
+      <m.div
         style={{ x }}
         drag={isTouch ? "x" : false}
         dragDirectionLock
@@ -58,7 +58,7 @@ export function SwipeToDelete({ onDelete, className, children }: { onDelete: () 
         className="relative touch-pan-y rounded-[inherit]"
       >
         {children}
-      </motion.div>
+      </m.div>
     </div>
   );
 }

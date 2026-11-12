@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { cn } from "@/lib/utils";
 import { playSfx } from "@/lib/sfx";
 
@@ -53,7 +53,7 @@ function SectionHeader<T extends string>({ title, subtitle, actions, tabs, activ
                 )}
               >
                 {active && (
-                  <motion.span
+                  <m.span
                     layoutId="subtab-pill"
                     className={cn("absolute inset-0 rounded-full", overlay ? "bg-white/15 shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]" : "bg-card shadow-soft")}
                     transition={{ type: "spring", stiffness: 420, damping: 34 }}

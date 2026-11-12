@@ -156,7 +156,7 @@ const Auth = () => {
 
   if (showReset) {
     return (
-      <div className={`flex min-h-screen items-center justify-center p-4 ${wallpaperAnimated ? "wp-animated" : ""}`} style={wallpaperStyle}>
+      <div className={`flex h-full flex-col overflow-y-auto overscroll-contain [&>*]:m-auto p-4 ${wallpaperAnimated ? "wp-animated" : ""}`} style={wallpaperStyle}>
         <Card className="w-full max-w-md border-2 border-primary/30">
           <CardHeader className="text-center">
             <CardTitle className="font-serif text-2xl font-medium">Restablecer contraseña</CardTitle>
@@ -164,7 +164,7 @@ const Auth = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleResetPassword} className="space-y-4">
-              <Input type="email" placeholder="tu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input type="email" placeholder="tu@email.com" aria-label="Correo" autoComplete="email" autoCapitalize="none" enterKeyHint="send" value={email} onChange={(e) => setEmail(e.target.value)} required />
               <Button type="submit" className="w-full font-pixel text-xs" disabled={loading}>
                 {loading ? "Enviando..." : "Enviar enlace"}
               </Button>
@@ -179,7 +179,7 @@ const Auth = () => {
   }
 
   return (
-    <div className={`flex h-full items-center justify-center overflow-y-auto p-4 ${wallpaperAnimated ? "wp-animated" : ""}`} style={wallpaperStyle}>
+    <div className={`flex h-full flex-col overflow-y-auto overscroll-contain p-4 [&>*]:m-auto ${wallpaperAnimated ? "wp-animated" : ""}`} style={wallpaperStyle}>
       <Card className="w-full max-w-md rounded-3xl border-0 shadow-lift">
         <CardHeader className="text-center">
           <div className="mx-auto mb-2">
@@ -199,12 +199,21 @@ const Auth = () => {
               <>
                 <Input
                   placeholder="Tu nombre"
+                  aria-label="Tu nombre"
+                  autoComplete="name"
+                  enterKeyHint="next"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   required
                 />
                 <Input
                   placeholder="Usuario (para iniciar sesión)"
+                  aria-label="Usuario"
+                  autoComplete="username"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  enterKeyHint="next"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
@@ -215,6 +224,10 @@ const Auth = () => {
             {isLogin && !useEmailLogin ? (
               <Input
                 placeholder="Usuario"
+                aria-label="Usuario"
+                autoComplete="username"
+                spellCheck={false}
+                enterKeyHint="next"
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
                 required
@@ -222,9 +235,9 @@ const Auth = () => {
                 autoCorrect="off"
               />
             ) : (
-              <Input type="email" placeholder="tu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input type="email" placeholder="tu@email.com" aria-label="Correo" autoComplete="email" autoCapitalize="none" enterKeyHint="next" value={email} onChange={(e) => setEmail(e.target.value)} required />
             )}
-            <Input type="password" placeholder="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+            <Input type="password" placeholder="Contraseña" aria-label="Contraseña" autoComplete={isLogin ? "current-password" : "new-password"} enterKeyHint="go" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
             {(!isLogin || password.length > 0) && password.length > 0 && (
               <PasswordStrength value={password} showError={!isLogin} />
             )}

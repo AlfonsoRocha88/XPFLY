@@ -32,14 +32,14 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div className="flex h-full flex-col overflow-y-auto overscroll-contain [&>*]:m-auto p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl text-center">Nueva contraseña</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <Input type="password" placeholder="Nueva contraseña" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+            <Input type="password" placeholder="Nueva contraseña" aria-label="Nueva contraseña" autoComplete="new-password" enterKeyHint="done" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Guardando..." : "Guardar contraseña"}
             </Button>

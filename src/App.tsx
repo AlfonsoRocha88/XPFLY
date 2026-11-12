@@ -1,5 +1,9 @@
 import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { LazyMotion } from "motion/react";
+
+// Motion's animation engine loads as its own chunk right after first paint, keeping it out of the main bundle.
+const loadMotionFeatures = () => import("@/lib/motionFeatures").then((r) => r.default);
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -51,6 +55,7 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => (
+  <LazyMotion features={loadMotionFeatures} strict>
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -71,6 +76,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
+  </LazyMotion>
 );
 
 export default App;

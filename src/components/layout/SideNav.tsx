@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import PlayerHUD from "@/components/PlayerHUD";
@@ -38,7 +38,7 @@ const SideNav = ({ current, onChange, badges = {} }: SideNavProps) => {
               )}
             >
               {active && (
-                <motion.span layoutId="sidenav-pill" className="absolute inset-0 rounded-xl bg-primary/10" transition={{ type: "spring", stiffness: 450, damping: 36 }} />
+                <m.span layoutId="sidenav-pill" className="absolute inset-0 rounded-xl bg-primary/10" transition={{ type: "spring", stiffness: 450, damping: 36 }} />
               )}
               <Icon className="relative h-5 w-5" strokeWidth={active ? 2.4 : 2} />
               <span className="relative flex-1 text-left">{label}</span>

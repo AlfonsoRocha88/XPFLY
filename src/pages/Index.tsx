@@ -13,7 +13,6 @@ import BottomNav from "@/components/layout/BottomNav";
 import SectionHeader from "@/components/layout/SectionHeader";
 import { SECTIONS, type SectionId } from "@/components/layout/sections";
 import PlayerHUD from "@/components/PlayerHUD";
-import TaskEditor from "@/components/task-editor/TaskEditor";
 import SleepCheckIn from "@/components/SleepCheckIn";
 import ListView from "@/components/ListView";
 import DailyQuestPanel from "@/components/DailyQuestPanel";
@@ -25,7 +24,7 @@ import type { Task } from "@/lib/types";
 import { playSfx } from "@/lib/sfx";
 import { cn } from "@/lib/utils";
 import { useAchievements } from "@/hooks/useAchievements";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { PageTransition, TabTransition, useDirection } from "@/components/layout/Transitions";
 
 // Heavier sections load on first visit to keep startup fast.
@@ -37,6 +36,9 @@ const SocialPanel = lazy(() => import("@/components/SocialPanel"));
 const ClansPanel = lazy(() => import("@/components/ClansPanel"));
 const Shop = lazy(() => import("@/pages/Shop"));
 const WallpaperSelector = lazy(() => import("@/components/WallpaperSelector"));
+// The editor (date picker, selects, popovers) is only needed once a task is opened.
+const loadTaskEditor = () => import("@/components/task-editor/TaskEditor");
+const TaskEditor = lazy(loadTaskEditor);
 const ProfileOverview = lazy(() => import("@/components/ProfileOverview"));
 const SignOutLink = lazy(() => import("@/components/ProfileOverview").then((m) => ({ default: m.SignOutLink })));
 const ScheduleBlockDialog = lazy(() => import("@/components/ScheduleBlockDialog"));
@@ -87,6 +89,14 @@ const Index = () => {
   const deleteTimers = useRef(new Map<string, { timer: number; commit: () => Promise<void> }>());
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  // Mount the editor the first time it opens and keep it mounted so its close animation still plays.
+  const [editorUsed, setEditorUsed] = useState(false);
+  useEffect(() => { if (dialogOpen) setEditorUsed(true); }, [dialogOpen]);
+  // Fetch its code while the phone is idle, so the first tap on + opens it without a wait.
+  useEffect(() => {
+    const idle = (window as Window & { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 1500));
+    idle(() => { void loadTaskEditor(); });
+  }, []);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [calendarDefaultDate, setCalendarDefaultDate] = useState<Date | null>(null);
   const [createChoiceOpen, setCreateChoiceOpen] = useState(false);
@@ -463,7 +473,7 @@ const Index = () => {
                 className={cn("relative flex-1 rounded-full py-1.5 text-sm font-medium transition-colors", profileTab === id ? "text-foreground" : "text-muted-foreground")}
               >
                 {profileTab === id && (
-                  <motion.span layoutId="profile-pill" className="absolute inset-0 rounded-full bg-card shadow-soft" transition={{ type: "spring", stiffness: 420, damping: 34 }} />
+                  <m.span layoutId="profile-pill" className="absolute inset-0 rounded-full bg-card shadow-soft" transition={{ type: "spring", stiffness: 420, damping: 34 }} />
                 )}
                 <span className="relative">{label}</span>
               </button>
@@ -485,7 +495,7 @@ const Index = () => {
       <SideNav current={section} onChange={setSection} badges={{ community: socialBadge, progress: claimableCount }} />
 
       <main
-        className="relative flex-1 overflow-y-auto overscroll-contain"
+        className="relative flex-1 overflow-y-auto overscroll-none"
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
@@ -553,6 +563,8 @@ const Index = () => {
         </div>
       )}
 
+      {editorUsed && (
+      <Suspense fallback={null}>
       <TaskEditor
         key={editingTask?.id ?? (dialogOpen ? "new" : "closed")}
         open={dialogOpen}
@@ -568,6 +580,8 @@ const Index = () => {
         onAddSubtask={editingTask ? handleAddSubtask : undefined}
         subtasks={editingTask ? subtasks.filter((s) => s.parent_task_id === editingTask.id) : []}
       />
+      </Suspense>
+      )}
 
       <ChestOpenOverlay
         open={chestOverlay.open}

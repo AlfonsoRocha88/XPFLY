@@ -17,6 +17,12 @@ function readMode(): ColorMode {
 
 function applyMode(mode: ColorMode) {
   document.documentElement.classList.toggle("dark", mode === "dark");
+  // The app switches theme with a class, so the browser chrome / status bar color must follow it here.
+  const color = mode === "dark" ? "#14161F" : "#F5F7FC";
+  document.querySelectorAll('meta[name="theme-color"]').forEach((m) => {
+    m.setAttribute("content", color);
+    m.removeAttribute("media");
+  });
 }
 
 /** Light is the default; dark is an opt-in stored per device. */

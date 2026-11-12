@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { ChevronLeft, Loader2, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CONSTELLATIONS, TIER_NAMES, type ConstellationId } from "@shared/achievements";
@@ -167,7 +167,7 @@ const GalaxyView = ({ states, starsLit, totalStars, claimableCount, claiming, on
 
   return (
     // Full screen behind the app chrome (the page above it is click-through in this tab).
-    <motion.div
+    <m.div
       data-no-swipe
       className="fixed inset-0 z-[5] select-none overflow-hidden md:left-64"
       style={{ background: "#070a1c" }}
@@ -227,7 +227,7 @@ const GalaxyView = ({ states, starsLit, totalStars, claimableCount, claiming, on
       {/* Overview header: progress and claim-all */}
       <AnimatePresence>
         {!focused && ready && (
-          <motion.div
+          <m.div
             key="summary"
             className={cn("absolute left-3 right-3 mx-auto flex max-w-xl items-center gap-3 rounded-3xl px-4 py-3", glass)}
             style={{ top: insets.top + 6 }}
@@ -243,7 +243,7 @@ const GalaxyView = ({ states, starsLit, totalStars, claimableCount, claiming, on
               <p className="text-xs text-white/60">Toca una constelación para acercarte</p>
             </div>
             {claimableCount > 0 && (
-              <motion.button
+              <m.button
                 type="button"
                 onClick={onClaimAll}
                 disabled={claiming}
@@ -252,9 +252,9 @@ const GalaxyView = ({ states, starsLit, totalStars, claimableCount, claiming, on
               >
                 {claiming ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
                 Reclamar {claimableCount}
-              </motion.button>
+              </m.button>
             )}
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
 
@@ -262,7 +262,7 @@ const GalaxyView = ({ states, starsLit, totalStars, claimableCount, claiming, on
       <AnimatePresence>
         {focused && info && (
           // Tapping empty sky goes back to the overview, so the only explicit control is a small icon.
-          <motion.div
+          <m.div
             key="detail"
             className="absolute inset-0"
             initial={{ opacity: 0 }}
@@ -290,7 +290,7 @@ const GalaxyView = ({ states, starsLit, totalStars, claimableCount, claiming, on
                     ref={(el) => { const k = `${focused}:${i}`; if (el) nodeRefs.current.set(k, el); else nodeRefs.current.delete(k); }}
                     className="absolute left-0 top-0"
                   >
-                  <motion.button
+                  <m.button
                     type="button"
                     /* A star that is ready claims on tap; any other opens its details. */
                     onClick={() => (s.claimable > 0 && !claiming ? onClaim(s.def.id) : onOpenAchievement(s.def.id))}
@@ -302,19 +302,19 @@ const GalaxyView = ({ states, starsLit, totalStars, claimableCount, claiming, on
                   >
                     <span className="relative">
                       {s.claimable > 0 && <span className="claim-halo absolute inset-0 rounded-full border-2 border-[#FDE7A6]" aria-hidden />}
-                      <motion.span layoutId={`emblem-${s.def.id}`} className="block">
+                      <m.span layoutId={`emblem-${s.def.id}`} className="block">
                         <TierMedallion tier={s.claimed} size={58} shine={s.claimed === 3} onDark>
                           {Art && <Art className="h-full w-full" />}
                         </TierMedallion>
-                      </motion.span>
+                      </m.span>
                     </span>
                     <span className="max-w-[84px] truncate rounded-full bg-black/30 px-2 py-0.5 text-[10.5px] font-medium text-white/85 backdrop-blur-sm">{s.def.name}</span>
-                  </motion.button>
+                  </m.button>
                   </div>
                 );
               })}
 
-            <motion.div
+            <m.div
               className={cn("absolute left-3 right-3 mx-auto max-w-xl overflow-y-auto overscroll-contain rounded-3xl p-2", glass)}
               style={{ bottom: insets.bottom + 10, maxHeight: (typeof window === "undefined" ? 600 : window.innerHeight - insets.top - insets.bottom) * 0.4 }}
               initial={{ y: 40, opacity: 0 }}
@@ -350,11 +350,11 @@ const GalaxyView = ({ states, starsLit, totalStars, claimableCount, claiming, on
                   </li>
                 ))}
               </ul>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </m.div>
   );
 };
 
