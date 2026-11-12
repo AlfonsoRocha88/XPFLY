@@ -266,6 +266,33 @@ export type Database = {
         }
         Relationships: []
       }
+      focus_settings: {
+        Row: {
+          focus_until: string | null
+          lock_until_dailies: boolean
+          pause_until: string | null
+          token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          focus_until?: string | null
+          lock_until_dailies?: boolean
+          pause_until?: string | null
+          token?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          focus_until?: string | null
+          lock_until_dailies?: boolean
+          pause_until?: string | null
+          token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       friendships: {
         Row: {
           created_at: string
