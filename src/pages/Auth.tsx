@@ -15,7 +15,7 @@ const Wordmark = () => (
     <h1 className="font-serif text-5xl font-normal tracking-tight text-white [font-variation-settings:'SOFT'_100] [text-shadow:0_0_18px_rgba(186,230,253,0.45),0_0_56px_rgba(167,139,250,0.4)]">
       Constela
     </h1>
-    <p className="mt-2 text-sm font-medium tracking-wide text-white/70">Sube de nivel en tu vida real</p>
+    <p className="mt-2 text-sm font-medium tracking-wide text-white/70">Alcanza más allá de las estrellas</p>
   </div>
 );
 
@@ -37,7 +37,6 @@ function authErrorEs(error: { code?: string; message: string }): string {
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [useEmailLogin, setUseEmailLogin] = useState(false);
   const [identifier, setIdentifier] = useState(""); // username for login
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -82,39 +81,28 @@ const Auth = () => {
     setLoading(true);
 
     if (isLogin) {
-      const loginEmail = email;
-      if (!useEmailLogin) {
-        // Sign in through the backend so usernames never expose account emails.
-        const { data, error: fnError } = await supabase.functions.invoke("resolve-username", {
-          body: { username: identifier.trim(), password },
-        });
-        if (data?.code === "email_not_confirmed" && data.email) {
-          setPendingEmail(data.email as string);
-          setLoading(false);
-          return;
-        }
-        if (fnError || !data?.access_token || !data?.refresh_token) {
-          toast.error(data?.error ?? "Usuario o contraseña inválidos");
-          setLoading(false);
-          return;
-        }
-        const { error } = await supabase.auth.setSession({
-          access_token: data.access_token as string,
-          refresh_token: data.refresh_token as string,
-        });
-        if (error) toast.error(error.message);
-        else navigate("/");
+      // Sign in through the backend so usernames never expose account emails.
+      const { data, error: fnError } = await supabase.functions.invoke("resolve-username", {
+        body: { username: identifier.trim(), password },
+      });
+      if (data?.code === "email_not_confirmed" && data.email) {
+        setPendingEmail(data.email as string);
         setLoading(false);
         return;
       }
-      const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password });
-      if (error?.code === "email_not_confirmed") {
-        setPendingEmail(loginEmail);
-      } else if (error) {
-        toast.error(authErrorEs(error));
-      } else {
-        navigate("/");
+      if (fnError || !data?.access_token || !data?.refresh_token) {
+        toast.error(data?.error ?? "Usuario o contraseña inválidos");
+        setLoading(false);
+        return;
       }
+      const { error } = await supabase.auth.setSession({
+        access_token: data.access_token as string,
+        refresh_token: data.refresh_token as string,
+      });
+      if (error) toast.error(error.message);
+      else navigate("/");
+      setLoading(false);
+      return;
     } else {
       const cleanUsername = username.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
       if (cleanUsername.length < 3) {
@@ -222,9 +210,7 @@ const Auth = () => {
             <h2 className="font-serif text-2xl font-normal text-white">
               {isLogin ? "Inicia sesión" : "Crea tu cuenta"}
             </h2>
-            <p className="text-sm text-white/65">
-              {isLogin ? "Qué bueno verte de nuevo" : "Organiza tu día y mide tu progreso"}
-            </p>
+            {!isLogin && <p className="text-sm text-white/65">Organiza tu día y mide tu progreso</p>}
           </div>
         </GlassItem>
         <form onSubmit={handleAuth} className="space-y-3">
@@ -259,7 +245,7 @@ const Auth = () => {
             </>
           )}
           <GlassItem>
-            {isLogin && !useEmailLogin ? (
+            {isLogin ? (
               <GlassInput
                 placeholder="Usuario"
                 aria-label="Usuario"
@@ -291,11 +277,6 @@ const Auth = () => {
             </GlassButton>
           </GlassItem>
           <GlassItem className="flex flex-col items-center gap-2 pt-2">
-            {isLogin && (
-              <GlassButton type="button" variant="pill" onClick={() => setUseEmailLogin(!useEmailLogin)}>
-                {useEmailLogin ? "Usar usuario en su lugar" : "¿Olvidaste tu usuario? Usar correo"}
-              </GlassButton>
-            )}
             <GlassButton type="button" variant="pill" className="text-white/90" onClick={() => setIsLogin(!isLogin)}>
               {isLogin ? "¿Nuevo aquí? Crear cuenta" : "¿Ya tienes cuenta? Entrar"}
             </GlassButton>
