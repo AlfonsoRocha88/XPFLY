@@ -8,8 +8,10 @@ export interface WallpaperOption {
   name: string;
   /** CSS `background` shorthand (or "" to use the app default). */
   background: string;
-  /** Premium animated scene drawn by <LivingBackground>; bought in the shop. */
+  /** Animated scene drawn by <LivingBackground>. Premium ones are bought in the shop. */
   living?: boolean;
+  /** Living scene everyone has (the default): never locked. */
+  free?: boolean;
   /** Small static preview for the picker. */
   preview?: string;
 }
@@ -76,6 +78,7 @@ export const WALLPAPERS: WallpaperOption[] = [
     name: "Nebulosa",
     background: "transparent",
     living: true,
+    free: true,
     preview: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 90'%3E%3Cdefs%3E%3CradialGradient id='a'%3E%3Cstop offset='0' stop-color='%23b18cff' stop-opacity='.9'/%3E%3Cstop offset='1' stop-color='%23b18cff' stop-opacity='0'/%3E%3C/radialGradient%3E%3CradialGradient id='b'%3E%3Cstop offset='0' stop-color='%235fc3ff' stop-opacity='.8'/%3E%3Cstop offset='1' stop-color='%235fc3ff' stop-opacity='0'/%3E%3C/radialGradient%3E%3CradialGradient id='c'%3E%3Cstop offset='0' stop-color='%23ff86c8' stop-opacity='.6'/%3E%3Cstop offset='1' stop-color='%23ff86c8' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='120' height='90' fill='%23120f33'/%3E%3Cellipse cx='34' cy='28' rx='44' ry='30' fill='url%28%23a%29'/%3E%3Cellipse cx='88' cy='56' rx='42' ry='30' fill='url%28%23b%29'/%3E%3Cellipse cx='56' cy='80' rx='34' ry='18' fill='url%28%23c%29'/%3E%3Cg fill='%23fff'%3E%3Ccircle cx='12' cy='10' r='.9'/%3E%3Ccircle cx='70' cy='14' r='1.2'/%3E%3Ccircle cx='104' cy='22' r='.8'/%3E%3Ccircle cx='26' cy='64' r='1'/%3E%3Ccircle cx='96' cy='80' r='1.1'/%3E%3Ccircle cx='60' cy='44' r='1.6'/%3E%3Ccircle cx='84' cy='36' r='.7'/%3E%3C/g%3E%3Cpath d='M60 39 L61 43.5 L65.5 44.5 L61 45.5 L60 50 L59 45.5 L54.5 44.5 L59 43.5 Z' fill='%23fff' opacity='.9'/%3E%3C/svg%3E") center / cover no-repeat`,
   },
   {
@@ -86,3 +89,6 @@ export const WALLPAPERS: WallpaperOption[] = [
     preview: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 90'%3E%3Cdefs%3E%3ClinearGradient id='w' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23cdeffd'/%3E%3Cstop offset='1' stop-color='%233e9fcb'/%3E%3C/linearGradient%3E%3ClinearGradient id='r' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23fff' stop-opacity='.55'/%3E%3Cstop offset='1' stop-color='%23fff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='120' height='90' fill='url%28%23w%29'/%3E%3Cg fill='url%28%23r%29'%3E%3Cpath d='M14 0 L24 0 L46 90 L32 90 Z'/%3E%3Cpath d='M54 0 L60 0 L78 90 L68 90 Z'/%3E%3Cpath d='M88 0 L98 0 L118 90 L104 90 Z'/%3E%3C/g%3E%3Cg fill='%23fff' fill-opacity='.2' stroke='%23fff' stroke-opacity='.85' stroke-width='.8'%3E%3Ccircle cx='30' cy='70' r='3.5'/%3E%3Ccircle cx='36' cy='56' r='2'/%3E%3Ccircle cx='33' cy='44' r='1.4'/%3E%3Ccircle cx='84' cy='76' r='4.5'/%3E%3Ccircle cx='80' cy='60' r='2.4'/%3E%3Ccircle cx='86' cy='48' r='1.6'/%3E%3Ccircle cx='60' cy='30' r='1.2'/%3E%3C/g%3E%3C/svg%3E") center / cover no-repeat`,
   },
 ];
+
+/** What everyone starts with (and what signed-out screens show). */
+export const DEFAULT_WALLPAPER = "living-nebulosa";

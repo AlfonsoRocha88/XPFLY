@@ -2,7 +2,7 @@ import { Check, Lock, Moon, Sparkles, Sun, Wind } from "lucide-react";
 import { toast } from "sonner";
 import { useProfile } from "@/hooks/useProfile";
 import { useColorMode } from "@/hooks/useAppTheme";
-import { WALLPAPERS } from "@/lib/wallpapers";
+import { DEFAULT_WALLPAPER, WALLPAPERS } from "@/lib/wallpapers";
 import { APP_THEMES } from "@/lib/themes";
 import { Switch } from "@/components/ui/switch";
 import NotificationSettings from "@/components/NotificationSettings";
@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 const WallpaperSelector = () => {
   const { profile, updateProfile } = useProfile();
   const { mode, setMode } = useColorMode();
-  const currentWallpaper = profile?.wallpaper || "default";
+  const currentWallpaper = profile?.wallpaper || DEFAULT_WALLPAPER;
   const currentTheme = profile?.theme || "system-cyan";
   const bgAnimations = profile?.bg_animations ?? true;
 
@@ -80,7 +80,7 @@ const WallpaperSelector = () => {
           {WALLPAPERS.map((wp) => {
             const active = currentWallpaper === wp.id;
             // Living backgrounds are bought in the shop; locked ones say where to get them.
-            const locked = !!wp.living && !(profile?.owned_items ?? []).includes(wp.id);
+            const locked = !!wp.living && !wp.free && !(profile?.owned_items ?? []).includes(wp.id);
             return (
               <button
                 key={wp.id}

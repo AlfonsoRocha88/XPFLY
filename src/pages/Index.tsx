@@ -19,7 +19,7 @@ import DailyQuestPanel from "@/components/DailyQuestPanel";
 import XpPopup from "@/components/XpPopup";
 import LevelUpToast from "@/components/LevelUpToast";
 import OrbOpenOverlay from "@/components/orb/OrbOpenOverlay";
-import { WALLPAPERS } from "@/lib/wallpapers";
+import { DEFAULT_WALLPAPER, WALLPAPERS } from "@/lib/wallpapers";
 import type { Task } from "@/lib/types";
 import { playSfx } from "@/lib/sfx";
 import { cn } from "@/lib/utils";
@@ -321,7 +321,7 @@ const Index = () => {
   };
 
   // ---------------- Wallpaper ----------------
-  const wallpaper = WALLPAPERS.find((w) => w.id === (profile?.wallpaper || "default"));
+  const wallpaper = WALLPAPERS.find((w) => w.id === (profile?.wallpaper || DEFAULT_WALLPAPER));
   const wallpaperAnimated = (profile?.bg_animations ?? true) && !!wallpaper?.background;
 
   // ---------------- Sections ----------------

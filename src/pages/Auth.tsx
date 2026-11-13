@@ -1,60 +1,26 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 
-import { WALLPAPERS } from "@/lib/wallpapers";
-import { lazy, Suspense } from "react";
-import type { LivingScene } from "@/components/living/LivingBackground";
+import { AuthScreen } from "@/components/auth/AuthScreen";
+import { GlassCard, GlassItem } from "@/components/auth/GlassCard";
+import { GlassInput } from "@/components/auth/GlassInput";
+import { GlassButton } from "@/components/auth/GlassButton";
+import { PasswordStrength } from "@/components/auth/PasswordStrength";
 
-const LivingBackground = lazy(() => import("@/components/living/LivingBackground"));
+/** Large serif wordmark with a soft, cold starlight glow. */
+const Wordmark = () => (
+  <div className="text-center">
+    <h1 className="font-serif text-6xl font-normal tracking-tight text-white [font-variation-settings:'SOFT'_100] [text-shadow:0_0_18px_rgba(186,230,253,0.45),0_0_56px_rgba(167,139,250,0.4)]">
+      XPFly
+    </h1>
+    <p className="mt-2 text-sm font-medium tracking-wide text-white/70">Sube de nivel en tu vida real</p>
+  </div>
+);
 
-function PasswordStrength({ value, showError }: { value: string; showError?: boolean }) {
-  const checks = [
-    value.length >= 6,
-    value.length >= 10,
-    /[A-Z]/.test(value),
-    /[0-9]/.test(value),
-    /[^A-Za-z0-9]/.test(value),
-  ];
-  const score = checks.filter(Boolean).length;
-  const labels = ["Muy débil", "Débil", "Aceptable", "Buena", "Fuerte", "Excelente"];
-  const colors = [
-    "bg-destructive",
-    "bg-destructive",
-    "bg-priority-medium",
-    "bg-priority-medium",
-    "bg-status-done",
-    "bg-status-done",
-  ];
-  const tooShort = value.length > 0 && value.length < 6;
-  return (
-    <div className="space-y-1">
-      <div className="flex gap-1">
-        {[0, 1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className={`h-1 flex-1 rounded-full transition-colors ${
-              i < score ? colors[score] : "bg-muted"
-            }`}
-          />
-        ))}
-      </div>
-      <p
-        className={`font-display text-xs ${
-          tooShort && showError ? "text-destructive" : "text-muted-foreground"
-        }`}
-      >
-        {tooShort && showError
-          ? "Mínimo 6 caracteres"
-          : `Fuerza: ${labels[score]}`}
-      </p>
-    </div>
-  );
-}
+/** Hairline of light separating the brand from the form. */
+const Divider = () => <div aria-hidden className="mx-auto h-px w-2/3 bg-gradient-to-r from-transparent via-white/30 to-transparent" />;
 
 /** Supabase auth errors in plain Spanish (the API returns English). */
 function authErrorEs(error: { code?: string; message: string }): string {
@@ -110,19 +76,6 @@ const Auth = () => {
     if (error) toast.error(authErrorEs(error));
     else { toast.success("Te enviamos un correo nuevo. Usa ese y no los anteriores."); setResendIn(60); }
   };
-
-  // Same look as inside the app: accent theme and light/dark mode are already applied by the
-  // inline script in index.html; the wallpaper and its animation come from the last session.
-  const lastWallpaperId = (typeof window !== "undefined" && localStorage.getItem("lastWallpaper")) || "default";
-  const lastAnims = (typeof window !== "undefined" && localStorage.getItem("lastBgAnimations")) !== "false";
-
-  const wp = useMemo(() => WALLPAPERS.find(w => w.id === lastWallpaperId), [lastWallpaperId]);
-  const wallpaperStyle: React.CSSProperties = wp?.background ? { background: wp.background } : {};
-  const wallpaperAnimated = lastAnims && !!wp?.background && wp.id !== "default";
-  // Default wallpaper = the app's soft ambient glow.
-  const bgClass = wp?.living ? "[&>*:not(canvas)]:relative [&>*:not(canvas)]:z-10" : wallpaperAnimated ? "wp-animated" : !wp?.background ? "ambient-bg" : "";
-  // A bought living background plays here too, so signing in already looks like your app.
-  const livingLayer = wp?.living ? <Suspense fallback={null}><LivingBackground scene={wp.id as LivingScene} /></Suspense> : null;
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -205,77 +158,80 @@ const Auth = () => {
 
   if (pendingEmail) {
     return (
-      <div className={`flex h-full flex-col overflow-y-auto overscroll-contain p-4 [&>*]:m-auto ${bgClass}`} style={wallpaperStyle}>
-        {livingLayer}
-        <Card className="w-full max-w-md rounded-3xl border-0 shadow-lift">
-          <CardHeader className="text-center">
-            <CardTitle className="font-serif text-2xl font-medium">Confirma tu correo</CardTitle>
-            <CardDescription className="text-sm">
-              Te enviamos un enlace a <span className="font-semibold text-foreground">{pendingEmail}</span>. Ábrelo para activar tu cuenta y luego vuelve aquí para entrar.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3 text-center">
-            <p className="text-sm text-muted-foreground">
+      <AuthScreen>
+        <GlassCard className="space-y-5 text-center">
+          <GlassItem className="space-y-2">
+            <h1 className="font-serif text-3xl font-normal tracking-tight text-white [text-shadow:0_0_24px_rgba(186,230,253,0.35)]">Confirma tu correo</h1>
+            <p className="text-sm leading-relaxed text-white/75">
+              Te enviamos un enlace a <span className="break-all font-semibold text-white">{pendingEmail}</span>. Ábrelo para activar tu cuenta y luego vuelve aquí para entrar.
+            </p>
+          </GlassItem>
+          <GlassItem>
+            <p className="text-sm text-white/60">
               Si no lo ves, revisa Spam o Promociones. Si pides otro, usa solo el más reciente.
             </p>
-            <Button type="button" variant="outline" className="h-11 w-full" disabled={resendIn > 0} onClick={resendConfirmation}>
+          </GlassItem>
+          <GlassItem className="space-y-3">
+            <GlassButton type="button" variant="secondary" disabled={resendIn > 0} onClick={resendConfirmation}>
               {resendIn > 0 ? `Reenviar correo (${resendIn} s)` : "Reenviar correo"}
-            </Button>
-            <Button type="button" className="h-11 w-full" onClick={() => { setPendingEmail(null); setIsLogin(true); }}>
+            </GlassButton>
+            <GlassButton type="button" onClick={() => { setPendingEmail(null); setIsLogin(true); }}>
               Ya lo confirmé, entrar
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+            </GlassButton>
+          </GlassItem>
+        </GlassCard>
+      </AuthScreen>
     );
   }
 
   if (showReset) {
     return (
-      <div className={`flex h-full flex-col overflow-y-auto overscroll-contain [&>*]:m-auto p-4 ${bgClass}`} style={wallpaperStyle}>
-        {livingLayer}
-        <Card className="w-full max-w-md border-2 border-primary/30">
-          <CardHeader className="text-center">
-            <CardTitle className="font-serif text-2xl font-medium">Restablecer contraseña</CardTitle>
-            <CardDescription className="font-pixel text-xs">Ingresa tu email para recibir un enlace</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleResetPassword} className="space-y-4">
-              <Input type="email" placeholder="tu@email.com" aria-label="Correo" autoComplete="email" autoCapitalize="none" enterKeyHint="send" value={email} onChange={(e) => setEmail(e.target.value)} required />
-              <Button type="submit" className="w-full font-pixel text-xs" disabled={loading}>
+      <AuthScreen>
+        <GlassCard className="space-y-5">
+          <GlassItem className="space-y-2 text-center">
+            <h1 className="font-serif text-3xl font-normal tracking-tight text-white [text-shadow:0_0_24px_rgba(186,230,253,0.35)]">Restablecer contraseña</h1>
+            <p className="text-sm text-white/70">Ingresa tu email para recibir un enlace</p>
+          </GlassItem>
+          <form onSubmit={handleResetPassword} className="space-y-3">
+            <GlassItem>
+              <GlassInput type="email" placeholder="tu@email.com" aria-label="Correo" autoComplete="email" autoCapitalize="none" enterKeyHint="send" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            </GlassItem>
+            <GlassItem className="space-y-3 pt-1">
+              <GlassButton type="submit" disabled={loading}>
                 {loading ? "Enviando..." : "Enviar enlace"}
-              </Button>
-              <Button type="button" variant="ghost" className="w-full font-pixel text-xs" onClick={() => setShowReset(false)}>
+              </GlassButton>
+              <GlassButton type="button" variant="secondary" onClick={() => setShowReset(false)}>
                 Volver
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
+              </GlassButton>
+            </GlassItem>
+          </form>
+        </GlassCard>
+      </AuthScreen>
     );
   }
 
   return (
-    <div className={`flex h-full flex-col overflow-y-auto overscroll-contain p-4 [&>*]:m-auto ${bgClass}`} style={wallpaperStyle}>
-        {livingLayer}
-      <Card className="w-full max-w-md rounded-3xl border-0 shadow-lift">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-2">
-            <h1 className="font-serif text-5xl font-semibold tracking-tight text-primary">XPFly</h1>
-            <p className="mt-1 text-sm font-medium text-muted-foreground">Sube de nivel en tu vida real</p>
+    <AuthScreen>
+      <GlassCard className="space-y-6">
+        <GlassItem>
+          <Wordmark />
+        </GlassItem>
+        <GlassItem className="space-y-4">
+          <Divider />
+          <div className="space-y-1 text-center">
+            <h2 className="font-serif text-2xl font-normal text-white">
+              {isLogin ? "Inicia sesión" : "Crea tu cuenta"}
+            </h2>
+            <p className="text-sm text-white/65">
+              {isLogin ? "Qué bueno verte de nuevo" : "Organiza tu día y mide tu progreso"}
+            </p>
           </div>
-          <CardTitle className="mt-4 font-serif text-2xl font-medium">
-            {isLogin ? "Inicia sesión" : "Crea tu cuenta"}
-          </CardTitle>
-          <CardDescription className="text-sm">
-            {isLogin ? "Qué bueno verte de nuevo" : "Organiza tu día y mide tu progreso"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleAuth} className="space-y-4">
-            {!isLogin && (
-              <>
-                <Input
+        </GlassItem>
+        <form onSubmit={handleAuth} className="space-y-3">
+          {!isLogin && (
+            <>
+              <GlassItem>
+                <GlassInput
                   placeholder="Tu nombre"
                   aria-label="Tu nombre"
                   autoComplete="name"
@@ -284,7 +240,9 @@ const Auth = () => {
                   onChange={(e) => setDisplayName(e.target.value)}
                   required
                 />
-                <Input
+              </GlassItem>
+              <GlassItem>
+                <GlassInput
                   placeholder="Usuario (para iniciar sesión)"
                   aria-label="Usuario"
                   autoComplete="username"
@@ -297,10 +255,12 @@ const Auth = () => {
                   required
                   minLength={3}
                 />
-              </>
-            )}
+              </GlassItem>
+            </>
+          )}
+          <GlassItem>
             {isLogin && !useEmailLogin ? (
-              <Input
+              <GlassInput
                 placeholder="Usuario"
                 aria-label="Usuario"
                 autoComplete="username"
@@ -313,38 +273,41 @@ const Auth = () => {
                 autoCorrect="off"
               />
             ) : (
-              <Input type="email" placeholder="tu@email.com" aria-label="Correo" autoComplete="email" autoCapitalize="none" enterKeyHint="next" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <GlassInput type="email" placeholder="tu@email.com" aria-label="Correo" autoComplete="email" autoCapitalize="none" enterKeyHint="next" value={email} onChange={(e) => setEmail(e.target.value)} required />
             )}
-            <Input type="password" placeholder="Contraseña" aria-label="Contraseña" autoComplete={isLogin ? "current-password" : "new-password"} enterKeyHint="go" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+          </GlassItem>
+          <GlassItem className="space-y-3">
+            <GlassInput type="password" placeholder="Contraseña" aria-label="Contraseña" autoComplete={isLogin ? "current-password" : "new-password"} enterKeyHint="go" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
             {(!isLogin || password.length > 0) && password.length > 0 && (
               <PasswordStrength value={password} showError={!isLogin} />
             )}
-            <Button
+          </GlassItem>
+          <GlassItem className="pt-2">
+            <GlassButton
               type="submit"
-              className="h-12 w-full text-base font-semibold"
               disabled={loading || (!isLogin && password.length > 0 && password.length < 6)}
             >
               {loading ? "Cargando..." : isLogin ? "Ingresar" : "Crear cuenta"}
-            </Button>
-            <div className="flex flex-col gap-2 text-center">
-              {isLogin && (
-                <button type="button" className="font-pixel text-[11px] text-muted-foreground hover:text-primary transition-colors" onClick={() => setUseEmailLogin(!useEmailLogin)}>
-                  {useEmailLogin ? "Usar usuario en su lugar" : "¿Olvidaste tu usuario? Usar correo"}
-                </button>
-              )}
-              <button type="button" className="font-pixel text-xs text-muted-foreground hover:text-primary transition-colors" onClick={() => setIsLogin(!isLogin)}>
-                {isLogin ? "¿Nuevo aquí? Crear cuenta" : "¿Ya tienes cuenta? Entrar"}
-              </button>
-              {isLogin && (
-                <button type="button" className="font-pixel text-xs text-muted-foreground hover:text-primary transition-colors" onClick={() => setShowReset(true)}>
-                  ¿Olvidaste tu contraseña?
-                </button>
-              )}
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+            </GlassButton>
+          </GlassItem>
+          <GlassItem className="flex flex-col items-center gap-2 pt-2">
+            {isLogin && (
+              <GlassButton type="button" variant="pill" onClick={() => setUseEmailLogin(!useEmailLogin)}>
+                {useEmailLogin ? "Usar usuario en su lugar" : "¿Olvidaste tu usuario? Usar correo"}
+              </GlassButton>
+            )}
+            <GlassButton type="button" variant="pill" className="text-white/90" onClick={() => setIsLogin(!isLogin)}>
+              {isLogin ? "¿Nuevo aquí? Crear cuenta" : "¿Ya tienes cuenta? Entrar"}
+            </GlassButton>
+            {isLogin && (
+              <GlassButton type="button" variant="pill" onClick={() => setShowReset(true)}>
+                ¿Olvidaste tu contraseña?
+              </GlassButton>
+            )}
+          </GlassItem>
+        </form>
+      </GlassCard>
+    </AuthScreen>
   );
 };
 
