@@ -35,3 +35,6 @@ verify_jwt = false
 verify_jwt = false
 [functions.moderate-avatar]
 verify_jwt = false
+
+[functions.shop-buy]
+verify_jwt = false
