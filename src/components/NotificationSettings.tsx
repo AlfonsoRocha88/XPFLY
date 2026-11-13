@@ -27,7 +27,7 @@ function describeStatus(status: Exclude<PushStatus, "on" | "off">): string {
     case "denied":
       return "Bloqueaste las notificaciones. Actívalas en la configuración de tu navegador para este sitio.";
     case "needs-install":
-      return "En iPhone, primero agrega XPFly a tu pantalla de inicio (Compartir → Agregar a inicio) y ábrela desde ahí.";
+      return "En iPhone, primero agrega Constela a tu pantalla de inicio (Compartir → Agregar a inicio) y ábrela desde ahí.";
     case "unsupported":
       return "Este navegador no admite notificaciones. Prueba con Chrome, Edge o Safari actualizado.";
   }

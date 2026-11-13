@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json();
     const userIds: string[] = body.user_ids || (body.user_id ? [body.user_id] : []);
-    const title: string = body.title || "XPFly";
+    const title: string = body.title || "Constela";
     const message: string = body.body || "";
     const tag: string | undefined = body.tag;
     const data: any = body.data || {};

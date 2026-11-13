@@ -17,7 +17,7 @@ const SideNav = ({ current, onChange, badges = {} }: SideNavProps) => {
 
   return (
     <aside className="glass relative z-20 hidden h-full w-64 shrink-0 flex-col rounded-none border-y-0 border-l-0 p-4 md:flex">
-      <div className="mb-5 px-2 font-serif text-3xl font-semibold tracking-tight text-primary">XPFly</div>
+      <div className="mb-5 px-2 font-serif text-3xl font-semibold tracking-tight text-primary">Constela</div>
 
       <div className="surface mb-5 p-3">
         <PlayerHUD />

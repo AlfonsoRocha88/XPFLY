@@ -95,7 +95,7 @@ Deno.serve(async (req) => {
     });
     if (signInErr?.code === "email_not_confirmed") {
       // Password was right; the account just hasn't confirmed its email yet.
-      return new Response(JSON.stringify({ error: "Confirma tu correo antes de entrar: abre el correo más reciente de XPFly.", code: "email_not_confirmed", email: userData.user.email }), {
+      return new Response(JSON.stringify({ error: "Confirma tu correo antes de entrar: abre el correo más reciente de Constela.", code: "email_not_confirmed", email: userData.user.email }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

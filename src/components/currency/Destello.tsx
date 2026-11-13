@@ -2,7 +2,7 @@ import { useId } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Destello: XPFly's currency. A faceted four-point crystal with a soft halo.
+ * Destello: Constela's currency. A faceted four-point crystal with a soft halo.
  * Pale iridescent fill (white → ice blue → lilac) reads as precious without shouting.
  */
 export function Destello({ size = 16, className, twinkle = false }: { size?: number; className?: string; twinkle?: boolean }) {

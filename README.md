@@ -1,4 +1,4 @@
-# XPFly
+# Constela
 
 Tu lista de pendientes con XP, niveles, amigos, clanes y un compañero llamado Pyro.
 

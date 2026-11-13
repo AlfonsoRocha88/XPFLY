@@ -12,8 +12,8 @@ import { PasswordStrength } from "@/components/auth/PasswordStrength";
 /** Large serif wordmark with a soft, cold starlight glow. */
 const Wordmark = () => (
   <div className="text-center">
-    <h1 className="font-serif text-6xl font-normal tracking-tight text-white [font-variation-settings:'SOFT'_100] [text-shadow:0_0_18px_rgba(186,230,253,0.45),0_0_56px_rgba(167,139,250,0.4)]">
-      XPFly
+    <h1 className="font-serif text-5xl font-normal tracking-tight text-white [font-variation-settings:'SOFT'_100] [text-shadow:0_0_18px_rgba(186,230,253,0.45),0_0_56px_rgba(167,139,250,0.4)]">
+      Constela
     </h1>
     <p className="mt-2 text-sm font-medium tracking-wide text-white/70">Sube de nivel en tu vida real</p>
   </div>
@@ -25,7 +25,7 @@ const Divider = () => <div aria-hidden className="mx-auto h-px w-2/3 bg-gradient
 /** Supabase auth errors in plain Spanish (the API returns English). */
 function authErrorEs(error: { code?: string; message: string }): string {
   switch (error.code) {
-    case "email_not_confirmed": return "Confirma tu correo antes de entrar: abre el correo más reciente de XPFly.";
+    case "email_not_confirmed": return "Confirma tu correo antes de entrar: abre el correo más reciente de Constela.";
     case "invalid_credentials": return "Correo o contraseña incorrectos.";
     case "user_already_exists":
     case "email_exists": return "Ya existe una cuenta con ese correo. Inicia sesión.";

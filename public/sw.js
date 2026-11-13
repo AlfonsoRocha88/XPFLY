@@ -1,5 +1,5 @@
-/* XPFly service worker - app shell cache + Web Push handlers */
-const CACHE_VERSION = "xpfly-v2";
+/* Constela service worker - app shell cache + Web Push handlers */
+const CACHE_VERSION = "constela-v3";
 const APP_SHELL = [
   "/",
   "/manifest.json",
@@ -61,13 +61,13 @@ self.addEventListener("fetch", (event) => {
 
 /* Push notification handler */
 self.addEventListener("push", (event) => {
-  let payload = { title: "XPFly", body: "" };
+  let payload = { title: "Constela", body: "" };
   try {
     if (event.data) payload = event.data.json();
   } catch (e) {
-    try { payload = { title: "XPFly", body: event.data ? event.data.text() : "" }; } catch {}
+    try { payload = { title: "Constela", body: event.data ? event.data.text() : "" }; } catch {}
   }
-  const title = payload.title || "XPFly";
+  const title = payload.title || "Constela";
   const options = {
     body: payload.body || "",
     icon: "/icons/icon-192.png",

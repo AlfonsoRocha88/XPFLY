@@ -39,7 +39,7 @@ export default function IOSInstallBanner() {
         <div className="flex items-start gap-2">
           <Share className="h-5 w-5 text-primary shrink-0 mt-0.5" />
           <p className="text-xs leading-relaxed text-foreground">
-            <span className="font-pixel text-xs text-primary">Instala XPFly</span>
+            <span className="font-pixel text-xs text-primary">Instala Constela</span>
             <br />
             toca compartir y selecciona <strong>'Añadir a pantalla de inicio'</strong>.
           </p>

@@ -1,4 +1,4 @@
-// XPFly sound set: synthesized live with Web Audio (no files to download).
+// Constela sound set: synthesized live with Web Audio (no files to download).
 // Palette: glass bells and soft shimmer in E major pentatonic (with a lydian A# for the
 // big moments), sent through a long, airy reverb so everything sounds spacious and calm.
 // Frequent actions (taps, tabs) are tiny and dry; rare ones (level up, orbs) get the full tail.
