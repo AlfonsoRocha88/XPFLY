@@ -40,7 +40,6 @@ const WallpaperSelector = lazy(() => import("@/components/WallpaperSelector"));
 const loadTaskEditor = () => import("@/components/task-editor/TaskEditor");
 const TaskEditor = lazy(loadTaskEditor);
 const ProfileOverview = lazy(() => import("@/components/ProfileOverview"));
-const FocusCard = lazy(() => import("@/components/focus/FocusCard"));
 const SignOutLink = lazy(() => import("@/components/ProfileOverview").then((m) => ({ default: m.SignOutLink })));
 const ScheduleBlockDialog = lazy(() => import("@/components/ScheduleBlockDialog"));
 
@@ -360,8 +359,6 @@ const Index = () => {
             unopenedChests={unopenedChests}
             onOpenChest={triggerOpenChest}
           />
-
-          <FocusCard pendingDailies={dailyMissions.filter((t) => t.status !== "done").length} />
 
           <section className="space-y-3">
             <div className="flex items-center justify-between gap-2">
