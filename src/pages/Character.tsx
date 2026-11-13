@@ -8,12 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getTitle, DEFAULT_TITLE_PROGRESS, TitleProgress } from "@/lib/titles";
 
-const FREEZE_COST_XP = 100;
 
 /** Profile detail: avatar, titles and account stats. */
 const Character = () => {
   const navigate = useNavigate();
-  const { profile, equipTitle, buyStreakFreeze, isLoading } = useProfile();
+  const { profile, equipTitle, isLoading } = useProfile();
 
   const level = profile?.level ?? 1;
   const equippedTitleId = profile?.equipped_title as string | null;
@@ -87,20 +86,9 @@ const Character = () => {
               <InfoRow label="Racha actual" value={`${streak} ${streak === 1 ? "día" : "días"}`} />
               <InfoRow label="Títulos desbloqueados" value={String(unlockedTitles.length)} />
               <InfoRow label="Protectores de racha" value={`${freezes} de ${freezeMax}`} />
-              <div className="flex items-center justify-between gap-3 pt-3">
-                <span className="text-muted-foreground">
-                  Un protector conserva tu racha si un día no completas tus tareas.
-                </span>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="shrink-0"
-                  disabled={freezes >= freezeMax || (profile?.xp ?? 0) < FREEZE_COST_XP || buyStreakFreeze.isPending}
-                  onClick={() => buyStreakFreeze.mutate()}
-                >
-                  Comprar ({FREEZE_COST_XP} XP)
-                </Button>
-              </div>
+              <p className="pt-3 text-muted-foreground">
+                Un protector conserva tu racha si un día no completas tus tareas. Consíguelos en la Tienda con destellos.
+              </p>
             </TabsContent>
           </Tabs>
         </div>

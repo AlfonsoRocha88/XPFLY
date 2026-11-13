@@ -429,6 +429,7 @@ export type Database = {
           demo_sequence: Json | null
           display_name: string | null
           equipped_frame: string | null
+          owned_items: string[]
           equipped_title: string | null
           friend_code: string | null
           highest_trophies: number
@@ -482,6 +483,7 @@ export type Database = {
           demo_sequence?: Json | null
           display_name?: string | null
           equipped_frame?: string | null
+          owned_items?: string[]
           equipped_title?: string | null
           friend_code?: string | null
           highest_trophies?: number
@@ -535,6 +537,7 @@ export type Database = {
           demo_sequence?: Json | null
           display_name?: string | null
           equipped_frame?: string | null
+          owned_items?: string[]
           equipped_title?: string | null
           friend_code?: string | null
           highest_trophies?: number

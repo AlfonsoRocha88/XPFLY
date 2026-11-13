@@ -1,4 +1,5 @@
-import { Coins, Flame, LogOut, Trophy } from "lucide-react";
+import { Flame, LogOut, Trophy } from "lucide-react";
+import { Destello } from "@/components/currency/Destello";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import PlayerHUD from "@/components/PlayerHUD";
@@ -10,7 +11,7 @@ const ProfileOverview = () => {
   const stats = [
     { icon: Flame, label: "Racha", value: profile?.daily_streak ?? 0, className: "text-warning" },
     { icon: Trophy, label: "Trofeos", value: profile?.trophies ?? 0, className: "text-primary" },
-    { icon: Coins, label: "Monedas", value: profile?.coins ?? 0, className: "text-xp" },
+    { icon: ({ className }: { className?: string }) => <Destello size={20} twinkle className={className} />, label: "Destellos", value: profile?.coins ?? 0, className: "" },
   ];
 
   return (

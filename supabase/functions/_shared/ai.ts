@@ -5,9 +5,26 @@
 export const AI_URL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
 
 export const AI_MODELS = {
-  /** Structured tasks such as profile-photo moderation. */
-  fast: "gemini-2.5-flash",
+  /** Structured tasks such as profile-photo moderation. Override with the GEMINI_MODEL secret. */
+  fast: Deno.env.get("GEMINI_MODEL") || "gemini-3.8-flash",
 } as const;
+
+/**
+ * Google retires model names over time (gemini-2.5-flash broke photo uploads).
+ * When the configured model is gone, ask the API which models exist and use the newest "flash".
+ */
+export async function latestFlashModel(): Promise<string | null> {
+  try {
+    const res = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/models", { headers: aiHeaders() });
+    if (!res.ok) return null;
+    const ids: string[] = ((await res.json())?.data ?? []).map((m: { id: string }) => m.id.replace(/^models\//, ""));
+    const flash = ids.filter((id) => /^gemini-[\d.]+-flash$/.test(id));
+    flash.sort((a, b) => parseFloat(b.split("-")[1]) - parseFloat(a.split("-")[1]));
+    return flash[0] ?? null;
+  } catch {
+    return null;
+  }
+}
 
 export function aiHeaders(): HeadersInit {
   const key = Deno.env.get("GEMINI_API_KEY");

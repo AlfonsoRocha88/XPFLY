@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { avatarSrc } from "@/lib/avatars";
-import { AVATAR_FRAMES } from "@/components/achievements/frames";
+import { frameById } from "@/components/achievements/frames";
 import type { ConstellationId } from "@shared/achievements";
 
 interface Props {
@@ -14,7 +14,7 @@ interface Props {
 }
 
 const CharacterPortrait = ({ url, seed, size = 96, frame, className }: Props) => {
-  const Frame = frame ? AVATAR_FRAMES[frame as ConstellationId]?.Frame : null;
+  const Frame = frameById(frame)?.Frame ?? null;
   const img = (
     <img
       src={avatarSrc(url, seed)}

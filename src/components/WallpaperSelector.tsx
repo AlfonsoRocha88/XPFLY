@@ -1,4 +1,5 @@
-import { Check, Moon, Sun, Wind } from "lucide-react";
+import { Check, Lock, Moon, Sparkles, Sun, Wind } from "lucide-react";
+import { toast } from "sonner";
 import { useProfile } from "@/hooks/useProfile";
 import { useColorMode } from "@/hooks/useAppTheme";
 import { WALLPAPERS } from "@/lib/wallpapers";
@@ -78,16 +79,23 @@ const WallpaperSelector = () => {
         <div className="grid grid-cols-3 gap-2">
           {WALLPAPERS.map((wp) => {
             const active = currentWallpaper === wp.id;
+            // Living backgrounds are bought in the shop; locked ones say where to get them.
+            const locked = !!wp.living && !(profile?.owned_items ?? []).includes(wp.id);
             return (
               <button
                 key={wp.id}
-                onClick={() => save({ wallpaper: wp.id })}
+                onClick={() => (locked ? toast("Consíguelo en la Tienda", { description: `${wp.name} es un fondo vivo.` }) : save({ wallpaper: wp.id }))}
                 className={cn(
                   "relative aspect-[4/3] overflow-hidden rounded-xl border-2 transition-colors",
                   active ? "border-primary" : "border-border hover:border-primary/40",
                 )}
               >
-                <div className="h-full w-full" style={{ background: wp.background || "hsl(var(--background))" }} />
+                <div className={cn("h-full w-full", locked && "opacity-60")} style={{ background: wp.preview || wp.background || "hsl(var(--background))" }} />
+                {wp.living && (
+                  <span className="absolute left-1.5 top-1.5 flex items-center gap-1 rounded-full bg-black/35 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
+                    {locked ? <Lock className="h-2.5 w-2.5" /> : <Sparkles className="h-2.5 w-2.5" />} Vivo
+                  </span>
+                )}
                 {active && (
                   <span className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
                     <Check className="h-3 w-3" strokeWidth={3} />

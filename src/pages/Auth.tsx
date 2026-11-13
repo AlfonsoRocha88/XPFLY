@@ -7,7 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 
 import { WALLPAPERS } from "@/lib/wallpapers";
-import { getThemeClass, THEME_CLASS_NAMES } from "@/lib/themes";
+import { lazy, Suspense } from "react";
+import type { LivingScene } from "@/components/living/LivingBackground";
+
+const LivingBackground = lazy(() => import("@/components/living/LivingBackground"));
 
 function PasswordStrength({ value, showError }: { value: string; showError?: boolean }) {
   const checks = [
@@ -108,25 +111,18 @@ const Auth = () => {
     else { toast.success("Te enviamos un correo nuevo. Usa ese y no los anteriores."); setResendIn(60); }
   };
 
-  // Apply user's last-saved theme, mode and wallpaper (cached on previous logged-in session)
+  // Same look as inside the app: accent theme and light/dark mode are already applied by the
+  // inline script in index.html; the wallpaper and its animation come from the last session.
   const lastWallpaperId = (typeof window !== "undefined" && localStorage.getItem("lastWallpaper")) || "default";
-  const lastTheme = (typeof window !== "undefined" && localStorage.getItem("lastTheme")) || undefined;
-  const lastMode = (typeof window !== "undefined" && localStorage.getItem("lastMode")) || undefined;
   const lastAnims = (typeof window !== "undefined" && localStorage.getItem("lastBgAnimations")) !== "false";
 
-  useEffect(() => {
-    const root = document.documentElement;
-    THEME_CLASS_NAMES.forEach((c) => root.classList.remove(c));
-    root.classList.add(getThemeClass(lastTheme));
-    if (lastMode === "light") root.classList.add("light");
-    else root.classList.remove("light");
-  }, [lastTheme, lastMode]);
-
   const wp = useMemo(() => WALLPAPERS.find(w => w.id === lastWallpaperId), [lastWallpaperId]);
-  const wallpaperStyle: React.CSSProperties = wp?.background
-    ? { background: wp.background, backgroundAttachment: "fixed" }
-    : {};
+  const wallpaperStyle: React.CSSProperties = wp?.background ? { background: wp.background } : {};
   const wallpaperAnimated = lastAnims && !!wp?.background && wp.id !== "default";
+  // Default wallpaper = the app's soft ambient glow.
+  const bgClass = wp?.living ? "[&>*:not(canvas)]:relative [&>*:not(canvas)]:z-10" : wallpaperAnimated ? "wp-animated" : !wp?.background ? "ambient-bg" : "";
+  // A bought living background plays here too, so signing in already looks like your app.
+  const livingLayer = wp?.living ? <Suspense fallback={null}><LivingBackground scene={wp.id as LivingScene} /></Suspense> : null;
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,7 +205,8 @@ const Auth = () => {
 
   if (pendingEmail) {
     return (
-      <div className={`flex h-full flex-col overflow-y-auto overscroll-contain p-4 [&>*]:m-auto ${wallpaperAnimated ? "wp-animated" : ""}`} style={wallpaperStyle}>
+      <div className={`flex h-full flex-col overflow-y-auto overscroll-contain p-4 [&>*]:m-auto ${bgClass}`} style={wallpaperStyle}>
+        {livingLayer}
         <Card className="w-full max-w-md rounded-3xl border-0 shadow-lift">
           <CardHeader className="text-center">
             <CardTitle className="font-serif text-2xl font-medium">Confirma tu correo</CardTitle>
@@ -235,7 +232,8 @@ const Auth = () => {
 
   if (showReset) {
     return (
-      <div className={`flex h-full flex-col overflow-y-auto overscroll-contain [&>*]:m-auto p-4 ${wallpaperAnimated ? "wp-animated" : ""}`} style={wallpaperStyle}>
+      <div className={`flex h-full flex-col overflow-y-auto overscroll-contain [&>*]:m-auto p-4 ${bgClass}`} style={wallpaperStyle}>
+        {livingLayer}
         <Card className="w-full max-w-md border-2 border-primary/30">
           <CardHeader className="text-center">
             <CardTitle className="font-serif text-2xl font-medium">Restablecer contraseña</CardTitle>
@@ -258,7 +256,8 @@ const Auth = () => {
   }
 
   return (
-    <div className={`flex h-full flex-col overflow-y-auto overscroll-contain p-4 [&>*]:m-auto ${wallpaperAnimated ? "wp-animated" : ""}`} style={wallpaperStyle}>
+    <div className={`flex h-full flex-col overflow-y-auto overscroll-contain p-4 [&>*]:m-auto ${bgClass}`} style={wallpaperStyle}>
+        {livingLayer}
       <Card className="w-full max-w-md rounded-3xl border-0 shadow-lift">
         <CardHeader className="text-center">
           <div className="mx-auto mb-2">

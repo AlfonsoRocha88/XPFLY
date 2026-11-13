@@ -18,7 +18,7 @@ import ListView from "@/components/ListView";
 import DailyQuestPanel from "@/components/DailyQuestPanel";
 import XpPopup from "@/components/XpPopup";
 import LevelUpToast from "@/components/LevelUpToast";
-import ChestOpenOverlay from "@/components/ChestOpenOverlay";
+import OrbOpenOverlay from "@/components/orb/OrbOpenOverlay";
 import { WALLPAPERS } from "@/lib/wallpapers";
 import type { Task } from "@/lib/types";
 import { playSfx } from "@/lib/sfx";
@@ -26,6 +26,9 @@ import { cn } from "@/lib/utils";
 import { useAchievements } from "@/hooks/useAchievements";
 import { m } from "motion/react";
 import { PageTransition, TabTransition, useDirection } from "@/components/layout/Transitions";
+import type { LivingScene } from "@/components/living/LivingBackground";
+
+const celebrateBackground = () => window.dispatchEvent(new Event("xpfly:celebrate"));
 
 // Heavier sections load on first visit to keep startup fast.
 const CalendarView = lazy(() => import("@/components/CalendarView"));
@@ -40,6 +43,7 @@ const WallpaperSelector = lazy(() => import("@/components/WallpaperSelector"));
 const loadTaskEditor = () => import("@/components/task-editor/TaskEditor");
 const TaskEditor = lazy(loadTaskEditor);
 const ProfileOverview = lazy(() => import("@/components/ProfileOverview"));
+const LivingBackground = lazy(() => import("@/components/living/LivingBackground"));
 const SignOutLink = lazy(() => import("@/components/ProfileOverview").then((m) => ({ default: m.SignOutLink })));
 const ScheduleBlockDialog = lazy(() => import("@/components/ScheduleBlockDialog"));
 
@@ -177,6 +181,7 @@ const Index = () => {
     }
 
     playSfx(completing ? "complete" : "toggle");
+    if (completing) celebrateBackground();
     try {
       await updateTask.mutateAsync({
         id: task.id,
@@ -196,8 +201,8 @@ const Index = () => {
         toast("+1 trofeo", { duration: 2500, className: "trophy-toast" });
       }
       if (result.leveledUp) {
-        setTimeout(() => playSfx("levelUp"), 600);
-        setTimeout(() => setLevelUp(result.level), 800);
+        // The chord in "levelUp" lands ~0.8s in, right when the ring closes and flashes.
+        setTimeout(() => { setLevelUp(result.level); playSfx("levelUp"); }, 700);
       }
     } catch {
       toast.error("No se pudo actualizar la tarea");
@@ -208,7 +213,7 @@ const Index = () => {
     try {
       const result = await claimDailyBonus.mutateAsync();
       setXpPopup(result.xpGained);
-      if (result.leveledUp) setTimeout(() => setLevelUp(result.level), 800);
+      if (result.leveledUp) setTimeout(() => { setLevelUp(result.level); playSfx("levelUp"); }, 700);
       toast.success(`Racha de ${result.streak} días · +${result.xpGained} XP`);
       // The claim grants a chest; refresh before opening it.
       await queryClient.refetchQueries({ queryKey: ["profile"] });
@@ -489,9 +494,14 @@ const Index = () => {
 
   return (
     <div
-      className={cn("flex h-full overflow-hidden", wallpaperAnimated && "wp-animated", !wallpaper?.background && "ambient-bg")}
+      className={cn("flex h-full overflow-hidden", wallpaperAnimated && !wallpaper?.living && "wp-animated", !wallpaper?.background && "ambient-bg", wallpaper?.living && wallpaper.id)}
       style={wallpaper?.background ? { background: wallpaper.background } : undefined}
     >
+      {wallpaper?.living && (
+        <Suspense fallback={null}>
+          <LivingBackground scene={wallpaper.id as LivingScene} />
+        </Suspense>
+      )}
       <SideNav current={section} onChange={setSection} badges={{ community: socialBadge, progress: claimableCount }} />
 
       <main
@@ -583,7 +593,7 @@ const Index = () => {
       </Suspense>
       )}
 
-      <ChestOpenOverlay
+      <OrbOpenOverlay
         open={chestOverlay.open}
         reward={chestOverlay.reward}
         opening={chestOverlay.opening}

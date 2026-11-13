@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { ORB_COSMETICS, shopItem } from "../_shared/shop.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,34 +7,23 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-function calculateLevel(totalXp: number) {
-  let lvl = 1, need = 0;
-  while (true) {
-    need += 50 + (lvl - 1) * 25;
-    if (totalXp < need) return lvl;
-    lvl++;
-  }
-}
+type Reward = { type: "destellos" | "cosmetic" | "freeze"; amount: number; label: string; icon: string; rarity: string; itemId?: string };
 
-function rollReward() {
+/** What an orb holds: almost always Destellos, sometimes a protector, rarely a shop cosmetic. */
+function rollReward(owned: string[], canFreeze: boolean): Reward {
   const r = Math.random();
-  if (r < 0.6) {
-    const amount = 10 + Math.floor(Math.random() * 21);
-    return { type: "coins", amount, label: `${amount} Monedas`, icon: "coin", rarity: "common" };
+  const missing = ORB_COSMETICS.filter((id) => !owned.includes(id));
+  if (r < 0.06 && missing.length) {
+    const id = missing[Math.floor(Math.random() * missing.length)];
+    return { type: "cosmetic", amount: 1, itemId: id, label: shopItem(id)!.name, icon: id.startsWith("frame") ? "frame" : "planet", rarity: "legendary" };
   }
-  if (r < 0.8) {
-    const amount = 15 + Math.floor(Math.random() * 21);
-    return { type: "xp", amount, label: `${amount} XP`, icon: "sparkle", rarity: "rare" };
-  }
-  if (r < 0.94) {
+  if (r < 0.1 && canFreeze) return { type: "freeze", amount: 1, label: "Protector de racha", icon: "frost", rarity: "epic" };
+  if (r < 0.3) {
     const amount = 50 + Math.floor(Math.random() * 51);
-    return { type: "coins_big", amount, label: `${amount} Monedas`, icon: "coins", rarity: "rare" };
+    return { type: "destellos", amount, label: `${amount} destellos`, icon: "destellos", rarity: "rare" };
   }
-  if (r < 0.99) {
-    return { type: "freeze", amount: 1, label: "Congelador de Racha", icon: "frost", rarity: "epic" };
-  }
-  const amount = 200 + Math.floor(Math.random() * 101);
-  return { type: "coins_big", amount, label: `${amount} Monedas`, icon: "gem", rarity: "legendary" };
+  const amount = 15 + Math.floor(Math.random() * 21);
+  return { type: "destellos", amount, label: `${amount} destellos`, icon: "destellos", rarity: "common" };
 }
 
 function j(b: unknown, s = 200) {
@@ -61,19 +51,18 @@ Deno.serve(async (req) => {
     const chests = profile.unopened_chests ?? 0;
     if (chests <= 0) return j({ error: "no_chests" }, 409);
 
-    const reward = rollReward();
+    const owned: string[] = profile.owned_items ?? [];
+    const canFreeze = (profile.streak_freezes ?? 0) < (profile.streak_freeze_max ?? 3);
+    const reward = rollReward(owned, canFreeze);
     const updates: Record<string, unknown> = { unopened_chests: chests - 1 };
 
-    if (reward.type === "coins" || reward.type === "coins_big") {
+    if (reward.type === "destellos") {
       updates.coins = (profile.coins ?? 0) + reward.amount;
-    } else if (reward.type === "xp") {
-      const newXp = (profile.xp ?? 0) + reward.amount;
-      updates.xp = newXp;
-      updates.level = calculateLevel(newXp);
     } else if (reward.type === "freeze") {
-      const max = profile.streak_freeze_max ?? 3;
-      const cur = profile.streak_freezes ?? 0;
-      updates.streak_freezes = Math.min(max, cur + 1);
+      updates.streak_freezes = (profile.streak_freezes ?? 0) + 1;
+    } else if (reward.itemId) {
+      updates.owned_items = [...owned, reward.itemId];
+      if (reward.itemId.startsWith("frame-")) updates.unlocked_frames = [...new Set([...(profile.unlocked_frames ?? []), reward.itemId])];
     }
 
     const { data: updated, error: uErr } = await admin.from("profiles").update(updates).eq("user_id", userId).select().single();

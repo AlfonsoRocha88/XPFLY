@@ -101,7 +101,7 @@ const AchievementSheet = ({ state: s, claiming, onClaim, onClose }: Props) => {
             className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#E1B12C] to-[#F5CF5A] py-3 text-sm font-semibold text-[#3A2A00] shadow-lift disabled:opacity-70"
           >
             {claiming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Coin size={18} />}
-            Reclamar +{pendingCoins} monedas
+            Reclamar +{pendingCoins} destellos
           </m.button>
         ) : s.reached === 3 ? (
           <p className="mt-5 text-center text-sm font-medium text-[#FFE07A]">Completado en oro</p>

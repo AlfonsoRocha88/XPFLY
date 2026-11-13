@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { AI_MODELS, AI_URL, aiHeaders } from "../_shared/ai.ts";
+import { AI_MODELS, AI_URL, aiHeaders, latestFlashModel } from "../_shared/ai.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -56,11 +56,12 @@ Deno.serve(async (req) => {
     const bytes = Uint8Array.from(atob(match[2]), (c) => c.charCodeAt(0));
     if (bytes.length > MAX_BYTES) return json({ error: "La imagen es demasiado grande" }, 413);
 
-    const ai = await fetch(AI_URL, {
-      method: "POST",
-      headers: aiHeaders(),
-      body: JSON.stringify({
-        model: AI_MODELS.fast,
+    const review = (model: string) =>
+      fetch(AI_URL, {
+        method: "POST",
+        headers: aiHeaders(),
+        body: JSON.stringify({
+        model,
         messages: [
           { role: "system", content: MODERATION_PROMPT },
           {
@@ -88,7 +89,15 @@ Deno.serve(async (req) => {
         }],
         tool_choice: "required", // single tool, so it must be report
       }),
-    });
+      });
+    let ai = await review(AI_MODELS.fast);
+    if (ai.status === 404) {
+      const fallback = await latestFlashModel();
+      if (fallback && fallback !== AI_MODELS.fast) {
+        console.warn("model unavailable, retrying with", fallback);
+        ai = await review(fallback);
+      }
+    }
 
     if (!ai.ok) {
       console.error("AI error:", ai.status, await ai.text());

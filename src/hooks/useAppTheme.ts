@@ -52,4 +52,15 @@ export function useAppTheme() {
   }, [theme]);
 
   useEffect(() => { applyMode(readMode()); }, []);
+
+  // Remember the look on this device so the sign-in screen matches it before anyone logs in.
+  const wallpaper = profile?.wallpaper;
+  const bgAnimations = profile?.bg_animations;
+  useEffect(() => {
+    if (!profile) return;
+    try {
+      localStorage.setItem("lastWallpaper", wallpaper || "default");
+      localStorage.setItem("lastBgAnimations", String(bgAnimations ?? true));
+    } catch { /* storage unavailable: sign-in falls back to the default look */ }
+  }, [profile, wallpaper, bgAnimations]);
 }

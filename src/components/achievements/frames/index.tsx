@@ -93,3 +93,70 @@ export const AVATAR_FRAMES: Record<ConstellationId, { name: string; Frame: (p: F
   conocimiento: { name: "Códice", Frame: Pages },
   ascenso: { name: "Cumbre", Frame: Peaks },
 };
+
+/* ---------- Shop frames (bought with Destellos) ---------- */
+
+/** Halo: a soft ring of light that turns slowly. */
+const Halo = ({ size }: FrameProps) => {
+  const id = useId().replace(/:/g, "");
+  return (
+    <svg viewBox="0 0 120 120" width={size} height={size} className="pointer-events-none absolute inset-0 overflow-visible" aria-hidden>
+      <defs>
+        <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#FFFFFF" />
+          <stop offset=".5" stopColor="#BFD4FF" />
+          <stop offset="1" stopColor="#B9A4FF" stopOpacity=".2" />
+        </linearGradient>
+      </defs>
+      <g className="frame-spin" style={{ transformOrigin: "60px 60px" }}>
+        <circle cx="60" cy="60" r="55" fill="none" stroke={`url(#${id})`} strokeWidth="3.2" strokeLinecap="round" strokeDasharray="250 96" />
+        <circle cx="60" cy="5" r="2.4" fill="#FFFFFF" />
+      </g>
+      <circle cx="60" cy="60" r="51" fill="none" stroke="#C9D8FF" strokeOpacity=".35" strokeWidth=".8" />
+    </svg>
+  );
+};
+
+/** Cristal: faceted crystal points around the rim. */
+const Cristal = ({ size }: FrameProps) => {
+  const id = useId().replace(/:/g, "");
+  return (
+    <svg viewBox="0 0 120 120" width={size} height={size} className="pointer-events-none absolute inset-0 overflow-visible" aria-hidden>
+      <defs>
+        <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#FFFFFF" />
+          <stop offset=".5" stopColor="#BFE3FF" />
+          <stop offset="1" stopColor="#8F9CFF" />
+        </linearGradient>
+      </defs>
+      <circle cx="60" cy="60" r="54" fill="none" stroke={`url(#${id})`} strokeWidth="2.4" />
+      {around(8, 55).map((p, i) => (
+        <path key={i} d="M0 -6 L2.4 0 L0 6 L-2.4 0 Z" transform={`translate(${p.x} ${p.y}) rotate(${p.deg + 90})`} fill={`url(#${id})`} stroke="#FFFFFF" strokeWidth=".5" />
+      ))}
+    </svg>
+  );
+};
+
+/** Órbita: two small moons circling the avatar. */
+const Orbita = ({ size }: FrameProps) => (
+  <svg viewBox="0 0 120 120" width={size} height={size} className="pointer-events-none absolute inset-0 overflow-visible" aria-hidden>
+    <circle cx="60" cy="60" r="55" fill="none" stroke="#C4B5FF" strokeOpacity=".55" strokeWidth="1.4" strokeDasharray="2 5" />
+    <g className="frame-spin" style={{ transformOrigin: "60px 60px" }}>
+      <circle cx="60" cy="5" r="5" fill="#EDE7FF" />
+      <circle cx="58.5" cy="3.6" r="1.6" fill="#FFFFFF" />
+    </g>
+    <g className="frame-spin-rev" style={{ transformOrigin: "60px 60px" }}>
+      <circle cx="60" cy="115" r="3.4" fill="#9FD8FF" />
+    </g>
+  </svg>
+);
+
+export const SHOP_FRAMES: Record<string, { name: string; Frame: (p: FrameProps) => JSX.Element }> = {
+  "frame-halo": { name: "Halo", Frame: Halo },
+  "frame-cristal": { name: "Cristal", Frame: Cristal },
+  "frame-orbita": { name: "Órbita", Frame: Orbita },
+};
+
+/** Any frame by id: achievement frames and shop frames. */
+export const frameById = (id: string | null | undefined) =>
+  id ? (AVATAR_FRAMES as Record<string, { name: string; Frame: (p: FrameProps) => JSX.Element }>)[id] ?? SHOP_FRAMES[id] : undefined;

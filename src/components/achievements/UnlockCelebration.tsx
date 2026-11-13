@@ -1,10 +1,10 @@
 import { useEffect, useMemo } from "react";
 import { m, useReducedMotion } from "motion/react";
 import { ACHIEVEMENT_BY_ID, TIER_NAMES, type ConstellationId } from "@shared/achievements";
-import { Coin } from "@/components/icons/GameIcons";
+import { Destello } from "@/components/currency/Destello";
 import { EMBLEM_ART } from "./emblems";
 import { TierMedallion, TIER_STYLE } from "./emblems/TierMedallion";
-import { AVATAR_FRAMES } from "./frames";
+import { frameById } from "./frames";
 
 export interface Celebration {
   achievementId: string;
@@ -58,7 +58,7 @@ const UnlockCelebration = ({ data, onDone }: { data: Celebration; onDone: () => 
       transition={{ duration: 0.3 }}
       onClick={onDone}
       role="alertdialog"
-      aria-label={`${def?.name}: ${TIER_NAMES[data.tier - 1]} desbloqueado, más ${data.coins} monedas`}
+      aria-label={`${def?.name}: ${TIER_NAMES[data.tier - 1]} desbloqueado, más ${data.coins} destellos`}
     >
       {!reduce && (
         <>
@@ -121,7 +121,7 @@ const UnlockCelebration = ({ data, onDone }: { data: Celebration; onDone: () => 
               animate={{ x: [0, c.x, c.x * 0.9], y: [0, c.y, c.y + 60], scale: [0, 1, 0.8], rotate: c.r, opacity: [0, 1, 0] }}
               transition={{ duration: 1.4, delay: c.delay, ease: [0.16, 1, 0.3, 1] }}
             >
-              <Coin size={24} />
+              <Destello size={24} />
             </m.span>
           ))}
       </div>
@@ -142,12 +142,12 @@ const UnlockCelebration = ({ data, onDone }: { data: Celebration; onDone: () => 
           animate={{ scale: 1 }}
           transition={{ delay: reduce ? 0 : 1.1, type: "spring", stiffness: 300, damping: 14 }}
         >
-          <Coin size={18} /> +{data.coins} monedas
+          <Destello size={18} twinkle /> +{data.coins} destellos
         </m.span>
         {data.extra > 0 && <span className="mt-2 text-sm text-white/60">y {data.extra} {data.extra === 1 ? "nivel más" : "niveles más"}</span>}
         {data.frames.map((f) => (
           <span key={f} className="mt-3 text-sm font-medium text-white">
-            Nuevo marco de avatar: {AVATAR_FRAMES[f as ConstellationId]?.name ?? f}
+            Nuevo marco de avatar: {frameById(f)?.name ?? f}
           </span>
         ))}
         <span className="mt-6 text-xs text-white/40">Toca para continuar</span>

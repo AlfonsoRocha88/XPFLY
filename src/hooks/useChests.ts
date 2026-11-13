@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "./useProfile";
 import { toast } from "sonner";
 
-export type ChestRewardType = "coins" | "coins_big" | "xp" | "freeze";
+export type ChestRewardType = "destellos" | "cosmetic" | "freeze";
 
 export interface ChestReward {
   type: ChestRewardType;
@@ -11,6 +11,7 @@ export interface ChestReward {
   label: string;
   icon: string;
   rarity: "common" | "rare" | "epic" | "legendary";
+  itemId?: string;
 }
 
 export const useChests = () => {
@@ -20,16 +21,14 @@ export const useChests = () => {
   const openChest = useMutation({
     mutationFn: async (): Promise<ChestReward> => {
       const { data, error } = await supabase.functions.invoke("open-chest", { body: {} });
-      if (error) throw new Error(error.message ?? "No se pudo abrir el cofre");
-      if (data?.error) throw new Error(data.error === "no_chests" ? "No tienes cofres por abrir" : data.error);
+      if (error) throw new Error(error.message ?? "No se pudo abrir el orbe");
+      if (data?.error) throw new Error(data.error === "no_chests" ? "No tienes orbes por abrir" : data.error);
       if (data?.profile) queryClient.setQueryData(["profile"], data.profile);
       return data.reward as ChestReward;
     },
-    onSuccess: (reward) => {
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
-      toast.success(`Obtuviste ${reward.label}`);
-    },
-    onError: (e: any) => toast.error(e?.message ?? "No se pudo abrir el cofre"),
+    // The orb overlay shows the reward; no toast on top of it.
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["profile"] }),
+    onError: (e: Error) => toast.error(e?.message ?? "No se pudo abrir el orbe"),
   });
 
   return {

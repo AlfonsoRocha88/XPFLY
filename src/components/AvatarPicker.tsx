@@ -65,8 +65,14 @@ const AvatarPicker = () => {
         reader.onerror = reject;
         reader.readAsDataURL(blob);
       });
-      const { data, error } = await supabase.functions.invoke("moderate-avatar", { body: { image } });
-      if (error && !data) throw error;
+      const { data: ok, error } = await supabase.functions.invoke("moderate-avatar", { body: { image } });
+      let data = ok;
+      // Non-2xx replies (e.g. "couldn't review right now") still carry a reason in their body.
+      if (error && !data) {
+        const body = await (error as { context?: Response }).context?.json?.().catch(() => null);
+        if (!body) throw error;
+        data = body;
+      }
       if (!data?.allowed) {
         playSfx("error");
         toast.error("No pudimos usar esta foto", { description: data?.reason ?? "Intenta con otra imagen." });

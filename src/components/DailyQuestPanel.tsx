@@ -1,4 +1,5 @@
-import { Check, Flame, Gift, Trash2, Sun } from "lucide-react";
+import { Check, Flame, Trash2, Sun } from "lucide-react";
+import { Orb } from "@/components/orb/Orb";
 import { SwipeToDelete } from "@/components/SwipeToDelete";
 import { cn } from "@/lib/utils";
 import type { Task } from "@/lib/types";
@@ -113,12 +114,12 @@ const DailyQuestPanel = ({
 
       <div className="daily-quest-reward flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl bg-xp/20 text-xp", allCompleted && !bonusClaimed && "animate-bounce")}>
-            <Gift className="h-5 w-5" />
+          <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10", allCompleted && !bonusClaimed && "animate-bounce")}>
+            <Orb size={26} />
           </div>
           <div>
             <p className="text-sm font-semibold">Recompensa diaria</p>
-            <p className="text-xs font-semibold text-muted-foreground">+{streakBonusXp} XP y un cofre</p>
+            <p className="text-xs font-semibold text-muted-foreground">+{streakBonusXp} XP y un orbe</p>
           </div>
         </div>
         {allCompleted && !bonusClaimed ? (
@@ -127,10 +128,10 @@ const DailyQuestPanel = ({
           </button>
         ) : bonusClaimed && unopenedChests > 0 && onOpenChest ? (
           <button
-            onClick={() => { playSfx("open"); onOpenChest(); }}
-            className="relative rounded-full bg-xp px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_0_hsl(var(--xp)/0.35)] transition-transform active:scale-95"
+            onClick={() => onOpenChest()}
+            className="relative rounded-full bg-gradient-to-r from-[#7b8cff] to-[#c47bff] px-4 py-2 text-sm font-semibold text-white shadow-[0_0_18px_rgba(160,140,255,0.55)]"
           >
-            Abrir cofre
+            Abrir orbe
             {unopenedChests > 1 && (
               <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-card bg-destructive px-1 text-[10px] text-white">
                 {unopenedChests}

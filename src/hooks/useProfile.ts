@@ -131,20 +131,6 @@ export const useProfile = () => {
     return subscribeProfileChanges(user.id, (row) => queryClient.setQueryData(["profile"], row));
   }, [user?.id, queryClient]);
 
-  const buyStreakFreeze = useMutation({
-    mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke("buy-streak-freeze", { body: {} });
-      if (error) throw error;
-      if (data?.error === "max_reached") throw new Error(`Máximo ${data.max} protectores`);
-      if (data?.error === "insufficient_xp") throw new Error(`Necesitas ${data.cost} XP`);
-      if (data?.error) throw new Error(data.error);
-      toast.success(`Protector de racha comprado (−${data.cost} XP)`);
-      return data.profile;
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["profile"] }),
-    onError: (e: any) => toast.error(e?.message ?? "No se pudo comprar"),
-  });
-
   const updateProfile = useMutation({
     mutationFn: async (updates: { display_name?: string; avatar_url?: string; wallpaper?: string; theme?: string; bg_animations?: boolean }) => {
       const { data, error } = await supabase
@@ -273,7 +259,7 @@ export const useProfile = () => {
     addXp,
     claimDailyBonus,
     equipTitle,
-    buyStreakFreeze,
+    
     reconcileStreak,
     XP_REWARDS,
   };

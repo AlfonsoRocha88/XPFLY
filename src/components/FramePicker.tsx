@@ -4,8 +4,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
 import { cn } from "@/lib/utils";
-import { CONSTELLATIONS, type ConstellationId } from "@shared/achievements";
-import { AVATAR_FRAMES } from "@/components/achievements/frames";
+import { CONSTELLATIONS } from "@shared/achievements";
+import { SHOP_FRAMES, frameById } from "@/components/achievements/frames";
 import CharacterPortrait from "@/components/CharacterPortrait";
 
 /** Avatar frames earned by completing a constellation in gold. Equipping goes through the server. */
@@ -27,7 +27,7 @@ const FramePicker = () => {
   return (
     <section className="surface p-4">
       <h2 className="section-title">Marcos de avatar</h2>
-      <p className="mb-3 mt-0.5 text-xs text-muted-foreground">Completa una constelación de Logros en oro para ganar su marco.</p>
+      <p className="mb-3 mt-0.5 text-xs text-muted-foreground">Gana marcos completando constelaciones de Logros en oro, o consíguelos en la Tienda.</p>
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
         <button
           type="button"
@@ -37,8 +37,7 @@ const FramePicker = () => {
           <CharacterPortrait url={profile?.avatar_url} seed={profile?.user_id} size={44} />
           Sin marco
         </button>
-        {CONSTELLATIONS.map((c) => {
-          const id = c.id as ConstellationId;
+        {[...CONSTELLATIONS.map((c) => c.id as string), ...Object.keys(SHOP_FRAMES)].map((id) => {
           const has = unlocked.has(id);
           const on = equipped === id;
           return (
@@ -52,10 +51,10 @@ const FramePicker = () => {
                 on ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground",
                 has ? "hover:border-primary/40" : "opacity-50",
               )}
-              aria-label={`${AVATAR_FRAMES[id].name}${has ? "" : ", bloqueado"}`}
+              aria-label={`${frameById(id)?.name}${has ? "" : ", bloqueado"}`}
             >
               <CharacterPortrait url={profile?.avatar_url} seed={profile?.user_id} size={38} frame={id} />
-              <span className="truncate">{AVATAR_FRAMES[id].name}</span>
+              <span className="truncate">{frameById(id)?.name}</span>
               {on && <Check className="absolute right-1.5 top-1.5 h-3.5 w-3.5" />}
               {!has && <Lock className="absolute right-1.5 top-1.5 h-3 w-3" />}
             </button>

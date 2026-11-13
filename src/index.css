@@ -587,3 +587,72 @@ button:not(:disabled):active, [role="button"]:active {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Destellos: a slow, faint twinkle (scale + glow), off for reduced motion. */
+@keyframes destello-twinkle {
+  0%, 100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 1.5px rgba(191, 210, 255, 0.55)); }
+  50% { transform: scale(1.08) rotate(8deg); filter: drop-shadow(0 0 4px rgba(191, 210, 255, 0.9)); }
+}
+.destello-twinkle {
+  transform-origin: center;
+  animation: destello-twinkle 3.2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .destello-twinkle { animation: none; }
+}
+
+/* Orb: nebula core inside a glass shell, lit from the top-left. */
+.orb {
+  background: radial-gradient(circle at 50% 55%, hsl(250 90% 70% / 0.35), transparent 70%);
+  filter: drop-shadow(0 0 10px hsl(250 95% 72% / 0.45));
+}
+.orb-core {
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.85) 0 6%, transparent 18%),
+    conic-gradient(from 0deg, #7b8cff, #c47bff, #6fe3ff, #a18bff, #ff9ad8, #7b8cff);
+  filter: blur(0.6px) saturate(1.2);
+}
+.orb-glass {
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0) 32%),
+    radial-gradient(circle at 70% 80%, rgba(20, 10, 60, 0.35), rgba(20, 10, 60, 0) 55%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45), inset 0 -6px 14px rgba(40, 20, 120, 0.35);
+}
+@keyframes orb-spin { to { transform: rotate(360deg); } }
+.orb-spin { animation: orb-spin 9s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .orb-spin { animation: none; } }
+
+/* Shop frames: slow orbit motion (decorative, so it stops for reduced motion). */
+@keyframes frame-spin { to { transform: rotate(360deg); } }
+.frame-spin { animation: frame-spin 14s linear infinite; }
+.frame-spin-rev { animation: frame-spin 20s linear infinite reverse; }
+@media (prefers-reduced-motion: reduce) { .frame-spin, .frame-spin-rev { animation: none; } }
+
+
+/* ===== Living background: Jardín — vines grow from task cards, flowers open when done ===== */
+.living-jardin .task-card-game,
+.living-jardin .daily-quest-panel { position: relative; }
+.living-jardin .task-card-game::after,
+.living-jardin .daily-quest-panel::after {
+  content: "";
+  position: absolute;
+  right: -4px;
+  top: -12px;
+  width: 64px;
+  height: 46px;
+  pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 46'%3E%3Cg fill='none' stroke='%235f9e62' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M62 2 C48 6 44 14 40 22 S30 36 18 38'/%3E%3Cpath d='M40 22 C44 26 46 31 45 36' stroke-width='1.4'/%3E%3C/g%3E%3Cg fill='%237cbf73'%3E%3Cellipse cx='50' cy='9' rx='6' ry='3' transform='rotate%28-20 50 9%29'/%3E%3Cellipse cx='33' cy='30' rx='6' ry='3' transform='rotate%2825 33 30%29'/%3E%3Cellipse cx='44' cy='17' rx='4.5' ry='2.4' transform='rotate%2850 44 17%29'/%3E%3C/g%3E%3Ccircle cx='18' cy='38' r='3.2' fill='%23f4a7c4'/%3E%3Ccircle cx='45' cy='37' r='2.4' fill='%23f9c6d8'/%3E%3C/svg%3E") no-repeat center / contain;
+  transform-origin: 95% 5%;
+  animation: vine-grow 0.9s cubic-bezier(0.23, 1, 0.32, 1) both, vine-sway 6s ease-in-out 1s infinite;
+}
+.living-jardin .task-card-game.completed::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 46'%3E%3Cg fill='none' stroke='%235f9e62' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M62 2 C48 6 44 14 40 22 S30 36 18 38'/%3E%3Cpath d='M40 22 C44 26 46 31 45 36' stroke-width='1.4'/%3E%3C/g%3E%3Cg fill='%237cbf73'%3E%3Cellipse cx='50' cy='9' rx='6' ry='3' transform='rotate%28-20 50 9%29'/%3E%3Cellipse cx='33' cy='30' rx='6' ry='3' transform='rotate%2825 33 30%29'/%3E%3Cellipse cx='44' cy='17' rx='4.5' ry='2.4' transform='rotate%2850 44 17%29'/%3E%3C/g%3E%3Cg fill='%23f48fb8'%3E%3Ccircle cx='18' cy='33' r='3.4'/%3E%3Ccircle cx='23' cy='38' r='3.4'/%3E%3Ccircle cx='18' cy='43' r='3.4'/%3E%3Ccircle cx='13' cy='38' r='3.4'/%3E%3C/g%3E%3Ccircle cx='18' cy='38' r='2.4' fill='%23ffe08a'/%3E%3Ccircle cx='45' cy='37' r='2.4' fill='%23f9c6d8'/%3E%3C/svg%3E");
+  animation: vine-bloom 0.6s cubic-bezier(0.23, 1, 0.32, 1) both, vine-sway 6s ease-in-out 1s infinite;
+}
+@keyframes vine-grow { from { clip-path: inset(0 0 100% 60%); opacity: 0; } to { clip-path: inset(0 0 0 0); opacity: 1; } }
+@keyframes vine-bloom { from { transform: scale(0.9); opacity: 0.6; } to { transform: scale(1); opacity: 1; } }
+@keyframes vine-sway { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-4deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .living-jardin .task-card-game::after,
+  .living-jardin .daily-quest-panel::after { animation: none; }
+}

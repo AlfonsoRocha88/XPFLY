@@ -15,8 +15,6 @@ verify_jwt = false
 verify_jwt = false
 
 
-[functions.buy-streak-freeze]
-verify_jwt = false
 
 [functions.reconcile-streak]
 verify_jwt = false
