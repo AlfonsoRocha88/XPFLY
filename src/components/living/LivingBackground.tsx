@@ -1,44 +1,4 @@
 import { useEffect, useRef } from "react";
-import { createSpaceScene } from "./spaceScene";
-
-/** Drives the Nebulosa sky (spaceScene.ts): frame loop, taps, celebrations, parallax, visibility. */
-function runSpace(canvas: HTMLCanvasElement, forceDark = false) {
-  const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-  const scene = createSpaceScene(canvas, { reduce, isDark: () => forceDark || document.documentElement.classList.contains("dark") });
-  let raf = 0, last = performance.now();
-  let lastPointer = { x: window.innerWidth / 2, y: window.innerHeight * 0.4 };
-  const loop = (now: number) => {
-    scene.frame(Math.min(0.05, (now - last) / 1000));
-    last = now;
-    if (!reduce) raf = requestAnimationFrame(loop);
-  };
-  raf = requestAnimationFrame(loop);
-  const onDown = (e: PointerEvent) => {
-    lastPointer = { x: e.clientX, y: e.clientY };
-    if (!reduce) scene.tap(e.clientX, e.clientY);
-  };
-  // Parallax follows the pointer (mouse) or the last touch, a few pixels at most.
-  const onMove = (e: PointerEvent) => scene.tilt((e.clientX / window.innerWidth) * 2 - 1, (e.clientY / window.innerHeight) * 2 - 1);
-  const onCelebrate = () => { if (!reduce) scene.celebrate(lastPointer.x, lastPointer.y); };
-  const onResize = () => { scene.resize(); if (reduce) scene.frame(0); };
-  const onVisibility = () => {
-    cancelAnimationFrame(raf);
-    if (!document.hidden) { last = performance.now(); raf = requestAnimationFrame(loop); }
-  };
-  window.addEventListener("pointerdown", onDown, { passive: true });
-  window.addEventListener("pointermove", onMove, { passive: true });
-  window.addEventListener("xpfly:celebrate", onCelebrate);
-  window.addEventListener("resize", onResize);
-  document.addEventListener("visibilitychange", onVisibility);
-  return () => {
-    cancelAnimationFrame(raf);
-    window.removeEventListener("pointerdown", onDown);
-    window.removeEventListener("pointermove", onMove);
-    window.removeEventListener("xpfly:celebrate", onCelebrate);
-    window.removeEventListener("resize", onResize);
-    document.removeEventListener("visibilitychange", onVisibility);
-  };
-}
 
 /**
  * Premium "living" backgrounds: a full-screen canvas behind the app that drifts on its own and
@@ -52,7 +12,7 @@ type P = { x: number; y: number; vx: number; vy: number; life: number; max: numb
 
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 
-const SCENES: Record<Exclude<LivingScene, "living-nebulosa">, {
+const SCENES: Record<LivingScene, {
   sky: (dark: boolean) => [string, string, string];
   ambient: number;
   spawnAmbient: (w: number, h: number) => P;
@@ -97,6 +57,34 @@ const SCENES: Record<Exclude<LivingScene, "living-nebulosa">, {
     },
   },
 
+  // Nebula: drifting clouds of gas and stars; taps leave light trails, completions a star burst.
+  "living-nebulosa": {
+    sky: (d) => d ? ["#0b0a24", "#1b1240", "#0a0d26"] : ["#efeefe", "#e7e2fb", "#eef3ff"],
+    ambient: 60,
+    spawnAmbient: (w, h) => ({ x: rand(0, w), y: rand(0, h), vx: rand(-3, 3), vy: rand(-3, 3), life: rand(0, 6), max: rand(6, 12), size: rand(0.6, 1.8), rot: 0, vr: 0, hue: rand(200, 290), kind: 0 }),
+    spawnTap: (x, y, big) => Array.from({ length: big ? 26 : 8 }, () => {
+      const a = rand(0, 6.28), s = rand(20, big ? 200 : 70);
+      return { x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 0, max: rand(0.8, 1.8), size: rand(1, big ? 3.2 : 2.2), rot: 0, vr: 0, hue: rand(190, 300), kind: 1 };
+    }),
+    update: (p) => { p.vx *= 0.985; p.vy *= 0.985; },
+    draw: (c, p, k, t) => {
+      const tw = p.kind === 0 ? 0.55 + 0.45 * Math.sin(t * 2 + p.x) : 1 - k;
+      c.globalAlpha = Math.max(0, tw) * (p.kind === 0 ? Math.min(1, k * 3) * (1 - k) * 1.4 : 1);
+      c.fillStyle = `hsl(${p.hue} 90% 85%)`;
+      c.shadowColor = `hsl(${p.hue} 95% 70%)`; c.shadowBlur = p.size * 6;
+      c.beginPath(); c.arc(p.x, p.y, p.size, 0, Math.PI * 2); c.fill();
+    },
+    backdrop: (c, w, h, t, d) => {
+      const blobs: [number, number, number, string][] = [[0.25, 0.3, 0.55, "268 85% 65%"], [0.75, 0.55, 0.5, "200 90% 60%"], [0.45, 0.85, 0.45, "320 80% 65%"]];
+      blobs.forEach(([bx, by, r, col], i) => {
+        const x = w * (bx + Math.sin(t * 0.05 + i) * 0.06), y = h * (by + Math.cos(t * 0.04 + i) * 0.05);
+        const g = c.createRadialGradient(x, y, 0, x, y, Math.max(w, h) * r);
+        g.addColorStop(0, `hsla(${col} / ${d ? 0.28 : 0.18})`); g.addColorStop(1, "transparent");
+        c.fillStyle = g; c.fillRect(0, 0, w, h);
+      });
+    },
+  },
+
   // Ocean: light rays from the surface and rising bubbles; taps release bubbles, completions a column.
   "living-oceano": {
     sky: (d) => d ? ["#04192a", "#062a40", "#020f1c"] : ["#e9f8ff", "#d7f0fb", "#eefbff"],
@@ -126,22 +114,20 @@ const SCENES: Record<Exclude<LivingScene, "living-nebulosa">, {
   },
 };
 
-/** `forceDark`: always the night sky, whatever the app's light/dark mode (used on sign-in). */
+/** `forceDark`: always the night look, whatever the app's light/dark mode (used on sign-in). */
 export default function LivingBackground({ scene, forceDark = false }: { scene: LivingScene; forceDark?: boolean }) {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = ref.current;
-    if (!canvas) return;
-    if (scene === "living-nebulosa") return runSpace(canvas, forceDark);
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    const S = SCENES[scene as Exclude<LivingScene, "living-nebulosa">];
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+    const S = SCENES[scene];
     const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
     const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     let w = 0, h = 0, raf = 0, last = performance.now(), t = 0;
     let lastPointer = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-    const isDark = () => document.documentElement.classList.contains("dark");
+    const isDark = () => forceDark || document.documentElement.classList.contains("dark");
     const particles: P[] = [];
 
     const resize = () => {
