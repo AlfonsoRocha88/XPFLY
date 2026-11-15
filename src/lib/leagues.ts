@@ -1,52 +1,79 @@
-// League system: twelve tiers named after metals and stones.
-// Each tier (except the top one) has 3 divisions: III (entry) → II → I (top).
-// Trophies are earned: +1 per completed task, +5 bonus when all dailies are done.
-// Ids are mirrored in supabase/functions/_shared/leagues.ts; keep both in sync.
+// League system for the app: twelve cosmic tiers (Asteroide → Galáctica), each but the top one
+// with divisions III (entry) → II → I. Ids, names and trophy rules come from the shared module
+// so the app and the edge functions can never disagree.
+import {
+  LEAGUES as SHARED,
+  FAMILY_NAMES,
+  type LeagueFamily,
+  TASKS_PER_TROPHY,
+  STREAK_BONUS_FROM,
+  DAILY_TROPHY_BONUS,
+  WEEKLY_TROPHY_BONUS,
+  DECAY_FROM_FAMILY,
+  leagueFamilyIndex,
+} from "@shared/leagues";
+
+export type { LeagueFamily };
+export { TASKS_PER_TROPHY, STREAK_BONUS_FROM, DAILY_TROPHY_BONUS, WEEKLY_TROPHY_BONUS, DECAY_FROM_FAMILY, leagueFamilyIndex, FAMILY_NAMES };
 
 export interface LeagueDivision {
-  /** Stable id stored in profiles.current_league_id (e.g. "plata-2") */
+  /** Stable id stored in profiles.current_league_id (e.g. "saturno-2") */
   id: string;
-  /** League family name */
+  /** Family id (e.g. "saturno"), used to pick the emblem */
+  family: LeagueFamily;
+  /** League family display name ("Saturno") */
   league: string;
   /** Division roman numeral ("III" | "II" | "I"). null for the single top tier. */
   division: "III" | "II" | "I" | null;
+  /** Division as a number (3 = entry, 1 = top), null for the top tier */
+  divisionNumber: 1 | 2 | 3 | null;
   /** Minimum trophies required to enter this division */
   minTrophies: number;
-  /** Base color of the league medallion */
+  /** Accent color of the league */
   color: string;
 }
 
-const slug = (name: string) => name.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+/** Accent per family: used for text, rings and progress bars next to the emblem. */
+const COLORS: Record<LeagueFamily, string> = {
+  asteroide: "#9a8f86",
+  cometa: "#7fd4e8",
+  luna: "#c9cfdc",
+  mercurio: "#c7a77a",
+  marte: "#d7744f",
+  tierra: "#4fa3e0",
+  neptuno: "#4f6fe8",
+  saturno: "#e0c07a",
+  jupiter: "#d4a27c",
+  sol: "#ffc857",
+  supernova: "#f28dd6",
+  galactica: "#b9a4ff",
+};
 
-const L = (league: string, color: string, base: [number, number, number]): LeagueDivision[] => [
-  { id: `${slug(league)}-3`, league, division: "III", minTrophies: base[0], color },
-  { id: `${slug(league)}-2`, league, division: "II", minTrophies: base[1], color },
-  { id: `${slug(league)}-1`, league, division: "I", minTrophies: base[2], color },
-];
+const ROMAN = { 1: "I", 2: "II", 3: "III" } as const;
 
-export const LEAGUES: LeagueDivision[] = [
-  ...L("Hierro", "#7d838c", [0, 50, 100]),
-  ...L("Bronce", "#b0763f", [200, 300, 400]),
-  ...L("Plata", "#a3adba", [550, 700, 850]),
-  ...L("Oro", "#c9a12e", [1050, 1250, 1450]),
-  ...L("Platino", "#6fa7b8", [1700, 1950, 2200]),
-  ...L("Zafiro", "#3a66c4", [2500, 2800, 3100]),
-  ...L("Esmeralda", "#2e8f66", [3500, 3900, 4300]),
-  ...L("Rubí", "#b8384f", [4800, 5300, 5800]),
-  ...L("Amatista", "#7f58bd", [6400, 7000, 7600]),
-  ...L("Diamante", "#4fb3d4", [8300, 9000, 9700]),
-  ...L("Ónix", "#2f3340", [10500, 11300, 12100]),
-  { id: "elite", league: "Élite", division: null, minTrophies: 13000, color: "#a8893a" },
-];
+export const LEAGUES: LeagueDivision[] = SHARED.map((d) => ({
+  id: d.id,
+  family: d.family,
+  league: FAMILY_NAMES[d.family],
+  division: d.division ? ROMAN[d.division] : null,
+  divisionNumber: d.division,
+  minTrophies: d.minTrophies,
+  color: COLORS[d.family],
+}));
 
-/** Medallion color for a league family name. */
-export function leagueColor(name: string): string {
-  return LEAGUES.find((d) => d.league === name)?.color ?? LEAGUES[0].color;
+/** Accent color for a league family name or id. */
+export function leagueColor(nameOrFamily: string): string {
+  return LEAGUES.find((d) => d.league === nameOrFamily || d.family === nameOrFamily)?.color ?? LEAGUES[0].color;
 }
 
-/** Display name with division: "Plata II" / "Élite" */
+/** Display name with division: "Saturno II" / "Galáctica" */
 export function leagueLabel(d: LeagueDivision): string {
   return d.division ? `${d.league} ${d.division}` : d.league;
+}
+
+/** Division object for a stored id (falls back to the first one). */
+export function leagueById(id: string | null | undefined): LeagueDivision {
+  return LEAGUES.find((d) => d.id === id) ?? LEAGUES[0];
 }
 
 /** Returns the player's current division based on their trophy count. */
@@ -77,10 +104,12 @@ export function getDivisionProgress(trophies: number): number {
   return Math.min(1, Math.max(0, (trophies - cur.minTrophies) / span));
 }
 
-/** Trophies awarded when claiming the daily bonus (all dailies done). */
-export const DAILY_TROPHY_BONUS = 5;
+/** Position of a division in the ladder (0 = Asteroide III), for "did I move up?" checks. */
+export function leagueRank(id: string | null | undefined): number {
+  return LEAGUES.findIndex((d) => d.id === id);
+}
 
-/** Returns the tier as Roman numeral (I = top, II, III = entry) or null for Élite. */
+/** Returns the tier as Roman numeral (I = top, II, III = entry) or null for Galáctica. */
 export function leagueTierRoman(id: string | null | undefined): "I" | "II" | "III" | null {
   if (!id) return null;
   const m = id.match(/-(\d)$/);

@@ -779,6 +779,22 @@ export type Database = {
           xp: number
         }[]
       }
+      get_league_rivals: {
+        Args: { _limit?: number }
+        Returns: {
+          avatar_config: Json
+          avatar_url: string
+          current_league_id: string
+          display_name: string
+          equipped_title: string
+          highest_trophies: number
+          level: number
+          trophies: number
+          user_id: string
+          username: string
+          xp: number
+        }[]
+      }
       get_leaderboard: {
         Args: { _limit?: number }
         Returns: {

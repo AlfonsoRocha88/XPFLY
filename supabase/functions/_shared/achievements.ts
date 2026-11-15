@@ -55,7 +55,7 @@ export const CONSTELLATIONS: { id: ConstellationId; name: string; tagline: strin
 
 const tag = (t: string) => (m: Metrics) => m.tags?.[t] ?? 0;
 
-/** League family index reached by a trophy count (hierro = 1 … elite = 12). Mirrors _shared/leagues.ts. */
+/** League family index reached by a trophy count (asteroide = 1 … galactica = 12). Mirrors _shared/leagues.ts. */
 const LEAGUE_MIN = [0, 200, 550, 1050, 1700, 2500, 3500, 4800, 6400, 8300, 10500, 13000];
 export const leagueFamilyFor = (trophies: number) => LEAGUE_MIN.filter((min) => trophies >= min).length;
 
@@ -91,7 +91,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   // Ascenso y comunidad
   { id: "ascenso", constellation: "ascenso", name: "Ascenso", unit: "niveles", thresholds: [5, 15, 30], value: (m) => m.level },
   { id: "coleccionista", constellation: "ascenso", name: "Coleccionista", unit: "trofeos (máximo)", thresholds: [50, 200, 500], value: (m) => m.highestTrophies },
-  { id: "liga", constellation: "ascenso", name: "Liga", unit: "liga alcanzada", thresholds: [3, 4, 10], tierLabels: ["Liga Plata", "Liga Oro", "Liga Diamante"], value: (m) => leagueFamilyFor(m.highestTrophies) },
+  { id: "liga", constellation: "ascenso", name: "Liga", unit: "liga alcanzada", thresholds: [3, 4, 10], tierLabels: ["Liga Luna", "Liga Mercurio", "Liga Sol"], value: (m) => leagueFamilyFor(m.highestTrophies) },
   { id: "amigos", constellation: "ascenso", name: "Amigos", unit: "amigos", thresholds: [1, 5, 10], value: (m) => m.friends },
   { id: "clan", constellation: "ascenso", name: "Clan", unit: "aportes a tu clan", thresholds: [1, 50, 200], tierLabels: ["Unirte a un clan", "50 aportes", "200 aportes"], value: (m) => (m.clanMember ? Math.max(1, m.clanContributions) : 0) },
   {

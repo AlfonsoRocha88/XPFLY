@@ -4,7 +4,7 @@
 //   - "trophy-decay" (daily): competitive leagues lose trophies after inactivity or overdue urgent tasks.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
-import { leagueFamilyIndex } from "../_shared/leagues.ts";
+import { DECAY_FROM_FAMILY, leagueFamilyIndex } from "../_shared/leagues.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -53,7 +53,7 @@ async function missionReminders() {
 }
 
 function isCompetitive(id: string | null | undefined): boolean {
-  return leagueFamilyIndex(id) >= 7;
+  return leagueFamilyIndex(id) >= DECAY_FROM_FAMILY;
 }
 
 const MAX_DAILY_TROPHY_LOSS = 14;

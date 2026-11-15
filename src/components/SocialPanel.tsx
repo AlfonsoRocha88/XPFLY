@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Users, UserPlus, Swords, Copy, Check, X, Crown, Shield, LogOut, Send, Bell, Search, Trophy, Flame } from "lucide-react";
+import { LeagueEmblem } from "@/components/leagues/LeagueEmblem";
+import { Users, UserPlus, Swords, Copy, Check, X, Crown, Shield, LogOut, Send, Bell, Search, Flame } from "lucide-react";
 import { useFriends, type FriendProfilePreview } from "@/hooks/useFriends";
 import { getCurrentLeague, leagueLabel } from "@/lib/leagues";
 import { useParty } from "@/hooks/useParty";
@@ -139,7 +140,7 @@ const SocialPanel = ({ view }: { view: "friends" | "party" }) => {
                       @{preview.username || "—"} · Nv.{preview.level}
                     </p>
                     <p className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Trophy className="h-3 w-3" style={{ color: lg.color }} /> {leagueLabel(lg)}
+                      <LeagueEmblem family={lg.family} division={lg.divisionNumber} size={14} animated={false} /> {leagueLabel(lg)}
                     </p>
                   </div>
                   <Button size="sm" onClick={handleSendRequest} disabled={sendRequest.isPending}>
@@ -204,7 +205,7 @@ const SocialPanel = ({ view }: { view: "friends" | "party" }) => {
                           <span>· {fp?.xp || 0} XP</span>
                         </p>
                         <p className="text-xs text-muted-foreground flex items-center gap-2">
-                          <span className="flex items-center gap-1"><Trophy className="h-3 w-3" style={{ color: lg.color }} />{leagueLabel(lg)}</span>
+                          <span className="flex items-center gap-1"><LeagueEmblem family={lg.family} division={lg.divisionNumber} size={14} animated={false} />{leagueLabel(lg)}</span>
                           <span className="flex items-center gap-1"><Flame className="h-3 w-3 text-orange-500" />{fp?.daily_streak || 0}</span>
                         </p>
                       </div>

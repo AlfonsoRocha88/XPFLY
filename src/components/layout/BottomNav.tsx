@@ -9,13 +9,13 @@ interface BottomNavProps {
   badges?: Partial<Record<SectionId, number>>;
 }
 
-/** Floating glass tab bar: the active pill glides between tabs and the icon pops on selection. */
+/** Floating glass tab bar, icons only (names live in aria-label): the pill glides and the icon pops. */
 const BottomNav = ({ current, onChange, badges = {} }: BottomNavProps) => (
   <nav
     className="glass fixed inset-x-3 z-40 rounded-[1.75rem] md:hidden"
     style={{ bottom: "max(0.6rem, env(safe-area-inset-bottom))" }}
   >
-    <div className="grid grid-cols-5 p-1.5">
+    <div className="grid grid-cols-6 p-1.5">
       {SECTIONS.map(({ id, label, icon: Icon }) => {
         const active = id === current;
         const badge = badges[id] ?? 0;
@@ -24,7 +24,9 @@ const BottomNav = ({ current, onChange, badges = {} }: BottomNavProps) => (
             key={id}
             onClick={() => { if (!active) { playSfx("nav"); onChange(id); } }}
             aria-current={active ? "page" : undefined}
-            className="relative flex flex-col items-center gap-0.5 rounded-[1.35rem] py-1.5"
+            aria-label={label}
+            title={label}
+            className="relative flex h-12 items-center justify-center rounded-[1.35rem]"
           >
             {active && (
               <m.span
@@ -38,16 +40,15 @@ const BottomNav = ({ current, onChange, badges = {} }: BottomNavProps) => (
               initial={active ? { scale: 0.7, y: 2 } : false}
               animate={{ scale: 1, y: 0 }}
               transition={{ type: "spring", stiffness: 520, damping: 15 }}
-              className={cn("relative flex h-7 items-center justify-center", active ? "text-primary" : "text-muted-foreground")}
+              className={cn("relative flex h-8 items-center justify-center", active ? "text-primary" : "text-muted-foreground")}
             >
-              <Icon className="h-[22px] w-[22px]" strokeWidth={active ? 2.4 : 2} />
+              <Icon className="h-6 w-6" strokeWidth={active ? 2.3 : 1.9} />
               {badge > 0 && (
                 <span className="absolute -right-2.5 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold leading-none text-destructive-foreground">
                   {badge > 9 ? "9+" : badge}
                 </span>
               )}
             </m.span>
-            <span className={cn("relative text-[10.5px] font-medium", active ? "text-primary" : "text-muted-foreground")}>{label}</span>
           </button>
         );
       })}

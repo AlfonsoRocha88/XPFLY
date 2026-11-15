@@ -1,5 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { currentLeague } from "../_shared/leagues.ts";
+import { STREAK_BONUS_FROM, TASKS_PER_TROPHY, currentLeague } from "../_shared/leagues.ts";
 import { localDay } from "../_shared/day.ts";
 
 const corsHeaders = {
@@ -173,11 +173,12 @@ Deno.serve(async (req) => {
     }
     const allUnlocked = [...unlocked, ...newlyUnlocked];
 
-    // Trophies: 1 trophy per 2 missions_completed (spec).
+    // Trophies: 1 every TASKS_PER_TROPHY completed tasks; with a 7+ day streak that trophy comes with +1 extra.
     const prevMissions = profile.missions_completed_total ?? 0;
     const newMissions = prevMissions + 1;
-    const bonusTrophy = !flagged && newMissions % 2 === 0;
-    const trophyDelta = bonusTrophy ? 1 : 0;
+    const bonusTrophy = !flagged && newMissions % TASKS_PER_TROPHY === 0;
+    const streakBonus = bonusTrophy && (profile.daily_streak ?? 0) >= STREAK_BONUS_FROM ? 1 : 0;
+    const trophyDelta = (bonusTrophy ? 1 : 0) + streakBonus;
     const newTrophies = (profile.trophies ?? 0) + trophyDelta;
 
     const { data: updated, error: uErr } = await admin
@@ -203,6 +204,8 @@ Deno.serve(async (req) => {
       xpGained: reward,
       leveledUp: newLevel > oldLevel,
       bonusTrophyAwarded: bonusTrophy,
+      trophyDelta,
+      streakBonus,
       missionsCompletedTotal: newMissions,
       newlyUnlockedTitles: newlyUnlocked,
     });

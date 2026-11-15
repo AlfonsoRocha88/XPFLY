@@ -26,11 +26,11 @@ import {
   DEFAULT_EMBLEM, EMBLEM_SHAPES, EMBLEM_PALETTE, EMBLEM_ICONS_BY_CATEGORY,
   type EmblemConfig, type EmblemIcon, type EmblemShape,
 } from "@/lib/clan-emblem";
-import { leagueTierRoman } from "@/lib/leagues";
+import { leagueById, leagueTierRoman } from "@/lib/leagues";
 import EmblemSVG from "@/components/clan/EmblemSVG";
 import RoleBadge from "@/components/clan/RoleBadge";
 import MedalIcon from "@/components/clan/MedalIcon";
-import LeagueShield from "@/components/leagues/LeagueShield";
+import { LeagueEmblem } from "@/components/leagues/LeagueEmblem";
 import ClanHeader, { ClanHeaderCompact } from "@/components/clan/ClanHeader";
 import ClanWeeklyChallenge from "@/components/clan/ClanWeeklyChallenge";
 import ClanChat from "@/components/clan/ClanChat";
@@ -47,7 +47,7 @@ const MemberRow = ({ member, rank, onSelect }: { member: ClanMember; rank: numbe
     : streak >= 7 ? "text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.7)]"
     : "text-muted-foreground";
   const tier = leagueTierRoman(p?.current_league_id ?? null);
-  const leagueName = (p?.current_league_id ?? "mortal-3").split("-")[0];
+  const league = leagueById(p?.current_league_id);
   return (
     <button
       onClick={onSelect}
@@ -59,7 +59,7 @@ const MemberRow = ({ member, rank, onSelect }: { member: ClanMember; rank: numbe
         )}
       </div>
       <div className="flex w-12 shrink-0 flex-col items-center">
-        <LeagueShield league={leagueName} size={40} />
+        <LeagueEmblem family={league.family} division={league.divisionNumber} size={40} animated={false} />
         <span className="mt-0.5 font-medium text-xs text-muted-foreground">{tier ?? "∞"}</span>
       </div>
       <div className="w-14 shrink-0 text-center">

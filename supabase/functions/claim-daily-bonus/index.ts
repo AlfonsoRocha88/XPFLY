@@ -1,5 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { currentLeague } from "../_shared/leagues.ts";
+import { DAILY_TROPHY_BONUS, WEEKLY_TROPHY_BONUS, currentLeague } from "../_shared/leagues.ts";
 import { localDay } from "../_shared/day.ts";
 
 const corsHeaders = {
@@ -8,7 +8,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const DAILY_TROPHY_BONUS = 5;
 
 function calculateLevel(totalXp: number) {
   let lvl = 1, need = 0;
@@ -81,7 +80,10 @@ Deno.serve(async (req) => {
     const newFreezes = earnedFreeze ? prevFreezes + 1 : prevFreezes;
 
     const newChests = (profile.unopened_chests ?? 0) + 1;
-    const newTrophies = (profile.trophies ?? 0) + DAILY_TROPHY_BONUS;
+    // "Semana perfecta": every 7 consecutive days with all dailies done pays a weekly bonus.
+    const weeklyBonus = newStreak > currentStreak && newStreak % 7 === 0 ? WEEKLY_TROPHY_BONUS : 0;
+    const trophyDelta = DAILY_TROPHY_BONUS + weeklyBonus;
+    const newTrophies = (profile.trophies ?? 0) + trophyDelta;
 
     // Streak title ("Constante" @ 7 days)
     const unlocked: string[] = profile.unlocked_titles ?? [];
@@ -109,6 +111,8 @@ Deno.serve(async (req) => {
       leveledUp: newLevel > oldLevel,
       streak: newStreak,
       earnedFreeze,
+      trophyDelta,
+      weeklyBonus,
       newlyUnlockedTitles: newlyUnlocked,
     });
   } catch (e) {

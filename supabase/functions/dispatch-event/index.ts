@@ -5,6 +5,7 @@
 // called with the public anon key.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { leagueName } from "../_shared/leagues.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -69,9 +70,9 @@ Deno.serve(async (req) => {
       }
       case "league_promotion": {
         if (!row_id) return new Response(JSON.stringify({ error: "row_id required" }), { status: 200, headers: corsHeaders });
-        const { data: lc } = await supabase.from("league_changes").select("user_id, direction").eq("id", row_id).maybeSingle();
+        const { data: lc } = await supabase.from("league_changes").select("user_id, direction, to_league_id").eq("id", row_id).maybeSingle();
         if (!lc || lc.direction !== "promotion") return new Response(JSON.stringify({ skipped: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
-        await send(lc.user_id, "Constela", "Subiste de liga. Buen trabajo.", "league-up", { url: "/leagues" });
+        await send(lc.user_id, "Constela", `Subiste a ${leagueName(lc.to_league_id)}. Buen trabajo.`, "league-up", { url: "/leagues" });
         break;
       }
       case "mission_reminder": {

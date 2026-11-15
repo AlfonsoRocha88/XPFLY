@@ -1,0 +1,150 @@
+/* ===== League emblems + trophy icon =====
+   Ambient loops only: transform/opacity keyframes, 4–140s, sine-like ease-in-out for breathing,
+   linear for rotation/scroll. Nothing here animates filters, gradients, layout or CSS variables. */
+
+.le-emblem {
+  display: inline-block;
+  flex-shrink: 0;
+  overflow: visible;
+  vertical-align: middle;
+}
+
+/* Pivots. Animated elements never carry a transform attribute; their static parent places the pivot. */
+.le-o0 { transform-box: view-box; transform-origin: 0 0; }       /* local origin */
+.le-oc { transform-box: view-box; transform-origin: 60px 60px; } /* emblem centre */
+.le-fb { transform-box: fill-box; transform-origin: center; }    /* own centre (symmetric shapes) */
+
+@keyframes le-spin { to { transform: rotate(360deg); } }
+@keyframes le-breathe {
+  from { transform: scale(0.95); opacity: 0.7; }
+  to { transform: scale(1.05); opacity: 1; }
+}
+
+/* Division stars: orbit + counter-rotation share one duration so the stars stay upright. */
+.le-emblem .le-orbit { animation: le-spin 40s linear infinite; }
+.le-emblem .le-orbit-counter { animation: le-spin 40s linear infinite reverse; }
+
+/* Asteroide: slow rocking tumble (light stays top-left), debris drifting. */
+@keyframes le-tumble {
+  0%, 100% { transform: rotate(0deg); }
+  35% { transform: rotate(-9deg); }
+  70% { transform: rotate(8deg); }
+}
+.le-emblem .le-tumble { animation: le-tumble 24s ease-in-out infinite; }
+@keyframes le-drift {
+  from { transform: translate(0, 0); opacity: 0.35; }
+  to { transform: translate(2.5px, -3px); opacity: 0.9; }
+}
+.le-emblem .le-drift-1 { animation: le-drift 7s ease-in-out infinite alternate; }
+.le-emblem .le-drift-2 { animation: le-drift 9.5s ease-in-out -3s infinite alternate; }
+.le-emblem .le-drift-3 { animation: le-drift 11.5s ease-in-out -6s infinite alternate; }
+
+/* Cometa: the two tail layers stretch out of phase (a ripple), the coma breathes. */
+@keyframes le-tail-a {
+  0%, 100% { transform: scale(1, 1); }
+  50% { transform: scale(1.06, 0.92); }
+}
+@keyframes le-tail-b {
+  0%, 100% { transform: scale(1, 1); }
+  50% { transform: scale(0.94, 1.08); }
+}
+.le-emblem .le-tail-a { animation: le-tail-a 6.5s ease-in-out infinite; }
+.le-emblem .le-tail-b { animation: le-tail-b 4.8s ease-in-out -1.2s infinite; }
+.le-emblem .le-coma { animation: le-breathe 3.4s ease-in-out infinite alternate; }
+
+/* Luna: the night side slides between gibbous and a fat crescent. */
+@keyframes le-phase {
+  from { transform: translateX(44px); }
+  to { transform: translateX(16px); }
+}
+.le-emblem .le-phase { animation: le-phase 16s ease-in-out infinite alternate; }
+
+/* Mercurio: hot limb pulse. */
+@keyframes le-heat {
+  from { opacity: 0.45; }
+  to { opacity: 1; }
+}
+.le-emblem .le-heat { animation: le-heat 4.2s ease-in-out infinite alternate; }
+
+/* Marte: dust haze drifting across. */
+@keyframes le-haze {
+  from { transform: translateX(-12px); }
+  to { transform: translateX(12px); }
+}
+.le-emblem .le-haze-1 { animation: le-haze 17s ease-in-out infinite alternate; }
+.le-emblem .le-haze-2 { animation: le-haze 23s ease-in-out -8s infinite alternate-reverse; }
+
+/* Tierra / Júpiter: seamless 60px scroll (the tiles repeat every 60 units). */
+@keyframes le-scroll-w { to { transform: translateX(-60px); } }
+@keyframes le-scroll-e { to { transform: translateX(60px); } }
+.le-emblem .le-scroll-land { animation: le-scroll-w 60s linear infinite; }
+.le-emblem .le-scroll-cloud { animation: le-scroll-w 36s linear infinite; }
+.le-emblem .le-scroll-west { animation: le-scroll-w 90s linear infinite; }
+.le-emblem .le-scroll-east { animation: le-scroll-e 120s linear infinite; }
+@keyframes le-sway {
+  from { transform: translateX(-1.5px); }
+  to { transform: translateX(1.5px); }
+}
+.le-emblem .le-sway { animation: le-sway 16s ease-in-out infinite alternate; }
+
+/* Neptuno: storm crosses the face, fading in and out at the limbs. */
+@keyframes le-storm {
+  0% { transform: translateX(-26px); opacity: 0; }
+  18%, 82% { opacity: 1; }
+  100% { transform: translateX(26px); opacity: 0; }
+}
+.le-emblem .le-storm { animation: le-storm 32s linear -12s infinite; }
+
+/* Saturno: sheen travelling around the rings. */
+.le-emblem .le-sheen { animation: le-spin 12s linear infinite; }
+
+/* Sol: two coronas breathing, two ray sets turning against each other. */
+.le-emblem .le-corona-1 { animation: le-breathe 7s ease-in-out infinite alternate; }
+.le-emblem .le-corona-2 { animation: le-breathe 9.5s ease-in-out -4s infinite alternate; }
+.le-emblem .le-rays-a { animation: le-spin 90s linear infinite; }
+.le-emblem .le-rays-b { animation: le-spin 140s linear infinite reverse; }
+
+/* Supernova: shockwaves expand and fade (ease-out cubic: fast blast, slow dissipation). */
+@keyframes le-shock {
+  0% { transform: scale(0.3); opacity: 0; }
+  10% { opacity: 0.9; }
+  100% { transform: scale(1.55); opacity: 0; }
+}
+.le-emblem .le-shock { animation: le-shock 6.6s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; }
+.le-emblem .le-shock-2 { animation-delay: -2.2s; }
+.le-emblem .le-shock-3 { animation-delay: -4.4s; }
+.le-emblem .le-flare { animation: le-breathe 3.2s ease-in-out infinite alternate; }
+.le-emblem .le-flare-slow { animation-duration: 8s; }
+
+/* Galáctica: slow rotation, distant stars twinkling. */
+.le-emblem .le-galaxy { animation: le-spin 80s linear infinite; }
+@keyframes le-twinkle {
+  from { opacity: 0.15; }
+  to { opacity: 1; }
+}
+.le-emblem .le-twinkle-1 { animation: le-twinkle 3.1s ease-in-out infinite alternate; }
+.le-emblem .le-twinkle-2 { animation: le-twinkle 4.3s ease-in-out -1.4s infinite alternate; }
+.le-emblem .le-twinkle-3 { animation: le-twinkle 5.2s ease-in-out -2.6s infinite alternate; }
+.le-emblem .le-twinkle-4 { animation: le-twinkle 3.7s ease-in-out -0.8s infinite alternate; }
+
+/* Paused: locked, animated={false}, off-screen, or reduced motion. Must stay after the rules above. */
+.le-emblem.le-paused .le-anim { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .le-emblem .le-anim { animation-play-state: paused; }
+}
+
+/* Locked: static dim + desaturate on the whole badge (nothing animates underneath, so no per-frame cost). */
+.le-emblem.le-locked {
+  opacity: 0.4;
+  filter: grayscale(0.85);
+}
+
+/* ===== TrophyIcon: optional spark travelling along the orbit ===== */
+.tr-spark {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  animation: le-spin 7s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tr-spark { animation-play-state: paused; }
+}

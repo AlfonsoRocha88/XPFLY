@@ -5,7 +5,7 @@ import { useAuth } from "./useAuth";
 import type { Profile } from "@/lib/types";
 import { getTitle } from "@/lib/titles";
 import { toast } from "sonner";
-import { getCurrentLeague, leagueLabel } from "@/lib/leagues";
+import { DAILY_TROPHY_BONUS } from "@/lib/leagues";
 import { XP_REWARDS } from "@/lib/xp";
 import { createElement } from "react";
 import { Gift, HeartCrack } from "@/components/icons/GameIcons";
@@ -153,7 +153,6 @@ export const useProfile = () => {
     mutationFn: async ({ taskId, priority, partyBonus = false }: { taskId: string; priority?: keyof typeof XP_REWARDS; partyBonus?: boolean }) => {
       const previous = queryClient.getQueryData<Profile>(["profile"]);
       const oldLevel = previous?.level ?? 1;
-      const prevTrophies = (previous as any)?.trophies ?? 0;
 
       const { data, error } = await supabase.functions.invoke("award-xp", { body: { task_id: taskId, priority, partyBonus } });
       if (error) throw error;
@@ -161,7 +160,6 @@ export const useProfile = () => {
 
       const updated = data.profile;
       const newLevel = updated.level ?? oldLevel;
-      const newTrophies = updated.trophies ?? prevTrophies;
       const newlyUnlocked: string[] = data.newlyUnlockedTitles ?? [];
 
       newlyUnlocked.forEach((id: string) => {
@@ -171,15 +169,7 @@ export const useProfile = () => {
         }
       });
 
-      const prevLeague = getCurrentLeague(prevTrophies);
-      const newLeague = getCurrentLeague(newTrophies);
-      if (newLeague.id !== prevLeague.id) {
-        toast.success(`Subiste a la liga ${leagueLabel(newLeague)}`, {
-          description: "Sigue completando tareas para subir más.",
-        });
-        toast.success(`Subiste a la liga ${leagueLabel(newLeague)}`);
-      }
-
+      // League-ups are celebrated by <LeagueUpCelebration /> (it watches current_league_id).
       if (newLevel > oldLevel) {
         
       }
@@ -189,6 +179,8 @@ export const useProfile = () => {
         xpGained: data.xpGained,
         leveledUp: data.leveledUp,
         bonusTrophyAwarded: data.bonusTrophyAwarded,
+        trophyDelta: (data.trophyDelta as number | undefined) ?? (data.bonusTrophyAwarded ? 1 : 0),
+        streakBonus: (data.streakBonus as number | undefined) ?? 0,
         missionsCompletedTotal: data.missionsCompletedTotal,
       };
     },
@@ -198,7 +190,6 @@ export const useProfile = () => {
   const claimDailyBonus = useMutation({
     mutationFn: async () => {
       const previous = queryClient.getQueryData<Profile>(["profile"]);
-      const prevTrophies = (previous as any)?.trophies ?? 0;
       const oldLevel = previous?.level ?? 1;
 
       const { data, error } = await supabase.functions.invoke("claim-daily-bonus", { body: {} });
@@ -207,19 +198,17 @@ export const useProfile = () => {
       if (data?.error) throw new Error(data.error);
 
       const updated = data.profile;
-      const newTrophies = updated.trophies ?? prevTrophies;
 
       toast.success("+1 Cofre de recompensa", {
         icon: createElement(Gift, { size: 18 }),
         description: "Ábrelo en la Tienda para reclamar tu botín.",
       });
-      toast.success(`+5 trofeos por completar todas las tareas diarias`);
-
-      const prevLeagueD = getCurrentLeague(prevTrophies);
-      const newLeagueD = getCurrentLeague(newTrophies);
-      if (newLeagueD.id !== prevLeagueD.id) {
-        toast.success(`Subiste a la liga ${leagueLabel(newLeagueD)}`);
-      }
+      const weeklyBonus = (data.weeklyBonus as number | undefined) ?? 0;
+      const trophyDelta = (data.trophyDelta as number | undefined) ?? DAILY_TROPHY_BONUS + weeklyBonus;
+      toast(`+${trophyDelta} trofeos`, {
+        className: "trophy-toast",
+        description: weeklyBonus > 0 ? `Semana perfecta: +${weeklyBonus} extra por 7 días seguidos` : "Por completar todas tus diarias",
+      });
 
       if (data.earnedFreeze) {
         toast.success(`+1 protector de racha (${updated.streak_freezes} de ${updated.streak_freeze_max})`, {

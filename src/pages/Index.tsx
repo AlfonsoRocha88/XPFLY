@@ -17,6 +17,8 @@ import SleepCheckIn from "@/components/SleepCheckIn";
 import ListView from "@/components/ListView";
 import DailyQuestPanel from "@/components/DailyQuestPanel";
 import XpPopup from "@/components/XpPopup";
+import { TrophyIcon } from "@/components/icons/TrophyIcon";
+import LeagueUpCelebration from "@/components/leagues/LeagueUpCelebration";
 import LevelUpToast from "@/components/LevelUpToast";
 import OrbOpenOverlay from "@/components/orb/OrbOpenOverlay";
 import { DEFAULT_WALLPAPER, WALLPAPERS } from "@/lib/wallpapers";
@@ -47,7 +49,7 @@ const LivingBackground = lazy(() => import("@/components/living/LivingBackground
 const SignOutLink = lazy(() => import("@/components/ProfileOverview").then((m) => ({ default: m.SignOutLink })));
 const ScheduleBlockDialog = lazy(() => import("@/components/ScheduleBlockDialog"));
 
-type ProgressTab = "stats" | "achievements" | "leagues";
+type ProgressTab = "stats" | "achievements";
 type CommunityTab = "friends" | "party" | "clans";
 type ProfileTab = "shop" | "style";
 
@@ -83,7 +85,7 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const sectionDir = useDirection(section, SECTIONS.map((s) => s.id));
-  const progressDir = useDirection<ProgressTab>(progressTab, ["stats", "achievements", "leagues"]);
+  const progressDir = useDirection<ProgressTab>(progressTab, ["stats", "achievements"]);
   const communityDir = useDirection<CommunityTab>(communityTab, ["friends", "party", "clans"]);
   const profileDir = useDirection<ProfileTab>(profileTab, ["shop", "style"]);
   // Logros is a full-screen scene behind the page: the page lets touches through to it.
@@ -197,8 +199,13 @@ const Index = () => {
       });
       playSfx("xp");
       setXpPopup(result.xpGained);
-      if (result.bonusTrophyAwarded) {
-        toast("+1 trofeo", { duration: 2500, className: "trophy-toast" });
+      if (result.trophyDelta > 0) {
+        toast(`+${result.trophyDelta} ${result.trophyDelta === 1 ? "trofeo" : "trofeos"}`, {
+          duration: 2500,
+          className: "trophy-toast",
+          icon: <TrophyIcon size={18} animated />,
+          description: result.streakBonus > 0 ? "Racha de 7+ días: trofeo doble" : undefined,
+        });
       }
       if (result.leveledUp) {
         // The chord in "levelUp" lands ~0.8s in, right when the ring closes and flashes.
@@ -434,14 +441,23 @@ const Index = () => {
       <>
         <SectionHeader<ProgressTab>
           title="Progreso"
-          tabs={[{ id: "stats", label: "Estadísticas" }, { id: "achievements", label: claimableCount ? `Logros (${claimableCount})` : "Logros" }, { id: "leagues", label: "Ligas" }]}
+          tabs={[{ id: "stats", label: "Estadísticas" }, { id: "achievements", label: claimableCount ? `Logros (${claimableCount})` : "Logros" }]}
           activeTab={progressTab}
           onTabChange={setProgressTab}
           overlay={galaxyMode}
         />
         <TabTransition id={progressTab} dir={progressDir} className="mx-auto w-full max-w-3xl px-4 md:px-8">
-          {progressTab === "leagues" ? <Leagues /> : progressTab === "stats" ? <StatsView habits={dailyTasks} /> : <AchievementsView />}
+          {progressTab === "stats" ? <StatsView habits={dailyTasks} /> : <AchievementsView />}
         </TabTransition>
+      </>
+    );
+  } else if (section === "leagues") {
+    content = (
+      <>
+        <SectionHeader title="Ligas" />
+        <div className="mx-auto w-full max-w-3xl px-4 md:px-8">
+          <Leagues />
+        </div>
       </>
     );
   } else if (section === "community") {
@@ -531,6 +547,7 @@ const Index = () => {
       {/* ---------------- Overlays ---------------- */}
       {xpPopup !== null && <XpPopup amount={xpPopup} onComplete={() => setXpPopup(null)} />}
       {levelUp !== null && <LevelUpToast level={levelUp} onComplete={() => setLevelUp(null)} />}
+      <LeagueUpCelebration />
 
       <Suspense fallback={null}>
         {scheduleOpen && <ScheduleBlockDialog open={scheduleOpen} onOpenChange={setScheduleOpen} />}
