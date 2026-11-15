@@ -40,7 +40,7 @@ const SideNav = ({ current, onChange, badges = {} }: SideNavProps) => {
               {active && (
                 <m.span layoutId="sidenav-pill" className="absolute inset-0 rounded-xl bg-primary/10" transition={{ type: "spring", stiffness: 450, damping: 36 }} />
               )}
-              <Icon className="relative h-5 w-5" strokeWidth={active ? 2.4 : 2} />
+              <Icon className={cn("relative h-5 w-5 transition-[opacity,filter] duration-200", !active && "opacity-70 saturate-[.75]")} />
               <span className="relative flex-1 text-left">{label}</span>
               {badge > 0 && (
                 <span className="relative flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[11px] font-semibold text-destructive-foreground">

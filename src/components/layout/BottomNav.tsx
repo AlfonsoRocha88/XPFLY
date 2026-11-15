@@ -40,9 +40,9 @@ const BottomNav = ({ current, onChange, badges = {} }: BottomNavProps) => (
               initial={active ? { scale: 0.7, y: 2 } : false}
               animate={{ scale: 1, y: 0 }}
               transition={{ type: "spring", stiffness: 520, damping: 15 }}
-              className={cn("relative flex h-8 items-center justify-center", active ? "text-primary" : "text-muted-foreground")}
+              className={cn("relative flex h-8 items-center justify-center transition-[opacity,filter] duration-200", active ? "opacity-100" : "opacity-70 saturate-[.75]")}
             >
-              <Icon className="h-6 w-6" strokeWidth={active ? 2.3 : 1.9} />
+              <Icon className="h-6 w-6" />
               {badge > 0 && (
                 <span className="absolute -right-2.5 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold leading-none text-destructive-foreground">
                   {badge > 9 ? "9+" : badge}
