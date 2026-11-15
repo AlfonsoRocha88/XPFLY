@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { CONSTELLATIONS } from "@shared/achievements";
 import { SHOP_FRAMES, frameById } from "@/components/achievements/frames";
 import CharacterPortrait from "@/components/CharacterPortrait";
+import { InfoTip } from "@/components/ui/info-tip";
 
 /** Avatar frames earned by completing a constellation in gold. Equipping goes through the server. */
 const FramePicker = () => {
@@ -26,8 +27,10 @@ const FramePicker = () => {
 
   return (
     <section className="surface p-4">
-      <h2 className="section-title">Marcos de avatar</h2>
-      <p className="mb-3 mt-0.5 text-xs text-muted-foreground">Gana marcos completando constelaciones de Logros en oro, o consíguelos en la Tienda.</p>
+      <h2 className="section-title mb-3 flex items-center gap-2">
+        Marcos de avatar
+        <InfoTip title="Marcos de avatar" align="start"><p>Gana marcos completando constelaciones de Logros en oro, o consíguelos en la Tienda.</p></InfoTip>
+      </h2>
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
         <button
           type="button"

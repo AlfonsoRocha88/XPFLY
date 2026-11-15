@@ -656,3 +656,63 @@ button:not(:disabled):active, [role="button"]:active {
   .living-jardin .task-card-game::after,
   .living-jardin .daily-quest-panel::after { animation: none; }
 }
+
+/* ───────────── Luminous edges ─────────────
+   Every card, glass panel and button gets a hairline lit edge (bright top-left, fading round the
+   rim). Near the pointer the edge brightens: useEdgeGlow() writes --mx/--my (pointer position in
+   the element's own box) and a radial gradient centred there lights the rim. Pattern: masked
+   ::before ring (padding-box excluded), so it never touches the element's own background/glass. */
+:root {
+  --edge-base: var(--primary);
+  --edge-base-a: 0.22;
+  --edge-fade-a: 0.06;
+  --edge-hot: var(--primary-glow, var(--primary));
+  --edge-hot-a: 0.95;
+  --edge-core: 0 0% 100%;
+  --edge-core-a: 0.55;
+}
+.dark {
+  --edge-base: 0 0% 100%;
+  --edge-base-a: 0.17;
+  --edge-fade-a: 0.03;
+  --edge-core-a: 0.95;
+}
+
+/* In the components layer so utilities like `fixed`/`absolute` on the same element still win. */
+@layer components {
+  .glass, .glass-strong, .surface, .task-card-game, .daily-quest-item, .glow-edge {
+    position: relative;
+  }
+}
+.glass::before, .glass-strong::before, .surface::before,
+.task-card-game::before, .daily-quest-item::before, .glow-edge::before {
+  content: "";
+  position: absolute;
+  inset: var(--edge-inset, -1px);
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  background:
+    radial-gradient(120px circle at var(--mx, -999px) var(--my, -999px), hsl(var(--edge-core) / var(--edge-core-a)), transparent 70%),
+    radial-gradient(260px circle at var(--mx, -999px) var(--my, -999px), hsl(var(--edge-hot) / var(--edge-hot-a)), transparent 65%),
+    linear-gradient(150deg, hsl(var(--edge-base) / var(--edge-base-a)), hsl(var(--edge-base) / var(--edge-fade-a)) 45%, hsl(var(--edge-base) / var(--edge-fade-a)) 70%, hsl(var(--primary) / 0.14));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  z-index: 0;
+}
+/* Elements without their own border sit the ring on their outer edge instead of outside it. */
+.task-card-game, .daily-quest-item, .glow-edge { --edge-inset: 0; }
+
+/* Soft inner spotlight under the pointer (pairs with the lit edge). ::after so it never fights the
+   edge ring; skipped inside the Jardín wallpaper, which already uses ::after on task cards. */
+.glass::after, .glass-strong::after, .surface::after, .daily-quest-item::after,
+.task-card-game:not(.living-jardin *)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(320px circle at var(--mx, -999px) var(--my, -999px), hsl(var(--edge-hot) / 0.09), transparent 70%);
+  z-index: 0;
+}

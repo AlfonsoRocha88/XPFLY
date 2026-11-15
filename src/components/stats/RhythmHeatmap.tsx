@@ -17,7 +17,7 @@ const RhythmHeatmap = ({ heat }: { heat: number[][] }) => {
   );
 
   return (
-    <ChartCard title="¿Cuándo rindes más?" subtitle="Completadas por día y franja" table={max ? table : undefined}>
+    <ChartCard title="¿Cuándo rindes más?" info={<p>Tareas completadas por día de la semana y franja del día. Más intenso = más tareas.</p>} table={max ? table : undefined}>
       {max === 0 ? (
         <EmptyChart icon={<Clock className="h-6 w-6" />} text="Aquí aparecerán los días y horarios en los que más avanzas." />
       ) : (

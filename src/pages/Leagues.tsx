@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { m, useReducedMotion } from "motion/react";
-import { Flame, Hourglass, ListChecks, Sparkles } from "lucide-react";
+import { CalendarCheck, Flame, Hourglass, ListChecks, Sparkles } from "lucide-react";
+import { InfoRow, InfoTip } from "@/components/ui/info-tip";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { LeagueEmblem } from "@/components/leagues/LeagueEmblem";
@@ -67,10 +68,10 @@ const Row = ({ row, rank }: { row: LbRow; rank: number }) => {
 const WeekRing = ({ days }: { days: number }) => {
   const r = 20, c = 2 * Math.PI * r;
   return (
-    <svg viewBox="0 0 48 48" className="h-12 w-12 -rotate-90" aria-hidden>
-      <circle cx="24" cy="24" r={r} fill="none" stroke="hsl(var(--foreground) / 0.1)" strokeWidth="4" />
+    <svg viewBox="0 0 48 48" className="h-6 w-6 -rotate-90" aria-hidden>
+      <circle cx="24" cy="24" r={r} fill="none" stroke="hsl(var(--foreground) / 0.12)" strokeWidth="6" />
       <m.circle
-        cx="24" cy="24" r={r} fill="none" stroke="hsl(var(--primary))" strokeWidth="4" strokeLinecap="round"
+        cx="24" cy="24" r={r} fill="none" stroke="hsl(var(--primary))" strokeWidth="6" strokeLinecap="round"
         strokeDasharray={c}
         initial={{ strokeDashoffset: c }}
         animate={{ strokeDashoffset: c * (1 - days / 7) }}
@@ -144,9 +145,13 @@ const Leagues = () => {
 
   return (
     <div className="space-y-5">
-      {/* Hero: current league, trophies and the next step */}
-      <section className="surface relative overflow-hidden p-5 text-center">
-        <div className="pointer-events-none absolute inset-x-0 -top-16 mx-auto h-48 w-48 rounded-full opacity-40 blur-3xl" style={{ background: current.color }} aria-hidden />
+      {/* Hero: no card, so the emblem floats on the glass background */}
+      <section className="relative pt-2 text-center">
+        <div
+          className="pointer-events-none absolute left-1/2 top-0 h-52 w-52 -translate-x-1/2 rounded-full opacity-30 blur-3xl"
+          style={{ background: current.color }}
+          aria-hidden
+        />
         <m.div
           key={current.id}
           className="relative mx-auto w-fit"
@@ -154,14 +159,25 @@ const Leagues = () => {
           animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
           transition={{ duration: 0.6, ease: EASE_OUT }}
         >
-          <LeagueEmblem family={current.family} division={current.divisionNumber} size={132} />
+          <LeagueEmblem family={current.family} division={current.divisionNumber} size={140} />
         </m.div>
         <h2 className="relative mt-2 font-serif text-3xl font-medium" style={{ color: current.color }}>{leagueLabel(current)}</h2>
-        <p className="relative mt-1 flex items-center justify-center gap-1.5 text-sm font-semibold tabular-nums">
+        <div className="relative mt-1 flex items-center justify-center gap-1.5 text-sm font-semibold tabular-nums">
           <TrophyIcon size={18} /> {trophies} trofeos
-        </p>
-        <div className="relative mt-4">
-          <div className="h-2.5 overflow-hidden rounded-full bg-foreground/10">
+          <InfoTip title="Cómo ganar trofeos" className="ml-1">
+            <InfoRow icon={<ListChecks className="h-4 w-4 text-primary" />}>{TASKS_PER_TROPHY} tareas completadas = 1 trofeo</InfoRow>
+            <InfoRow icon={<Sparkles className="h-4 w-4 text-primary" />}>+{DAILY_TROPHY_BONUS} al completar todas tus diarias</InfoRow>
+            <InfoRow icon={<Flame className="h-4 w-4 text-warning" />}>
+              Racha de {STREAK_BONUS_FROM}+ días: trofeos dobles{streak >= STREAK_BONUS_FROM ? <span className="font-semibold text-warning"> (activo)</span> : null}
+            </InfoRow>
+            <InfoRow icon={<CalendarCheck className="h-4 w-4 text-primary" />}>Semana perfecta: +{WEEKLY_TROPHY_BONUS} cada 7 días seguidos con todas tus diarias</InfoRow>
+            <InfoRow icon={<Hourglass className="h-4 w-4" />}>
+              Desde Neptuno, si pasas más de un día sin completar tareas o dejas urgentes vencidas, pierdes algunos trofeos.
+            </InfoRow>
+          </InfoTip>
+        </div>
+        <div className="relative mx-auto mt-5 max-w-sm">
+          <div className="h-2 overflow-hidden rounded-full bg-foreground/10">
             <m.div
               className="h-full rounded-full"
               style={{ background: `linear-gradient(90deg, ${current.color}, ${next?.color ?? current.color})` }}
@@ -173,6 +189,12 @@ const Leagues = () => {
           <p className="mt-2 text-xs font-semibold text-muted-foreground">
             {next ? <>Faltan <span className="text-foreground">{missing}</span> para {leagueLabel(next)}</> : "Llegaste a la liga más alta"}
           </p>
+        </div>
+        {/* Weekly goal: one quiet line instead of a box */}
+        <div className="relative mt-3 flex items-center justify-center gap-2 text-xs font-semibold text-muted-foreground">
+          <WeekRing days={weekDays} />
+          <span>Semana perfecta <span className="tabular-nums text-foreground">{weekDays}/7</span> · +{WEEKLY_TROPHY_BONUS}</span>
+          {familyIdx >= DECAY_FROM_FAMILY && <Hourglass className="h-3.5 w-3.5" aria-label="Tu liga pierde trofeos por inactividad" />}
         </div>
       </section>
 
@@ -199,30 +221,6 @@ const Leagues = () => {
           })}
         </div>
       </div>
-
-      {/* How to earn trophies (mirrors the server rules) */}
-      <section className="surface p-4">
-        <h3 className="section-title">Cómo ganar trofeos</h3>
-        <ul className="mt-3 space-y-2.5 text-sm">
-          <li className="flex items-center gap-3"><ListChecks className="h-4 w-4 shrink-0 text-primary" /> {TASKS_PER_TROPHY} tareas completadas = 1 trofeo</li>
-          <li className="flex items-center gap-3"><Sparkles className="h-4 w-4 shrink-0 text-primary" /> +{DAILY_TROPHY_BONUS} al completar todas tus diarias</li>
-          <li className={cn("flex items-center gap-3", streak >= STREAK_BONUS_FROM && "font-semibold text-warning")}>
-            <Flame className="h-4 w-4 shrink-0 text-warning" /> Racha de {STREAK_BONUS_FROM}+ días: trofeos dobles{streak >= STREAK_BONUS_FROM ? " (activo)" : ""}
-          </li>
-        </ul>
-        <div className="mt-4 flex items-center gap-3 rounded-2xl bg-foreground/[0.04] p-3">
-          <WeekRing days={weekDays} />
-          <span className="min-w-0 flex-1">
-            <span className="block text-sm font-semibold">Semana perfecta · +{WEEKLY_TROPHY_BONUS}</span>
-            <span className="block text-xs text-muted-foreground">{weekDays} de 7 días seguidos con todas tus diarias</span>
-          </span>
-        </div>
-        {familyIdx >= DECAY_FROM_FAMILY && (
-          <p className="mt-3 flex items-start gap-2 text-xs text-muted-foreground">
-            <Hourglass className="mt-0.5 h-3.5 w-3.5 shrink-0" /> Desde Neptuno, si pasas más de un día sin completar tareas o dejas urgentes vencidas, pierdes algunos trofeos.
-          </p>
-        )}
-      </section>
 
       {/* Rivals in your league / global ranking */}
       <section>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Moon, X } from "lucide-react";
 import { useTodaySleep } from "@/hooks/useDailyLog";
 import SleepLogger from "./SleepLogger";
+import { InfoTip } from "@/components/ui/info-tip";
 
 const DISMISS_KEY = "sleepCheckInDismissed";
 
@@ -39,8 +40,10 @@ const SleepCheckIn = () => {
             <Moon className="h-4 w-4" aria-hidden />
           </span>
           <div>
-            <p className="text-sm font-medium text-foreground">¿Cuánto dormiste anoche?</p>
-            <p className="text-xs text-muted-foreground">Te ayuda a ver cómo el descanso afecta tu día.</p>
+            <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+              ¿Cuánto dormiste anoche?
+              <InfoTip title="Sueño" align="start"><p>Te ayuda a ver en Estadísticas cómo el descanso afecta tu día.</p></InfoTip>
+            </p>
           </div>
         </div>
         <button type="button" onClick={dismiss} className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Ahora no">

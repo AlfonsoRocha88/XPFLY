@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import NotificationSettings from "@/components/NotificationSettings";
 import FramePicker from "@/components/FramePicker";
 import { cn } from "@/lib/utils";
+import { InfoTip } from "@/components/ui/info-tip";
 
 /** Appearance and device settings: color mode, accent, background and notifications. */
 const WallpaperSelector = () => {
@@ -45,8 +46,10 @@ const WallpaperSelector = () => {
       <NotificationSettings />
 
       <section className="surface p-4">
-        <h2 className="section-title">Color</h2>
-        <p className="mb-3 text-sm text-muted-foreground">El color principal de botones, barras y detalles.</p>
+        <h2 className="section-title mb-3 flex items-center gap-2">
+          Color
+          <InfoTip title="Color" align="start"><p>El color principal de botones, barras y detalles.</p></InfoTip>
+        </h2>
         <div className="grid grid-cols-4 gap-3 sm:grid-cols-7">
           {APP_THEMES.map((t) => {
             const active = currentTheme === t.id;

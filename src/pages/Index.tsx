@@ -147,7 +147,10 @@ const Index = () => {
   }, [tasks, searchQuery, pendingDelete]);
 
   const calendarTasks = useMemo(
-    () => [...allTasks, ...blocks].filter((t) => !t.is_daily && !t.parent_task_id && !pendingDelete.has(t.id)),
+    // Done one-off tasks leave the calendar; a recurring task's "done" is only today's run, so it stays.
+    () => [...allTasks, ...blocks].filter((t) =>
+      !t.is_daily && !t.parent_task_id && !pendingDelete.has(t.id)
+      && (t.status !== "done" || !!(t.recurrence_interval && t.recurrence_unit))),
     [allTasks, blocks, pendingDelete],
   );
 

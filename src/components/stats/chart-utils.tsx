@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Table2, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { InfoTip } from "@/components/ui/info-tip";
 
 /** Width of an element, kept in sync with resizes. Charts draw in real pixels so text never scales. */
 export function useWidth<T extends HTMLElement>() {
@@ -71,6 +72,7 @@ export function ChartTooltip({ x, y, width, children }: { x: number; y: number; 
 export function ChartCard({
   title,
   subtitle,
+  info,
   action,
   table,
   children,
@@ -78,6 +80,8 @@ export function ChartCard({
 }: {
   title: string;
   subtitle?: string;
+  /** What the chart means, behind a small "?" next to the title. */
+  info?: ReactNode;
   action?: ReactNode;
   table?: ReactNode;
   children: ReactNode;
@@ -88,7 +92,10 @@ export function ChartCard({
     <section className={cn("surface p-5", className)} aria-label={title}>
       <header className="mb-4 flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+          <h3 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+            {title}
+            {info && <InfoTip title={title} align="start">{info}</InfoTip>}
+          </h3>
           {subtitle && <p className="mt-0.5 text-xs text-muted-foreground">{subtitle}</p>}
         </div>
         <div className="flex items-center gap-1">

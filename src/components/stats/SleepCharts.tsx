@@ -136,7 +136,7 @@ export const SleepVsTasks = ({ pairs }: { pairs: Stats["sleepPairs"] }) => {
   return (
     <ChartCard
       title="Sueño y productividad"
-      subtitle="Cada punto es un día: horas dormidas y tareas completadas"
+      info={<p>Cada punto es un día: a la derecha, más horas dormidas; arriba, más tareas completadas.</p>}
       table={<DataTable head={["Día", "Horas", "Completadas"]} rows={pairs.map((p) => [p.key, fmtHours(p.minutes), p.total])} />}
     >
       <div ref={ref} className="relative">

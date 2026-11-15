@@ -7,7 +7,7 @@ const RISK = 0.6;
 const HabitConsistency = ({ habits }: { habits: HabitRow[] }) => (
   <ChartCard
     title="Constancia por hábito"
-    subtitle="Días cumplidos de los que tocaba"
+    info={<p>Para cada tarea diaria: cuántos días la cumpliste de los días que te tocaba hacerla.</p>}
     table={habits.length ? <DataTable head={["Hábito", "Cumplidos", "Tocaban", "%"]} rows={habits.map((h) => [h.title, h.done, h.due, `${Math.round(h.rate * 100)}%`])} /> : undefined}
   >
     {habits.length === 0 ? (

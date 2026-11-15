@@ -11,6 +11,7 @@ import PriorityPills from "./PriorityPills";
 import DaysPicker from "./DaysPicker";
 import DetailChips from "./DetailChips";
 import { useTaskForm, type TaskDialogData, type TaskKind } from "./useTaskForm";
+import { InfoTip } from "@/components/ui/info-tip";
 
 export type { TaskDialogData };
 
@@ -101,7 +102,10 @@ function EditorBody({ task, defaultProjectId, defaultDate, onSave, onClose, onAd
 
         {isDaily ? (
           <section aria-label="Días" className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground">Se repite estos días y se reinicia cada mañana</p>
+            <p className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              Días
+              <InfoTip title="Tareas diarias" align="start"><p>Se repite los días que marques y se reinicia cada mañana.</p></InfoTip>
+            </p>
             <DaysPicker form={form} />
           </section>
         ) : (

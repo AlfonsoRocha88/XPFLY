@@ -13,6 +13,7 @@ import { Orb } from "@/components/orb/Orb";
 import OrbOpenOverlay from "@/components/orb/OrbOpenOverlay";
 import CharacterPortrait from "@/components/CharacterPortrait";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { InfoTip } from "@/components/ui/info-tip";
 
 const SECTIONS: { kind: ShopItem["kind"]; title: string; hint: string }[] = [
   { kind: "background", title: "Fondos vivos", hint: "Escenas animadas que reaccionan a lo que haces." },
@@ -86,8 +87,10 @@ const Shop = () => {
       {SECTIONS.map((sec) => (
         <section key={sec.kind}>
           <div className="mb-3">
-            <h2 className="section-title">{sec.title}</h2>
-            {sec.hint && <p className="text-xs text-muted-foreground">{sec.hint}</p>}
+            <h2 className="section-title flex items-center gap-2">
+              {sec.title}
+              {sec.hint && <InfoTip title={sec.title} align="start"><p>{sec.hint}</p></InfoTip>}
+            </h2>
           </div>
           <div className={cn("grid gap-3", sec.kind === "consumable" ? "grid-cols-1" : "grid-cols-2 sm:grid-cols-3")}>
             {SHOP_ITEMS.filter((i) => i.kind === sec.kind).map((item, idx) => {
