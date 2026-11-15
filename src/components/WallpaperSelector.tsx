@@ -1,4 +1,5 @@
-import { Check, Lock, Moon, Sparkles, Sun, Wind } from "lucide-react";
+import { Check, Droplets, Lock, Moon, Sparkles, Sun, Wind } from "lucide-react";
+import { useLiquidGlass } from "@/lib/liquidGlass";
 import { toast } from "sonner";
 import { useProfile } from "@/hooks/useProfile";
 import { useColorMode } from "@/hooks/useAppTheme";
@@ -14,6 +15,7 @@ import { InfoTip } from "@/components/ui/info-tip";
 const WallpaperSelector = () => {
   const { profile, updateProfile } = useProfile();
   const { mode, setMode } = useColorMode();
+  const [liquid, setLiquid] = useLiquidGlass();
   const currentWallpaper = profile?.wallpaper || DEFAULT_WALLPAPER;
   const currentTheme = profile?.theme || "system-cyan";
   const bgAnimations = profile?.bg_animations ?? true;
@@ -39,6 +41,17 @@ const WallpaperSelector = () => {
             </button>
           ))}
         </div>
+        <label className="mt-3 flex cursor-pointer items-center gap-3 rounded-xl bg-foreground/[0.04] px-3 py-3">
+          <Droplets className="h-4 w-4 shrink-0 text-primary" />
+          <span className="flex flex-1 items-center gap-2 text-sm font-semibold">
+            Liquid Glass
+            <InfoTip title="Liquid Glass" align="start">
+              <p>Cristal transparente como el de iOS: casi sin desenfoque, el fondo se curva en los bordes y la orilla brilla con la luz.</p>
+              <p>Se ve completo en Chrome y Edge; en Safari queda como cristal claro. Puede gastar un poco más de batería.</p>
+            </InfoTip>
+          </span>
+          <Switch checked={liquid} onCheckedChange={setLiquid} />
+        </label>
       </section>
 
       <FramePicker />

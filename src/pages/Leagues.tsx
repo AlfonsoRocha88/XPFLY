@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { m, useReducedMotion } from "motion/react";
-import { CalendarCheck, Flame, Hourglass, ListChecks, Sparkles } from "lucide-react";
+import { CalendarCheck, Hourglass, ListChecks, Sparkles } from "lucide-react";
 import { InfoRow, InfoTip } from "@/components/ui/info-tip";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,6 +23,7 @@ import {
 } from "@/lib/leagues";
 import { cn } from "@/lib/utils";
 import { avatarSrc } from "@/lib/avatars";
+import { StreakComet } from "@/components/icons/StreakComet";
 
 const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 
@@ -167,7 +168,7 @@ const Leagues = () => {
           <InfoTip title="Cómo ganar trofeos" className="ml-1">
             <InfoRow icon={<ListChecks className="h-4 w-4 text-primary" />}>{TASKS_PER_TROPHY} tareas completadas = 1 trofeo</InfoRow>
             <InfoRow icon={<Sparkles className="h-4 w-4 text-primary" />}>+{DAILY_TROPHY_BONUS} al completar todas tus diarias</InfoRow>
-            <InfoRow icon={<Flame className="h-4 w-4 text-warning" />}>
+            <InfoRow icon={<StreakComet streak={Math.max(streak, STREAK_BONUS_FROM)} size={16} />}>
               Racha de {STREAK_BONUS_FROM}+ días: trofeos dobles{streak >= STREAK_BONUS_FROM ? <span className="font-semibold text-warning"> (activo)</span> : null}
             </InfoRow>
             <InfoRow icon={<CalendarCheck className="h-4 w-4 text-primary" />}>Semana perfecta: +{WEEKLY_TROPHY_BONUS} cada 7 días seguidos con todas tus diarias</InfoRow>

@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Moon } from "lucide-react";
 import { dayInitial, fmtHours, type RangeDays, type Stats } from "@/lib/stats";
+import { cn } from "@/lib/utils";
 import { ChartCard, ChartTooltip, DataTable, EmptyChart, linear, useWidth } from "./chart-utils";
 
 const H = 170;
@@ -116,67 +117,70 @@ export const SleepChart = ({ stats, range, onLog }: { stats: Stats; range: Range
   );
 };
 
-const SH = 190;
-const SPAD = { top: 12, right: 12, bottom: 30, left: 30 };
+const BUCKETS = [
+  { label: "Menos de 6 h", lo: 0, hi: 6 * 60 },
+  { label: "6–7 h", lo: 6 * 60, hi: 7 * 60 },
+  { label: "7–8 h", lo: 7 * 60, hi: 8 * 60 },
+  { label: "8–9 h", lo: 8 * 60, hi: 9 * 60 },
+  { label: "9 h o más", lo: 9 * 60, hi: Infinity },
+];
+const fmtAvg = (n: number) => (Math.round(n * 10) / 10).toString().replace(".", ",");
 
-/** Hours slept (x) vs completions that day (y). One measure per axis, no dual scales. */
+/**
+ * Sleep vs productivity, readable at a glance: one bar per range of hours slept, its length the
+ * average tasks completed on those days. The best range is highlighted and summed up in one line.
+ * (Replaces a scatter plot, which asked people to read a cloud of dots.)
+ */
 export const SleepVsTasks = ({ pairs }: { pairs: Stats["sleepPairs"] }) => {
-  const [ref, width] = useWidth<HTMLDivElement>();
-  const [hover, setHover] = useState<number | null>(null);
-  if (pairs.length < 5) return null;
+  const rows = useMemo(
+    () =>
+      BUCKETS.map((b) => {
+        const days = pairs.filter((p) => p.minutes >= b.lo && p.minutes < b.hi);
+        return { ...b, days: days.length, avg: days.length ? days.reduce((a, d) => a + d.total, 0) / days.length : 0 };
+      }).filter((r) => r.days > 0),
+    [pairs],
+  );
+  if (pairs.length < 5 || rows.length < 2) return null;
 
-  const xMin = Math.min(4, ...pairs.map((p) => p.minutes / 60));
-  const xMax = Math.max(10, ...pairs.map((p) => p.minutes / 60));
-  const yMax = Math.max(4, ...pairs.map((p) => p.total));
-  const x = linear(xMin, xMax, SPAD.left, width - SPAD.right);
-  const y = linear(0, yMax, SH - SPAD.bottom, SPAD.top);
-  const xTicks = Array.from({ length: Math.floor(xMax) - Math.ceil(xMin) + 1 }, (_, i) => Math.ceil(xMin) + i).filter((t) => t % 2 === 0);
-  const yTicks = [0, Math.round(yMax / 2), yMax];
+  const max = Math.max(...rows.map((r) => r.avg), 1);
+  // The highlighted bar is always the longest one; a note says when it rests on very few days.
+  const best = rows.reduce((a, b) => (b.avg > a.avg ? b : a));
+  const worst = rows.reduce((a, b) => (b.avg < a.avg ? b : a));
+  const gain = worst.avg > 0 ? Math.round(((best.avg - worst.avg) / worst.avg) * 100) : null;
+  const thin = best.days < 3 ? " (aún con pocos días registrados)" : "";
 
   return (
     <ChartCard
       title="Sueño y productividad"
-      info={<p>Cada punto es un día: a la derecha, más horas dormidas; arriba, más tareas completadas.</p>}
-      table={<DataTable head={["Día", "Horas", "Completadas"]} rows={pairs.map((p) => [p.key, fmtHours(p.minutes), p.total])} />}
+      subtitle={
+        best !== worst && gain && gain > 0
+          ? `Durmiendo ${best.label.toLowerCase()} completas ${gain}% más tareas que con ${worst.label.toLowerCase()}${thin}`
+          : `Durmiendo ${best.label.toLowerCase()} completas ${fmtAvg(best.avg)} tareas en promedio${thin}`
+      }
+      info={<p>Agrupa tus días según cuánto dormiste la noche anterior y muestra cuántas tareas completaste en promedio. Cuantos más días registres, más confiable es.</p>}
+      table={<DataTable head={["Sueño", "Días", "Tareas promedio"]} rows={rows.map((r) => [r.label, r.days, fmtAvg(r.avg)])} />}
     >
-      <div ref={ref} className="relative">
-        {width > 0 && (
-          <svg width={width} height={SH} role="img" aria-label="Relación entre horas de sueño y tareas completadas">
-            <rect x={x(7)} width={Math.max(0, x(9) - x(7))} y={SPAD.top} height={SH - SPAD.top - SPAD.bottom} fill="hsl(var(--success) / 0.08)" />
-            {yTicks.map((t) => (
-              <g key={t}>
-                <line x1={SPAD.left} x2={width - SPAD.right} y1={y(t)} y2={y(t)} className="stroke-border" strokeOpacity={t === 0 ? 1 : 0.5} strokeDasharray={t === 0 ? undefined : "2 4"} />
-                <text x={SPAD.left - 6} y={y(t)} dy="0.32em" textAnchor="end" className="fill-muted-foreground text-[10px] tabular-nums">{t}</text>
-              </g>
-            ))}
-            {xTicks.map((t) => (
-              <text key={t} x={x(t)} y={SH - 12} textAnchor="middle" className="fill-muted-foreground text-[10px] tabular-nums">{t}h</text>
-            ))}
-            {pairs.map((p, i) => (
-              <circle
-                key={p.key}
-                className="animate-cell-in"
-                cx={x(p.minutes / 60)}
-                cy={y(p.total)}
-                r={hover === i ? 7 : 5}
-                fill="hsl(var(--primary) / 0.75)"
-                stroke="hsl(var(--card))"
-                strokeWidth={2}
-                style={{ animationDelay: `${Math.min(i * 20, 320)}ms`, transition: "r 120ms" }}
-                onMouseEnter={() => setHover(i)}
-                onPointerLeave={(e) => e.pointerType === "mouse" && setHover(null)}
-                onClick={() => setHover(i)}
-              />
-            ))}
-          </svg>
-        )}
-        {hover !== null && pairs[hover] && (
-          <ChartTooltip x={x(pairs[hover].minutes / 60)} y={y(pairs[hover].total)} width={width}>
-            <p className="font-medium first-letter:uppercase">{format(new Date(pairs[hover].key + "T12:00"), "EEEE d MMM", { locale: es })}</p>
-            <p className="text-muted-foreground">{fmtHours(pairs[hover].minutes)} · {pairs[hover].total} completadas</p>
-          </ChartTooltip>
-        )}
-      </div>
+      <ul className="space-y-2.5" aria-label="Tareas promedio según horas de sueño">
+        {rows.map((r, i) => {
+          const isBest = r === best;
+          return (
+            <li key={r.label} className="grid grid-cols-[5.5rem_1fr_auto] items-center gap-3 text-xs">
+              <span className={cn("font-medium", isBest ? "text-foreground" : "text-muted-foreground")}>{r.label}</span>
+              <span className="relative h-6 overflow-hidden rounded-lg bg-foreground/[0.06]">
+                <span
+                  className={cn("absolute inset-y-0 left-0 origin-left rounded-lg animate-bar-grow-x", isBest ? "bg-primary shadow-[0_0_14px_hsl(var(--primary)/0.55)]" : "bg-primary/35")}
+                  style={{ width: `${Math.max(6, (r.avg / max) * 100)}%`, animationDelay: `${i * 60}ms` }}
+                />
+                {isBest && r.avg / max > 0.55 && <span className="absolute inset-y-0 left-2 flex items-center text-[10px] font-semibold text-primary-foreground">Tu mejor rango</span>}
+              </span>
+              <span className="w-16 text-right tabular-nums">
+                <span className="font-semibold text-foreground">{fmtAvg(r.avg)}</span>
+                <span className="text-muted-foreground"> · {r.days} {r.days === 1 ? "día" : "días"}</span>
+              </span>
+            </li>
+          );
+        })}
+      </ul>
     </ChartCard>
   );
 };

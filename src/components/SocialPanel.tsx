@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { LeagueEmblem } from "@/components/leagues/LeagueEmblem";
-import { Users, UserPlus, Swords, Copy, Check, X, Crown, Shield, LogOut, Send, Bell, Search, Flame } from "lucide-react";
+import { Users, UserPlus, Swords, Copy, Check, X, Crown, Shield, LogOut, Send, Bell, Search } from "lucide-react";
 import { useFriends, type FriendProfilePreview } from "@/hooks/useFriends";
 import { getCurrentLeague, leagueLabel } from "@/lib/leagues";
 import { useParty } from "@/hooks/useParty";
@@ -12,6 +12,7 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { avatarSrc } from "@/lib/avatars";
+import { StreakComet } from "@/components/icons/StreakComet";
 
 const SocialPanel = ({ view }: { view: "friends" | "party" }) => {
   const { user } = useAuth();
@@ -206,7 +207,7 @@ const SocialPanel = ({ view }: { view: "friends" | "party" }) => {
                         </p>
                         <p className="text-xs text-muted-foreground flex items-center gap-2">
                           <span className="flex items-center gap-1"><LeagueEmblem family={lg.family} division={lg.divisionNumber} size={14} animated={false} />{leagueLabel(lg)}</span>
-                          <span className="flex items-center gap-1"><Flame className="h-3 w-3 text-orange-500" />{fp?.daily_streak || 0}</span>
+                          <span className="flex items-center gap-1"><StreakComet streak={fp?.daily_streak || 0} size={13} animated={false} />{fp?.daily_streak || 0}</span>
                         </p>
                       </div>
                     </div>

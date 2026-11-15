@@ -54,7 +54,7 @@ const AvatarPicker = () => {
     setPending(file);
   };
 
-  // Photos are reviewed server-side (moderate-avatar) before anyone can see them.
+  // The moderate-avatar function stores the photo with the service role (no AI review anymore).
   const upload = async (blob: Blob) => {
     if (!uid) return;
     setSaving(true);

@@ -1,7 +1,8 @@
-import { ArrowDownRight, ArrowUpRight, CheckCircle2, Flame, Moon, Repeat2, Sparkles, type LucideIcon } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, CheckCircle2, Moon, Repeat2, Sparkles, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { fmtHours, type Stats } from "@/lib/stats";
 import { useCountUp } from "./chart-utils";
+import { StreakComet } from "@/components/icons/StreakComet";
 
 interface TileProps {
   icon: LucideIcon;
@@ -49,7 +50,7 @@ function Tile({ icon: Icon, label, value, prev, format, points, delay }: TilePro
 const StatTiles = ({ stats, streak }: { stats: Stats; streak: number }) => (
   <div className="space-y-3">
     <div className="flex items-baseline gap-2 px-1">
-      <Flame className="h-4 w-4 self-center text-warning" aria-hidden />
+      <StreakComet streak={streak} size={22} className="self-center" />
       <span className="font-serif text-2xl font-medium tabular-nums text-foreground">{streak}</span>
       <span className="text-sm text-muted-foreground">{streak === 1 ? "día de racha" : "días de racha"}</span>
       <span className="ml-auto text-xs text-muted-foreground">{stats.activeDays} de {stats.days.length} días activos</span>

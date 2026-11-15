@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import { LiquidGlassFilter } from "@/lib/liquidGlass";
 import { useEdgeGlow } from "@/hooks/useEdgeGlow";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion } from "motion/react";
@@ -60,6 +61,7 @@ const EdgeGlow = () => { useEdgeGlow(); return null; };
 const App = () => (
   <LazyMotion features={loadMotionFeatures} strict>
   <EdgeGlow />
+  <LiquidGlassFilter />
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />

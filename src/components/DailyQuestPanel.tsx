@@ -1,10 +1,11 @@
-import { Check, Flame, Trash2, Sun } from "lucide-react";
+import { Check, Trash2, Sun } from "lucide-react";
 import { Orb } from "@/components/orb/Orb";
 import { SwipeToDelete } from "@/components/SwipeToDelete";
 import { cn } from "@/lib/utils";
 import type { Task } from "@/lib/types";
 import TaskCheck from "@/components/TaskCheck";
 import { playSfx } from "@/lib/sfx";
+import { StreakComet } from "@/components/icons/StreakComet";
 
 interface DailyQuestPanelProps {
   dailyTasks: Task[];
@@ -63,7 +64,7 @@ const DailyQuestPanel = ({
           title={`Racha: ${dailyStreak} días · próximo hito: ${nextMilestone}`}
           aria-label={`Racha actual: ${dailyStreak} días`}
         >
-          <Flame className="h-4 w-4" /> {dailyStreak}
+          <StreakComet streak={dailyStreak} size={20} /> {dailyStreak}
         </div>
       </div>
 

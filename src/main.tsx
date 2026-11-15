@@ -2,6 +2,10 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { registerServiceWorker } from "./lib/pwa";
+import { applyLiquidGlass } from "./lib/liquidGlass";
+
+// Before the first paint, so the chosen glass style never flashes.
+applyLiquidGlass();
 
 // A failed email link (expired, already used, or replaced by a newer email) comes back as
 // #error=...&error_code=otp_expired. Keep it for the sign-in screen before routing drops the hash.

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Shield, X, Search, Plus, LogOut, Check, Bell, Users, Crown, Star, Award,
-  ChevronLeft, Flame, Sparkles, MessageSquare, Target,
+  ChevronLeft, Sparkles, MessageSquare, Target,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -35,7 +35,7 @@ import ClanHeader, { ClanHeaderCompact } from "@/components/clan/ClanHeader";
 import ClanWeeklyChallenge from "@/components/clan/ClanWeeklyChallenge";
 import ClanChat from "@/components/clan/ClanChat";
 import { avatarSrc } from "@/lib/avatars";
-import { Flame as StreakFlame } from "@/components/icons/GameIcons";
+import { StreakComet } from "@/components/icons/StreakComet";
 
 
 /* ───────────────────────────── Member row ───────────────────────────── */
@@ -75,7 +75,7 @@ const MemberRow = ({ member, rank, onSelect }: { member: ClanMember; rank: numbe
       </div>
       <div className={cn("flex shrink-0 items-center gap-1 text-sm font-medium tabular-nums", streakCls)}>
         <span>{streak}</span>
-        <StreakFlame size={15} />
+        <StreakComet streak={streak} size={16} animated={false} />
       </div>
     </button>
   );
@@ -126,7 +126,7 @@ const MemberSheet = ({
         <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
           <div className="rounded-lg border border-border bg-muted/40 p-2"><div className="font-medium text-foreground">{p?.trophies ?? 0}</div><div className="text-xs text-muted-foreground">Trofeos</div></div>
           <div className="rounded-lg border border-border bg-muted/40 p-2"><div className="font-medium text-foreground">{p?.xp ?? 0}</div><div className="text-xs text-muted-foreground">XP</div></div>
-          <div className="rounded-lg border border-border bg-muted/40 p-2"><div className="font-medium text-foreground"><span className="inline-flex items-center gap-0.5">{p?.daily_streak ?? 0} <StreakFlame size={13} className="text-warning" /></span></div><div className="text-xs text-muted-foreground">Racha</div></div>
+          <div className="rounded-lg border border-border bg-muted/40 p-2"><div className="font-medium text-foreground"><span className="inline-flex items-center gap-0.5">{p?.daily_streak ?? 0} <StreakComet streak={p?.daily_streak ?? 0} size={14} /></span></div><div className="text-xs text-muted-foreground">Racha</div></div>
         </div>
 
         {!isMe && viewerRole && (

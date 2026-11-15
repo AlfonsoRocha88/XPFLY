@@ -1,16 +1,17 @@
-import { Flame, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { TrophyIcon } from "@/components/icons/TrophyIcon";
 import { Destello } from "@/components/currency/Destello";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import PlayerHUD from "@/components/PlayerHUD";
+import { StreakComet } from "@/components/icons/StreakComet";
 
 /** Profile summary at the top of the Perfil section. */
 const ProfileOverview = () => {
   const { profile } = useProfile();
 
   const stats = [
-    { icon: Flame, label: "Racha", value: profile?.daily_streak ?? 0, className: "text-warning" },
+    { icon: ({ className }: { className?: string }) => <StreakComet streak={profile?.daily_streak ?? 0} size={22} className={className} />, label: "Racha", value: profile?.daily_streak ?? 0, className: "" },
     { icon: ({ className }: { className?: string }) => <TrophyIcon size={20} className={className} />, label: "Trofeos", value: profile?.trophies ?? 0, className: "text-primary" },
     { icon: ({ className }: { className?: string }) => <Destello size={20} twinkle className={className} />, label: "Destellos", value: profile?.coins ?? 0, className: "" },
   ];
