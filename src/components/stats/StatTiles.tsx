@@ -50,7 +50,7 @@ function Tile({ icon: Icon, label, value, prev, format, points, delay }: TilePro
 const StatTiles = ({ stats, streak }: { stats: Stats; streak: number }) => (
   <div className="space-y-3">
     <div className="flex items-baseline gap-2 px-1">
-      <StreakComet streak={streak} size={22} className="self-center" />
+      <StreakComet streak={streak} size={34} className="self-center" />
       <span className="font-serif text-2xl font-medium tabular-nums text-foreground">{streak}</span>
       <span className="text-sm text-muted-foreground">{streak === 1 ? "día de racha" : "días de racha"}</span>
       <span className="ml-auto text-xs text-muted-foreground">{stats.activeDays} de {stats.days.length} días activos</span>

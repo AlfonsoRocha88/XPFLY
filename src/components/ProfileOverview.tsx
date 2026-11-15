@@ -11,7 +11,7 @@ const ProfileOverview = () => {
   const { profile } = useProfile();
 
   const stats = [
-    { icon: ({ className }: { className?: string }) => <StreakComet streak={profile?.daily_streak ?? 0} size={22} className={className} />, label: "Racha", value: profile?.daily_streak ?? 0, className: "" },
+    { icon: () => <StreakComet streak={profile?.daily_streak ?? 0} size={34} className="mx-auto -my-1.5" />, label: "Racha", value: profile?.daily_streak ?? 0, className: "" },
     { icon: ({ className }: { className?: string }) => <TrophyIcon size={20} className={className} />, label: "Trofeos", value: profile?.trophies ?? 0, className: "text-primary" },
     { icon: ({ className }: { className?: string }) => <Destello size={20} twinkle className={className} />, label: "Destellos", value: profile?.coins ?? 0, className: "" },
   ];

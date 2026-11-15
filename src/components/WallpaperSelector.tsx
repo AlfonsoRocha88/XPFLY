@@ -1,5 +1,6 @@
 import { Check, Droplets, Lock, Moon, Sparkles, Sun, Wind } from "lucide-react";
-import { useLiquidGlass } from "@/lib/liquidGlass";
+import { useLiquidGlass, useLiquidGlassClarity } from "@/lib/liquidGlass";
+import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { useProfile } from "@/hooks/useProfile";
 import { useColorMode } from "@/hooks/useAppTheme";
@@ -16,6 +17,7 @@ const WallpaperSelector = () => {
   const { profile, updateProfile } = useProfile();
   const { mode, setMode } = useColorMode();
   const [liquid, setLiquid] = useLiquidGlass();
+  const [clarity, setClarity] = useLiquidGlassClarity();
   const currentWallpaper = profile?.wallpaper || DEFAULT_WALLPAPER;
   const currentTheme = profile?.theme || "system-cyan";
   const bgAnimations = profile?.bg_animations ?? true;
@@ -52,6 +54,26 @@ const WallpaperSelector = () => {
           </span>
           <Switch checked={liquid} onCheckedChange={setLiquid} />
         </label>
+        {liquid && (
+          <div className="mt-2 rounded-xl bg-foreground/[0.04] px-3 py-3">
+            <div className="mb-3 flex items-center justify-between text-sm">
+              <span className="font-medium">Transparencia</span>
+              <span className="tabular-nums text-muted-foreground">{clarity}%</span>
+            </div>
+            <Slider
+              value={[clarity]}
+              min={0}
+              max={100}
+              step={1}
+              onValueChange={([v]) => setClarity(v)}
+              aria-label="Transparencia del Liquid Glass"
+            />
+            <div className="mt-2 flex justify-between text-[11px] text-muted-foreground">
+              <span>Esmerilado</span>
+              <span>Transparente</span>
+            </div>
+          </div>
+        )}
       </section>
 
       <FramePicker />

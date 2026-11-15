@@ -64,7 +64,7 @@ const DailyQuestPanel = ({
           title={`Racha: ${dailyStreak} días · próximo hito: ${nextMilestone}`}
           aria-label={`Racha actual: ${dailyStreak} días`}
         >
-          <StreakComet streak={dailyStreak} size={20} /> {dailyStreak}
+          <StreakComet streak={dailyStreak} size={36} className="-my-2.5 -ml-1" /> {dailyStreak}
         </div>
       </div>
 

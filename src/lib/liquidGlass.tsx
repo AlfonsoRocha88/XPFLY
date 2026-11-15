@@ -11,7 +11,27 @@ const listeners = new Set<() => void>();
 const read = () => {
   try { return localStorage.getItem(KEY) === "on"; } catch { return false; }
 };
-export const applyLiquidGlass = (on = read()) => document.documentElement.classList.toggle("liquid-glass", on);
+/** Transparency 0–100 (100 = clear like iOS, lower = more frost and a darker tint). */
+const CLARITY_KEY = "liquid-glass-clarity";
+export const DEFAULT_CLARITY = 85;
+const readClarity = () => {
+  try {
+    const v = Number(localStorage.getItem(CLARITY_KEY));
+    return Number.isFinite(v) && localStorage.getItem(CLARITY_KEY) !== null ? Math.min(100, Math.max(0, v)) : DEFAULT_CLARITY;
+  } catch { return DEFAULT_CLARITY; }
+};
+/** Clarity → the two knobs the CSS reads: tint opacity and frost radius. */
+const applyClarity = (v: number) => {
+  const opaque = 1 - v / 100;
+  const root = document.documentElement.style;
+  root.setProperty("--lg-fill-a", (opaque * 0.6).toFixed(3));
+  root.setProperty("--lg-blur", `${(1.5 + opaque * 18).toFixed(1)}px`);
+};
+
+export const applyLiquidGlass = (on = read()) => {
+  applyClarity(readClarity());
+  return document.documentElement.classList.toggle("liquid-glass", on);
+};
 
 export function useLiquidGlass() {
   const on = useSyncExternalStore((cb) => { listeners.add(cb); return () => listeners.delete(cb); }, read);
@@ -21,6 +41,16 @@ export function useLiquidGlass() {
     listeners.forEach((l) => l());
   }, []);
   return [on, set] as const;
+}
+
+export function useLiquidGlassClarity() {
+  const value = useSyncExternalStore((cb) => { listeners.add(cb); return () => listeners.delete(cb); }, readClarity);
+  const set = useCallback((v: number) => {
+    try { localStorage.setItem(CLARITY_KEY, String(Math.round(v))); } catch { /* storage blocked: this visit only */ }
+    applyClarity(v);
+    listeners.forEach((l) => l());
+  }, []);
+  return [value, set] as const;
 }
 
 /*

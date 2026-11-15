@@ -207,7 +207,7 @@ const SocialPanel = ({ view }: { view: "friends" | "party" }) => {
                         </p>
                         <p className="text-xs text-muted-foreground flex items-center gap-2">
                           <span className="flex items-center gap-1"><LeagueEmblem family={lg.family} division={lg.divisionNumber} size={14} animated={false} />{leagueLabel(lg)}</span>
-                          <span className="flex items-center gap-1"><StreakComet streak={fp?.daily_streak || 0} size={13} animated={false} />{fp?.daily_streak || 0}</span>
+                          <span className="flex items-center gap-1"><StreakComet streak={fp?.daily_streak || 0} size={18} animated={false} />{fp?.daily_streak || 0}</span>
                         </p>
                       </div>
                     </div>

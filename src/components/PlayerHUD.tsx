@@ -52,7 +52,7 @@ const PlayerHUD = ({ className, showStreak = false }: { className?: string; show
           <span className="block truncate text-[15px] font-semibold">{profile?.display_name ?? "Usuario"}</span>
           {showStreak && (
             <span className={cn("flex shrink-0 items-center gap-0.5 text-sm font-semibold", streak > 0 ? "text-warning" : "text-muted-foreground")}>
-              <StreakComet streak={streak} size={18} /> {streak}
+              <StreakComet streak={streak} size={26} className="-my-1" /> {streak}
             </span>
           )}
         </span>

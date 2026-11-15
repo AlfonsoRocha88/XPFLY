@@ -39,8 +39,8 @@ export function StreakComet({ streak, size = 18, animated = true, className }: {
   // 0 → 1 intensity: grows fast at first, keeps growing slowly up to a month.
   const power = lit ? Math.min(1, 0.28 + Math.log(streak + 1) / Math.log(31) * 0.72) : 0;
   const c = useMemo(() => palette(streak), [streak]);
-  const len = 6 + power * 9.5; // tail length (px in the 24-unit box)
-  const r = 2.6 + power * 0.9; // head radius
+  const len = 7.5 + power * 10.5; // tail length (units in the 24-unit box)
+  const r = 3.3 + power * 1.3; // head radius
   const speed = `${(1.25 - power * 0.6).toFixed(2)}s`; // hotter flickers faster
 
   return (
@@ -75,7 +75,7 @@ export function StreakComet({ streak, size = 18, animated = true, className }: {
       </defs>
 
       {/* Head sits upper-right; the tail streams down-left (local +x after the rotation). */}
-      <g transform="translate(15.5 8.5) rotate(135)">
+      <g transform="translate(16 8) rotate(135)">
         {lit && (
           <>
             <circle r={r * 2.4} fill={`url(#${id}g)`} className="sc-glow" />
