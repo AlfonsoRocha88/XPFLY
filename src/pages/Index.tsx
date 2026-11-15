@@ -75,7 +75,7 @@ const Index = () => {
   const { projects } = useProjects();
   const { party, partyInvites } = useParty();
   const { pendingRequests } = useFriends();
-  const { tasks, dailyTasks, subtasks, allTasks, createTask, updateTask, deleteTask } = useTasks();
+  const { tasks, dailyTasks, subtasks, allTasks, blocks, createTask, updateTask, deleteTask } = useTasks();
   const queryClient = useQueryClient();
 
   const [section, setSection] = useState<SectionId>("tasks");
@@ -107,6 +107,7 @@ const Index = () => {
   const [calendarDefaultDate, setCalendarDefaultDate] = useState<Date | null>(null);
   const [createChoiceOpen, setCreateChoiceOpen] = useState(false);
   const [scheduleOpen, setScheduleOpen] = useState(false);
+  const [editingBlock, setEditingBlock] = useState<Task | null>(null);
 
   const [xpPopup, setXpPopup] = useState<number | null>(null);
   const [levelUp, setLevelUp] = useState<number | null>(null);
@@ -144,7 +145,10 @@ const Index = () => {
     );
   }, [tasks, searchQuery, pendingDelete]);
 
-  const calendarTasks = useMemo(() => allTasks.filter((t) => !t.is_daily && !t.parent_task_id && !pendingDelete.has(t.id)), [allTasks, pendingDelete]);
+  const calendarTasks = useMemo(
+    () => [...allTasks, ...blocks].filter((t) => !t.is_daily && !t.parent_task_id && !pendingDelete.has(t.id)),
+    [allTasks, blocks, pendingDelete],
+  );
 
   // ---------------- Actions ----------------
   const openNewTask = (date: Date | null = null) => {
@@ -430,7 +434,11 @@ const Index = () => {
             tasks={calendarTasks}
             projects={projects}
             onCreateAt={(d) => openNewTask(d)}
-            onEditTask={openEditTask}
+            onEditTask={(t) => {
+              // Schedule blocks have their own editor; the task editor would strip their tag.
+              if (t.tags?.includes("tipo:horario")) { playSfx("open"); setEditingBlock(t); setScheduleOpen(true); }
+              else openEditTask(t);
+            }}
             onDeleteTask={handleDeleteTask}
           />
         </div>
@@ -550,7 +558,7 @@ const Index = () => {
       <LeagueUpCelebration />
 
       <Suspense fallback={null}>
-        {scheduleOpen && <ScheduleBlockDialog open={scheduleOpen} onOpenChange={setScheduleOpen} />}
+        {scheduleOpen && <ScheduleBlockDialog open={scheduleOpen} block={editingBlock} onOpenChange={(o) => { setScheduleOpen(o); if (!o) setEditingBlock(null); }} />}
       </Suspense>
 
       {createChoiceOpen && (

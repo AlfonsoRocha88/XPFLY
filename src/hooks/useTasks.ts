@@ -38,7 +38,6 @@ export const useTasks = () => {
       const { data, error } = await supabase
         .from("tasks")
         .select("*")
-        .not("tags", "cs", '{tipo:horario}')
         .order("position", { ascending: true });
       if (error) throw error;
       return data;
@@ -47,8 +46,13 @@ export const useTasks = () => {
   });
 
   const lists = useMemo(() => {
-    const all = allQuery.data ?? [];
+    // Schedule blocks ("tipo:horario") live in the same table but only belong on the calendar:
+    // keep them out of every task list (and so out of stats and XP).
+    const isBlock = (t: Task) => !!t.tags?.includes("tipo:horario");
+    const all = (allQuery.data ?? []).filter((t) => !isBlock(t));
+    const blocks = (allQuery.data ?? []).filter(isBlock);
     return {
+      blocks,
       tasks: all.filter((t) => !t.parent_task_id && !t.is_daily),
       dailyTasks: all.filter((t) => !t.parent_task_id && t.is_daily),
       subtasks: all.filter((t) => !!t.parent_task_id),

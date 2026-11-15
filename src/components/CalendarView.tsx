@@ -419,12 +419,12 @@ const OccChip = ({
   return (
     <div
       onClick={(e) => { e.stopPropagation(); onEdit(occ.task); }}
-      className="group/chip flex items-center gap-1 rounded px-1.5 py-0.5 text-xs cursor-pointer hover:opacity-80 transition-opacity"
+      className="group/chip flex min-w-0 items-center gap-1 overflow-hidden rounded px-1.5 py-0.5 text-xs cursor-pointer hover:opacity-80 transition-opacity"
       style={{ backgroundColor: (color ?? "hsl(var(--primary))") + "30", borderLeft: `2px solid ${color ?? "hsl(var(--primary))"}` }}
     >
-      {occ.task.start_time && <span className="text-muted-foreground shrink-0">{formatTime12(occ.start)}</span>}
+      {occ.task.start_time && <span className="hidden shrink-0 text-muted-foreground sm:inline">{formatTime12(occ.start)}</span>}
       {isRecurring && <Repeat className="h-2.5 w-2.5 shrink-0 text-muted-foreground" />}
-      <span className={cn("truncate flex-1", occ.task.status === "done" && "line-through opacity-50")}>{occ.task.title}</span>
+      <span className={cn("min-w-0 truncate flex-1", occ.task.status === "done" && "line-through opacity-50")}>{occ.task.title}</span>
       <button
         onClick={(e) => { e.stopPropagation(); onDelete(occ.task.id); }}
         className="opacity-0 group-hover/chip:opacity-100 text-muted-foreground hover:text-destructive shrink-0"
