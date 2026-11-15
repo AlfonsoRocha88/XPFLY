@@ -177,8 +177,8 @@ Deno.serve(async (req) => {
     const prevMissions = profile.missions_completed_total ?? 0;
     const newMissions = prevMissions + 1;
     const bonusTrophy = !flagged && newMissions % TASKS_PER_TROPHY === 0;
-    const streakBonus = bonusTrophy && (profile.daily_streak ?? 0) >= STREAK_BONUS_FROM ? 1 : 0;
-    const trophyDelta = (bonusTrophy ? 1 : 0) + streakBonus;
+    const trophyStreakBonus = bonusTrophy && (profile.daily_streak ?? 0) >= STREAK_BONUS_FROM ? 1 : 0;
+    const trophyDelta = (bonusTrophy ? 1 : 0) + trophyStreakBonus;
     const newTrophies = (profile.trophies ?? 0) + trophyDelta;
 
     const { data: updated, error: uErr } = await admin
@@ -205,7 +205,7 @@ Deno.serve(async (req) => {
       leveledUp: newLevel > oldLevel,
       bonusTrophyAwarded: bonusTrophy,
       trophyDelta,
-      streakBonus,
+      streakBonus: trophyStreakBonus,
       missionsCompletedTotal: newMissions,
       newlyUnlockedTitles: newlyUnlocked,
     });

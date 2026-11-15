@@ -18,6 +18,8 @@ create or replace function pg_temp.cosmic_league(old_id text) returns text langu
 $$;
 
 -- The rename is not a promotion: keep it out of league_changes (and its push notification).
+-- current_league_id is guarded (guard_profile_privileged_columns): only the service role may change it.
+select set_config('request.jwt.claims', '{"role":"service_role"}', true);
 alter table public.profiles disable trigger trg_log_league_change;
 update public.profiles
   set current_league_id = pg_temp.cosmic_league(current_league_id)
