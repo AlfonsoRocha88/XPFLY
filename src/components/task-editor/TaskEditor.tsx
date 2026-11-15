@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ListChecks, Plus, RotateCcw, Sparkles } from "lucide-react";
+import { CalendarClock, ListChecks, Plus, RotateCcw, Sparkles } from "lucide-react";
 import type { Project, Task } from "@/lib/types";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
@@ -24,6 +24,8 @@ interface TaskEditorProps {
   onSave: (data: TaskDialogData) => void;
   onAddSubtask?: (title: string) => void;
   subtasks?: Task[];
+  /** Opened from an empty calendar slot: offer "Evento" (calendar-only, no XP) instead of "Diaria". */
+  onPickEvent?: (title: string) => void;
 }
 
 const KINDS: { id: TaskKind; label: string; icon: typeof ListChecks }[] = [
@@ -31,7 +33,7 @@ const KINDS: { id: TaskKind; label: string; icon: typeof ListChecks }[] = [
   { id: "daily", label: "Diaria", icon: RotateCcw },
 ];
 
-function EditorBody({ task, defaultProjectId, defaultDate, onSave, onClose, onAddSubtask, subtasks = [] }: Omit<TaskEditorProps, "open" | "onOpenChange" | "projects"> & { onClose: () => void }) {
+function EditorBody({ task, defaultProjectId, defaultDate, onSave, onClose, onAddSubtask, subtasks = [], onPickEvent }: Omit<TaskEditorProps, "open" | "onOpenChange" | "projects"> & { onClose: () => void }) {
   const form = useTaskForm(task, defaultProjectId, defaultDate);
   const [subtaskInput, setSubtaskInput] = useState("");
 
@@ -60,7 +62,24 @@ function EditorBody({ task, defaultProjectId, defaultDate, onSave, onClose, onAd
       <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 pb-4 pt-5">
         {/* Kind switch */}
         <div role="radiogroup" aria-label="Tipo" className="inline-flex rounded-full bg-muted p-1">
-          {KINDS.map(({ id, label, icon: Icon }) => (
+          {onPickEvent && !form.editing ? (
+            <>
+              <span role="radio" aria-checked className="inline-flex items-center gap-1.5 rounded-full bg-card px-3.5 py-1.5 text-sm font-medium text-foreground shadow-soft">
+                <ListChecks className="h-3.5 w-3.5" aria-hidden />
+                Tarea
+              </span>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={false}
+                onClick={() => onPickEvent(form.text)}
+                className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:text-foreground"
+              >
+                <CalendarClock className="h-3.5 w-3.5" aria-hidden />
+                Evento
+              </button>
+            </>
+          ) : KINDS.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               type="button"

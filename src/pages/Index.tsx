@@ -108,6 +108,7 @@ const Index = () => {
   const [createChoiceOpen, setCreateChoiceOpen] = useState(false);
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [editingBlock, setEditingBlock] = useState<Task | null>(null);
+  const [eventDraft, setEventDraft] = useState<{ date: Date; title: string } | null>(null);
 
   const [xpPopup, setXpPopup] = useState<number | null>(null);
   const [levelUp, setLevelUp] = useState<number | null>(null);
@@ -435,7 +436,7 @@ const Index = () => {
             projects={projects}
             onCreateAt={(d) => openNewTask(d)}
             onEditTask={(t) => {
-              // Schedule blocks have their own editor; the task editor would strip their tag.
+              // Events ("tipo:horario" blocks) have their own editor; the task editor would strip their tag.
               if (t.tags?.includes("tipo:horario")) { playSfx("open"); setEditingBlock(t); setScheduleOpen(true); }
               else openEditTask(t);
             }}
@@ -558,7 +559,7 @@ const Index = () => {
       <LeagueUpCelebration />
 
       <Suspense fallback={null}>
-        {scheduleOpen && <ScheduleBlockDialog open={scheduleOpen} block={editingBlock} onOpenChange={(o) => { setScheduleOpen(o); if (!o) setEditingBlock(null); }} />}
+        {scheduleOpen && <ScheduleBlockDialog open={scheduleOpen} block={editingBlock} defaultDate={eventDraft?.date} defaultTitle={eventDraft?.title} onOpenChange={(o) => { setScheduleOpen(o); if (!o) { setEditingBlock(null); setEventDraft(null); } }} />}
       </Suspense>
 
       {createChoiceOpen && (
@@ -576,7 +577,7 @@ const Index = () => {
             <div className="flex flex-col gap-2">
               {[
                 { icon: Swords, title: "Nueva tarea", desc: "Gana XP al completarla", onClick: () => openNewTask() },
-                { icon: CalendarClock, title: "Bloque de horario", desc: "Solo en el calendario, sin XP", onClick: () => { playSfx("open"); setScheduleOpen(true); } },
+                { icon: CalendarClock, title: "Nuevo evento", desc: "Solo en el calendario, sin XP", onClick: () => { playSfx("open"); setScheduleOpen(true); } },
               ].map(({ icon: Icon, title, desc, onClick }) => (
                 <button
                   key={title}
@@ -614,6 +615,12 @@ const Index = () => {
         onSave={handleSaveTask}
         onAddSubtask={editingTask ? handleAddSubtask : undefined}
         subtasks={editingTask ? subtasks.filter((s) => s.parent_task_id === editingTask.id) : []}
+        onPickEvent={calendarDefaultDate && !editingTask ? (title) => {
+          // Swap the task sheet for the event dialog, keeping the slot and anything typed.
+          setEventDraft({ date: calendarDefaultDate, title });
+          setDialogOpen(false); setCalendarDefaultDate(null);
+          setEditingBlock(null); setScheduleOpen(true);
+        } : undefined}
       />
       </Suspense>
       )}

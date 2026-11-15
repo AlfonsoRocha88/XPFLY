@@ -17,8 +17,11 @@ import type { Task, TaskInsert } from "@/lib/types";
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** When set, edit this existing block instead of creating new ones. */
+  /** When set, edit this existing event instead of creating new ones. */
   block?: Task | null;
+  /** Opened from a calendar slot: a one-time event on that day (and hour, if it has one). */
+  defaultDate?: Date | null;
+  defaultTitle?: string;
 }
 
 const DAY_LABELS = ["L", "M", "X", "J", "V", "S", "D"];
@@ -68,9 +71,9 @@ function TimeWheels({ value, onChange, label }: { value: number; onChange: (mins
   );
 }
 
-/** Dates (local) on which the block repeats, from today, for the chosen days and horizon. */
-function occurrenceDays(days: number[], count: number, unit: "days" | "weeks") {
-  const today = startOfDay(new Date());
+/** Dates (local) on which the event repeats, from `from` (today at the earliest), for the chosen days and horizon. */
+function occurrenceDays(days: number[], count: number, unit: "days" | "weeks", from: Date) {
+  const today = startOfDay(from < new Date() ? new Date() : from);
   const end = unit === "weeks" ? addWeeks(today, count) : addDays(today, count);
   const want = new Set(days.map((d) => TO_JS_DOW[d]));
   const out: Date[] = [];
@@ -84,15 +87,21 @@ const at = (day: Date, mins: number) => {
   return d.toISOString();
 };
 
-export default function ScheduleBlockDialog({ open, onOpenChange, block }: Props) {
+/** Start time from a tapped slot: its hour if it has one (week/day view), else 9:00. */
+const slotStart = (d?: Date | null) => (d && (d.getHours() || d.getMinutes()) ? d.getHours() * 60 + Math.round(d.getMinutes() / 5) * 5 : 9 * 60);
+const slotEnd = (d?: Date | null) => Math.min(slotStart(d) + 60, 23 * 60 + 55);
+const jsToOurDow = (d: Date) => (d.getDay() + 6) % 7;
+
+export default function ScheduleBlockDialog({ open, onOpenChange, block, defaultDate, defaultTitle }: Props) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const editing = !!block;
 
-  const [name, setName] = useState(block?.title ?? "");
-  const [days, setDays] = useState<number[]>([]);
-  const [start, setStart] = useState(minsOf(block?.start_time, 9 * 60));
-  const [end, setEnd] = useState(minsOf(block?.end_time, 10 * 60));
+  const [name, setName] = useState(block?.title ?? defaultTitle ?? "");
+  const [days, setDays] = useState<number[]>(defaultDate ? [jsToOurDow(defaultDate)] : []);
+  const [repeat, setRepeat] = useState(!defaultDate);
+  const [start, setStart] = useState(minsOf(block?.start_time, slotStart(defaultDate)));
+  const [end, setEnd] = useState(minsOf(block?.end_time, slotEnd(defaultDate)));
   const [color, setColor] = useState(colorOf(block));
   const [countIdx, setCountIdx] = useState(3); // 4
   const [unit, setUnit] = useState<"days" | "weeks">("weeks");
@@ -101,16 +110,21 @@ export default function ScheduleBlockDialog({ open, onOpenChange, block }: Props
 
   useEffect(() => {
     if (!open) return;
-    setName(block?.title ?? "");
-    setDays([]);
-    setStart(minsOf(block?.start_time, 9 * 60));
-    setEnd(minsOf(block?.end_time, 10 * 60));
+    setName(block?.title ?? defaultTitle ?? "");
+    setDays(defaultDate ? [jsToOurDow(defaultDate)] : []);
+    setRepeat(!defaultDate);
+    setStart(minsOf(block?.start_time, slotStart(defaultDate)));
+    setEnd(minsOf(block?.end_time, slotEnd(defaultDate)));
     setColor(colorOf(block));
     setCountIdx(3); setUnit("weeks"); setScope("one");
-  }, [open, block]);
+  }, [open, block, defaultDate, defaultTitle]);
 
   const count = COUNTS[countIdx];
-  const dates = useMemo(() => (editing ? [] : occurrenceDays(days, count, unit)), [editing, days, count, unit]);
+  const oneDay = useMemo(() => startOfDay(defaultDate ?? new Date()), [defaultDate]);
+  const dates = useMemo(
+    () => (editing ? [] : repeat ? occurrenceDays(days, count, unit, oneDay) : [oneDay]),
+    [editing, repeat, days, count, unit, oneDay],
+  );
   const duration = end - start;
   const durationLabel = duration > 0 ? `${Math.floor(duration / 60) ? `${Math.floor(duration / 60)} h ` : ""}${duration % 60 ? `${duration % 60} min` : ""}`.trim() : null;
 
@@ -144,9 +158,9 @@ export default function ScheduleBlockDialog({ open, onOpenChange, block }: Props
         }));
         const failed = results.find((r) => r.error);
         if (failed?.error) throw failed.error;
-        toast.success(rows.length > 1 ? `${rows.length} bloques actualizados` : "Bloque actualizado");
+        toast.success(rows.length > 1 ? `${rows.length} eventos actualizados` : "Evento actualizado");
       } else {
-        if (days.length === 0) { toast.error("Elige al menos un día"); setSaving(false); return; }
+        if (repeat && days.length === 0) { toast.error("Elige al menos un día"); setSaving(false); return; }
         if (dates.length === 0) { toast.error("No hay fechas que coincidan"); setSaving(false); return; }
         const serie = `serie:${crypto.randomUUID()}`;
         const rows: TaskInsert[] = dates.map((d) => ({
@@ -155,13 +169,13 @@ export default function ScheduleBlockDialog({ open, onOpenChange, block }: Props
         }));
         const { error } = await supabase.from("tasks").insert(rows);
         if (error) throw error;
-        toast.success(rows.length === 1 ? "Bloque creado" : `${rows.length} bloques creados`);
+        toast.success(rows.length === 1 ? "Evento creado" : `${rows.length} eventos creados`);
       }
       playSfx("create");
       refresh();
       close();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "No se pudo guardar el horario");
+      toast.error(e instanceof Error ? e.message : "No se pudo guardar el evento");
     } finally {
       setSaving(false);
     }
@@ -174,7 +188,7 @@ export default function ScheduleBlockDialog({ open, onOpenChange, block }: Props
       const ids = scope === "series" ? (await seriesRows()).map((r) => r.id) : [block.id];
       const { error } = await supabase.from("tasks").delete().in("id", ids);
       if (error) throw error;
-      toast.success(ids.length > 1 ? `${ids.length} bloques eliminados` : "Bloque eliminado");
+      toast.success(ids.length > 1 ? `${ids.length} eventos eliminados` : "Evento eliminado");
       refresh();
       close();
     } catch (e) {
@@ -197,11 +211,13 @@ export default function ScheduleBlockDialog({ open, onOpenChange, block }: Props
           <div className="flex items-center gap-3 pr-8">
             <span className="h-9 w-1.5 shrink-0 rounded-full" style={{ background: color }} aria-hidden />
             <div className="min-w-0">
-              <DialogTitle className="text-lg font-semibold">{editing ? "Editar bloque" : "Bloque de horario"}</DialogTitle>
+              <DialogTitle className="text-lg font-semibold">{editing ? "Editar evento" : "Nuevo evento"}</DialogTitle>
               <DialogDescription className="text-sm text-muted-foreground">
                 {editing && block?.start_time
                   ? format(new Date(block.start_time), "EEEE d 'de' MMMM", { locale: es })
-                  : "Aparece en tu calendario, sin XP"}
+                  : !repeat
+                    ? `${format(oneDay, "EEEE d 'de' MMMM", { locale: es })} · solo en el calendario`
+                    : "Solo en el calendario, sin XP"}
               </DialogDescription>
             </div>
           </div>
@@ -209,12 +225,29 @@ export default function ScheduleBlockDialog({ open, onOpenChange, block }: Props
           <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Nombre, p. ej. Gimnasio"
+            placeholder="Nombre, p. ej. Clase de inglés"
             className="h-12 rounded-2xl text-base"
             maxLength={60}
           />
 
           {!editing && (
+            <div className="flex rounded-2xl bg-muted/50 p-1" role="radiogroup" aria-label="Frecuencia">
+              {([[false, "Una vez"], [true, "Se repite"]] as const).map(([val, lbl]) => (
+                <button
+                  key={lbl}
+                  type="button"
+                  role="radio"
+                  aria-checked={repeat === val}
+                  onClick={() => setRepeat(val)}
+                  className={cn("flex-1 rounded-xl py-2 text-sm font-medium transition-colors", repeat === val ? "bg-card text-foreground shadow-soft" : "text-muted-foreground")}
+                >
+                  {lbl}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {!editing && repeat && (
             <section className="space-y-2.5">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold">Días</h3>
@@ -270,7 +303,7 @@ export default function ScheduleBlockDialog({ open, onOpenChange, block }: Props
             {duration <= 0 && <p className="px-1 text-xs font-medium text-destructive">La hora de fin debe ser después del inicio</p>}
           </section>
 
-          {!editing && (
+          {!editing && repeat && (
             <section className="space-y-2.5">
               <h3 className="text-sm font-semibold">Repetir durante</h3>
               <div className="flex items-center gap-3">
@@ -296,7 +329,7 @@ export default function ScheduleBlockDialog({ open, onOpenChange, block }: Props
                       ? "Elige los días arriba"
                       : dates.length === 0
                         ? "Ningún día cae en ese periodo"
-                        : `${dates.length} ${dates.length === 1 ? "bloque" : "bloques"}, hasta el ${format(lastDate!, "d MMM", { locale: es })}`}
+                        : `${dates.length} ${dates.length === 1 ? "evento" : "eventos"}, hasta el ${format(lastDate!, "d MMM", { locale: es })}`}
                   </p>
                 </div>
               </div>
@@ -347,7 +380,7 @@ export default function ScheduleBlockDialog({ open, onOpenChange, block }: Props
             <Button variant="ghost" onClick={close} className="h-12 rounded-2xl px-5">Cancelar</Button>
           )}
           <Button onClick={save} disabled={saving || duration <= 0} className="h-12 flex-1 rounded-2xl text-base font-semibold">
-            {saving ? "Guardando…" : editing ? "Guardar cambios" : dates.length > 1 ? `Crear ${dates.length} bloques` : "Crear bloque"}
+            {saving ? "Guardando…" : editing ? "Guardar cambios" : dates.length > 1 ? `Crear ${dates.length} eventos` : "Crear evento"}
           </Button>
         </div>
       </DialogContent>

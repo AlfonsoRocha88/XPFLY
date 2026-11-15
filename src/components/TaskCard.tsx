@@ -31,7 +31,7 @@ const TaskCard = ({ task, subtasks, onToggleComplete, onEdit, onDelete, onToggle
   const handleToggle = () => onToggleComplete(task);
 
   return (
-    <SwipeToDelete onDelete={() => onDelete(task.id)} className="rounded-2xl">
+    <SwipeToDelete onDelete={() => onDelete(task.id)} onComplete={handleToggle} done={isDone} className="rounded-2xl">
     <div
       ref={cardRef}
       className={cn("task-card-game group task-card-enter", isDone && "completed", exiting && "task-card-exit")}

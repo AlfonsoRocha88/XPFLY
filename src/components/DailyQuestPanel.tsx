@@ -84,7 +84,7 @@ const DailyQuestPanel = ({
           const isDone = task.status === "done";
           return (
             <li key={task.id}>
-            <SwipeToDelete onDelete={() => onDeleteTask(task.id)} className="rounded-2xl">
+            <SwipeToDelete onDelete={() => onDeleteTask(task.id)} onComplete={() => onToggleComplete(task)} done={isDone} className="rounded-2xl">
             <div
               className={cn("daily-quest-item group/daily cursor-pointer", isDone && "daily-quest-item-done")}
               onClick={() => onEditTask?.(task)}
