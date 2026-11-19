@@ -6,6 +6,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { leagueName } from "../_shared/leagues.ts";
+import { isServiceCaller } from "../_shared/serviceAuth.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -18,10 +19,12 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 async function send(targetUserId: string, title: string, body: string, tag: string, data: any = {}) {
   const res = await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
     method: "POST",
-    headers: { "Authorization": `Bearer ${SERVICE_KEY}`, "Content-Type": "application/json" },
+    headers: { "Authorization": `Bearer ${SERVICE_KEY}`, apikey: SERVICE_KEY, "Content-Type": "application/json" },
     body: JSON.stringify({ user_id: targetUserId, title, body, tag, data }),
   });
-  return res.json();
+  const result = await res.json().catch(() => ({ error: `send-push ${res.status}` }));
+  if (!res.ok || result?.error) console.error("send-push failed", res.status, result);
+  return result;
 }
 
 Deno.serve(async (req) => {
@@ -37,8 +40,7 @@ Deno.serve(async (req) => {
       "mission_reminder",
     ]);
     if (PRIVILEGED_EVENTS.has(event)) {
-      const auth = req.headers.get("authorization") || "";
-      if (auth !== `Bearer ${SERVICE_KEY}`) {
+      if (!(await isServiceCaller(req))) {
         return new Response(JSON.stringify({ error: "unauthorized" }), {
           status: 401,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -47,6 +49,16 @@ Deno.serve(async (req) => {
     }
 
     switch (event) {
+      case "test_push": {
+        // Sent from Settings ("Enviar prueba"): only ever to the signed-in caller's own devices.
+        const token = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
+        const { data: u } = await supabase.auth.getUser(token);
+        if (!u?.user) {
+          return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+        const result = await send(u.user.id, "Constela", "Las notificaciones funcionan en este dispositivo.", "test-push", { url: "/" });
+        return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
       case "friend_request": {
         // Re-fetch friendship row to validate
         if (!row_id) return new Response(JSON.stringify({ error: "row_id required" }), { status: 200, headers: corsHeaders });

@@ -3,9 +3,12 @@ import App from "./App.tsx";
 import "./index.css";
 import { registerServiceWorker } from "./lib/pwa";
 import { applyLiquidGlass } from "./lib/liquidGlass";
+import { captureInviteFromUrl } from "./lib/friendInvite";
 
 // Before the first paint, so the chosen glass style never flashes.
 applyLiquidGlass();
+// A friend invite link (?add=…) is saved before sign-in redirects can drop it.
+captureInviteFromUrl();
 
 // A failed email link (expired, already used, or replaced by a newer email) comes back as
 // #error=...&error_code=otp_expired. Keep it for the sign-in screen before routing drops the hash.

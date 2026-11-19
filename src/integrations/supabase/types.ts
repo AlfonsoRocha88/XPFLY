@@ -751,6 +751,12 @@ export type Database = {
         Returns: undefined
       }
       calculate_level: { Args: { total_xp: number }; Returns: number }
+      accept_friend_invite: {
+        Args: { _code: string; _key: string }
+        Returns: Json
+      }
+      get_my_friend_invite: { Args: never; Returns: string }
+      reset_my_friend_invite: { Args: never; Returns: string }
       find_profile_preview: {
         Args: { _query: string }
         Returns: {

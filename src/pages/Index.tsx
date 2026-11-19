@@ -21,6 +21,7 @@ import { TrophyIcon } from "@/components/icons/TrophyIcon";
 import LeagueUpCelebration from "@/components/leagues/LeagueUpCelebration";
 import LevelUpToast from "@/components/LevelUpToast";
 import OrbOpenOverlay from "@/components/orb/OrbOpenOverlay";
+import { takePendingInvite } from "@/lib/friendInvite";
 import { DEFAULT_WALLPAPER, WALLPAPERS } from "@/lib/wallpapers";
 import type { Task } from "@/lib/types";
 import { playSfx } from "@/lib/sfx";
@@ -39,6 +40,7 @@ const StatsView = lazy(() => import("@/components/stats/StatsView"));
 const Leagues = lazy(() => import("@/pages/Leagues"));
 const SocialPanel = lazy(() => import("@/components/SocialPanel"));
 const ClansPanel = lazy(() => import("@/components/ClansPanel"));
+const FriendsPanel = lazy(() => import("@/components/social/FriendsPanel"));
 const Shop = lazy(() => import("@/pages/Shop"));
 const WallpaperSelector = lazy(() => import("@/components/WallpaperSelector"));
 // The editor (date picker, selects, popovers) is only needed once a task is opened.
@@ -74,7 +76,7 @@ const Index = () => {
   const { chests: unopenedChests, openChest } = useChests();
   const { projects } = useProjects();
   const { party, partyInvites } = useParty();
-  const { pendingRequests } = useFriends();
+  const { pendingRequests, acceptInvite } = useFriends();
   const { tasks, dailyTasks, subtasks, allTasks, blocks, createTask, updateTask, deleteTask } = useTasks();
   const queryClient = useQueryClient();
 
@@ -167,6 +169,20 @@ const Index = () => {
     setCalendarDefaultDate(null);
     setDialogOpen(true);
   }, []);
+
+  // Opened a friend's invite link (or scanned their QR with the phone camera): become friends now.
+  const acceptInviteRef = useRef(acceptInvite);
+  acceptInviteRef.current = acceptInvite;
+  useEffect(() => {
+    if (!profile) return;
+    const inv = takePendingInvite();
+    if (!inv) return;
+    acceptInviteRef.current.mutateAsync(inv).then((r) => {
+      if (r.status === "added") { toast.success(`¡Ahora eres amigo de ${r.name}!`); setSection("community"); setCommunityTab("friends"); }
+      else if (r.status === "already") toast(`Ya eras amigo de ${r.name}`);
+      else if (r.status === "invalid") toast.error("Esa invitación ya no es válida. Pídele un link nuevo.");
+    }, () => toast.error("No se pudo usar la invitación"));
+  }, [profile]);
 
   const triggerOpenChest = useCallback(async () => {
     setChestOverlay({ open: true, reward: null, opening: true });
@@ -486,7 +502,7 @@ const Index = () => {
           onTabChange={setCommunityTab}
         />
         <TabTransition id={communityTab} dir={communityDir} className="mx-auto w-full max-w-3xl px-4 md:px-8">
-          {communityTab === "clans" ? <ClansPanel /> : <SocialPanel view={communityTab} />}
+          {communityTab === "clans" ? <ClansPanel /> : communityTab === "friends" ? <FriendsPanel /> : <SocialPanel view="party" />}
         </TabTransition>
       </>
     );

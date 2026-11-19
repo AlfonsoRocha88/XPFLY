@@ -4,12 +4,21 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import webpush from "npm:web-push@3.6.7";
+import { isServiceCaller } from "../_shared/serviceAuth.ts";
 
-const VAPID_PUBLIC = Deno.env.get("VAPID_PUBLIC_KEY")!;
-const VAPID_PRIVATE = Deno.env.get("VAPID_PRIVATE_KEY")!;
+const VAPID_PUBLIC = Deno.env.get("VAPID_PUBLIC_KEY") || "";
+const VAPID_PRIVATE = Deno.env.get("VAPID_PRIVATE_KEY") || "";
 const VAPID_SUBJECT = Deno.env.get("VAPID_SUBJECT") || "mailto:noreply@xpfly.app";
 
-webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC, VAPID_PRIVATE);
+// setVapidDetails throws on a missing/invalid key, which would crash the function at boot with
+// no useful log. Keep the error and report it per request instead.
+let vapidError: string | null = null;
+try {
+  webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC, VAPID_PRIVATE);
+} catch (e: any) {
+  vapidError = `VAPID config invalid (check VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY / VAPID_SUBJECT secrets): ${e?.message || e}`;
+  console.error(vapidError);
+}
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -19,12 +28,15 @@ const supabase = createClient(
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  // Auth: either service-role (internal/cron) or another edge function passing service key
-  const auth = req.headers.get("authorization") || "";
-  const expected = `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`;
-  if (auth !== expected) {
+  // Auth: only trusted server-side callers (other edge functions, pg_cron) with a secret key.
+  if (!(await isServiceCaller(req))) {
     return new Response(JSON.stringify({ error: "unauthorized" }), {
-      status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  if (vapidError) {
+    return new Response(JSON.stringify({ error: vapidError }), {
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 
@@ -68,13 +80,14 @@ Deno.serve(async (req) => {
       await supabase.from("push_subscriptions").delete().in("id", expired);
     }
 
-    return new Response(JSON.stringify({ sent, expired: expired.length }), {
+    console.log("send-push", { users: userIds.length, subs: subs?.length ?? 0, sent, expired: expired.length });
+    return new Response(JSON.stringify({ sent, subs: subs?.length ?? 0, expired: expired.length }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {
     console.error(e);
     return new Response(JSON.stringify({ error: String(e?.message || e) }), {
-      status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });

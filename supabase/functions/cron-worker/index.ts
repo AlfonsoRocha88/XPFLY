@@ -5,6 +5,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { DECAY_FROM_FAMILY, leagueFamilyIndex } from "../_shared/leagues.ts";
+import { isServiceCaller } from "../_shared/serviceAuth.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -14,16 +15,24 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 async function dispatch(event: string, user_id: string, payload: any = {}) {
-  await fetch(`${SUPABASE_URL}/functions/v1/dispatch-event`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${SERVICE_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ event, user_id, payload }),
-  }).catch((e) => console.error("dispatch fail", e));
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/dispatch-event`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${SERVICE_KEY}`, apikey: SERVICE_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ event, user_id, payload }),
+    });
+    const text = await res.text();
+    if (!res.ok || text.includes("error")) console.error("dispatch", event, res.status, text);
+  } catch (e) {
+    console.error("dispatch fail", e);
+  }
 }
 
 async function missionReminders() {
   const now = Date.now();
-  const windowMs = 90 * 1000; // 1.5 min window for safety
+  // pg_cron runs every minute, so each run owns (now - 60s, now]. A wider window made
+  // two consecutive runs both fire the same reminder.
+  const windowMs = 60 * 1000;
 
   // Pull tasks with non-empty reminders and start_time in the near future
   const horizon = new Date(now + 24 * 60 * 60 * 1000).toISOString();
@@ -152,11 +161,9 @@ Deno.serve(async (req) => {
   const url = new URL(req.url);
   const mode = url.searchParams.get("mode") || "mission-reminders";
 
-  // Allow either service-role auth or apikey header from pg_cron
-  const auth = req.headers.get("authorization") || "";
-  const apikey = req.headers.get("apikey") || "";
-  const ok = auth === `Bearer ${SERVICE_KEY}` || apikey === SERVICE_KEY;
-  if (!ok) return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401, headers: corsHeaders });
+  // pg_cron calls with the secret key stored in Vault (xpfly_service_key). It may be a different
+  // valid secret than this function's SUPABASE_SERVICE_ROLE_KEY, so verify it rather than compare.
+  if (!(await isServiceCaller(req))) return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401, headers: corsHeaders });
 
   try {
     let result: any;
@@ -164,6 +171,7 @@ Deno.serve(async (req) => {
     else result = await missionReminders();
     return new Response(JSON.stringify({ mode, ...result }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e: any) {
-    return new Response(JSON.stringify({ error: String(e?.message || e) }), { status: 200, headers: corsHeaders });
+    console.error(mode, e);
+    return new Response(JSON.stringify({ error: String(e?.message || e) }), { status: 500, headers: corsHeaders });
   }
 });

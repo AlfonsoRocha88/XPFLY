@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { Bell, BellRing, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
-import { enablePushNotifications } from "@/lib/push";
-import { isIos } from "@/lib/pwa";
+import { enablePushNotifications, sendTestPush, syncPushSubscription } from "@/lib/push";
+import { isIos, isStandalone } from "@/lib/pwa";
 import { Button } from "@/components/ui/button";
 
 type PushStatus = "on" | "off" | "denied" | "unsupported" | "needs-install";
@@ -11,8 +11,7 @@ type PushStatus = "on" | "off" | "denied" | "unsupported" | "needs-install";
 /** Why push isn't available (or not yet on) on this device. */
 function detectStatus(subscribed: boolean): PushStatus {
   if (typeof window === "undefined") return "unsupported";
-  const standalone = window.matchMedia("(display-mode: standalone)").matches;
-  if (isIos() && !standalone) return "needs-install";
+  if (isIos() && !isStandalone()) return "needs-install";
   if (!("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) return "unsupported";
   if (Notification.permission === "denied") return "denied";
   return subscribed ? "on" : "off";
@@ -38,16 +37,27 @@ const NotificationSettings = () => {
   const { user } = useAuth();
   const [status, setStatus] = useState<PushStatus>("off");
   const [busy, setBusy] = useState(false);
+  const [testing, setTesting] = useState(false);
 
+  // "On" means this device is subscribed AND saved for this account, so re-sync silently
+  // (never prompts) instead of trusting the browser's subscription alone.
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const reg = "serviceWorker" in navigator ? await navigator.serviceWorker.getRegistration() : undefined;
-      const sub = reg ? await reg.pushManager?.getSubscription() : null;
-      if (!cancelled) setStatus(detectStatus(!!sub));
-    })().catch(() => setStatus(detectStatus(false)));
+      const synced = user ? await syncPushSubscription(user.id) : false;
+      if (!cancelled) setStatus(detectStatus(synced));
+    })().catch(() => { if (!cancelled) setStatus(detectStatus(false)); });
     return () => { cancelled = true; };
-  }, []);
+  }, [user]);
+
+  const test = async () => {
+    setTesting(true);
+    const { sent, error } = await sendTestPush().catch((e) => ({ sent: 0, error: String(e) }));
+    setTesting(false);
+    if (sent > 0) toast.success("Prueba enviada. Debería llegarte en unos segundos.");
+    else if (error) toast.error("No se pudo enviar la prueba. Intenta de nuevo más tarde.");
+    else toast.error("No encontramos este dispositivo. Toca «Activar notificaciones» otra vez.");
+  };
 
   const enable = async () => {
     if (!user) return;
@@ -68,8 +78,13 @@ const NotificationSettings = () => {
         Recordatorios de tareas y solicitudes de amigos o de tu clan.
       </p>
       {status === "on" ? (
-        <div className="flex items-center gap-2 rounded-xl bg-success/10 px-3 py-2.5 text-sm font-semibold text-success">
-          <BellRing className="h-4 w-4" /> Activadas en este dispositivo
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 rounded-xl bg-success/10 px-3 py-2.5 text-sm font-semibold text-success">
+            <BellRing className="h-4 w-4" /> Activadas en este dispositivo
+          </div>
+          <Button variant="outline" onClick={test} disabled={testing} className="w-full">
+            {testing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="h-4 w-4" />} Enviar prueba
+          </Button>
         </div>
       ) : status === "off" ? (
         <Button onClick={enable} disabled={busy} className="w-full">

@@ -22,28 +22,31 @@ async function getVapidPublicKey(): Promise<string | null> {
   }
 }
 
-/** Request permission, subscribe to push, and persist to push_subscriptions. Returns true on success. */
-export async function enablePushNotifications(userId: string): Promise<boolean> {
-  if (typeof window === "undefined") return false;
-  if (!("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) return false;
+function sameKey(a: ArrayBuffer | null | undefined, b: BufferSource): boolean {
+  if (!a) return false;
+  const x = new Uint8Array(a);
+  const y = new Uint8Array(b instanceof ArrayBuffer ? b : (b as ArrayBufferView).buffer);
+  return x.length === y.length && x.every((v, i) => v === y[i]);
+}
 
-  const reg = await registerServiceWorker();
-  if (!reg) return false;
-
-  // iOS requires the app to be installed (standalone) for push
-  const perm = Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
-  if (perm !== "granted") return false;
-
+/**
+ * Subscribe this device (reusing a live subscription) and save it to push_subscriptions.
+ * Permission must already be granted. A subscription made with an old VAPID key can't receive
+ * pushes anymore, so it's replaced.
+ */
+async function subscribeAndSave(reg: ServiceWorkerRegistration, userId: string): Promise<boolean> {
   const publicKey = await getVapidPublicKey();
   if (!publicKey) return false;
+  const serverKey = urlBase64ToUint8Array(publicKey);
 
   let sub = await reg.pushManager.getSubscription();
+  if (sub && !sameKey(sub.options?.applicationServerKey, serverKey)) {
+    await sub.unsubscribe().catch(() => {});
+    sub = null;
+  }
   if (!sub) {
     try {
-      sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(publicKey),
-      });
+      sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: serverKey });
     } catch (e) {
       console.error("pushManager.subscribe failed", e);
       return false;
@@ -58,13 +61,7 @@ export async function enablePushNotifications(userId: string): Promise<boolean> 
   const { error } = await supabase
     .from("push_subscriptions")
     .upsert(
-      {
-        user_id: userId,
-        endpoint: sub.endpoint,
-        p256dh,
-        auth,
-        user_agent: navigator.userAgent,
-      },
+      { user_id: userId, endpoint: sub.endpoint, p256dh, auth, user_agent: navigator.userAgent },
       { onConflict: "endpoint" }
     );
   if (error) {
@@ -72,4 +69,43 @@ export async function enablePushNotifications(userId: string): Promise<boolean> 
     return false;
   }
   return true;
+}
+
+function pushSupported(): boolean {
+  return typeof window !== "undefined" && "Notification" in window && "serviceWorker" in navigator && "PushManager" in window;
+}
+
+/** Request permission, subscribe to push, and persist to push_subscriptions. Returns true on success. */
+export async function enablePushNotifications(userId: string): Promise<boolean> {
+  if (!pushSupported()) return false;
+
+  // Ask first, straight from the tap: Safari (iOS) only shows the prompt while the user gesture
+  // is still active, and awaiting other work first can lose it.
+  const perm = Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
+  if (perm !== "granted") return false;
+
+  const reg = await registerServiceWorker();
+  if (!reg) return false;
+  await navigator.serviceWorker.ready;
+  return subscribeAndSave(reg, userId);
+}
+
+/**
+ * Silent re-sync on app open when permission is already granted: makes sure this device's
+ * subscription is saved for the signed-in user (rows get removed when the push service reports
+ * them expired, and the endpoint can rotate). Never prompts. Returns whether it's subscribed.
+ */
+export async function syncPushSubscription(userId: string): Promise<boolean> {
+  if (!pushSupported() || Notification.permission !== "granted") return false;
+  const reg = await navigator.serviceWorker.getRegistration();
+  if (!reg) return false;
+  return subscribeAndSave(reg, userId);
+}
+
+/** Ask the server to push a test notification to the signed-in user's devices. */
+export async function sendTestPush(): Promise<{ sent: number; error?: string }> {
+  const { data, error } = await supabase.functions.invoke("dispatch-event", { body: { event: "test_push" } });
+  if (error) return { sent: 0, error: error.message };
+  if (data?.error) return { sent: 0, error: String(data.error) };
+  return { sent: Number(data?.sent ?? 0) };
 }

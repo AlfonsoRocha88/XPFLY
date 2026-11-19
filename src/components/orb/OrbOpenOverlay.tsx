@@ -62,14 +62,31 @@ const OrbOpenOverlay = ({ open, reward, onClose }: Props) => {
     playSfx("orbCharge");
   }, [open]);
 
-  // Once the reward is known (and the charge had time to read), burst, then reveal.
+  // Once the reward is known (and the charge had time to read), burst...
   useEffect(() => {
     if (!open || !reward || phase !== "charge") return;
     const wait = Math.max(0, MIN_CHARGE_MS - (performance.now() - openedAt.current));
-    const t1 = window.setTimeout(() => { setPhase("burst"); playSfx("orbBurst"); }, reduce ? 0 : wait);
-    const t2 = window.setTimeout(() => { setPhase("reveal"); playSfx(RARITY[reward.rarity]?.sound ?? "reveal"); }, reduce ? 50 : wait + 380);
-    return () => { window.clearTimeout(t1); window.clearTimeout(t2); };
+    const t = window.setTimeout(() => { setPhase("burst"); playSfx("orbBurst"); }, reduce ? 0 : wait);
+    return () => window.clearTimeout(t);
   }, [open, reward, phase, reduce]);
+
+  // ...then reveal. Its own effect: when both timers lived in the one above, entering "burst"
+  // re-ran it and the cleanup cancelled the reveal, leaving the overlay stuck on screen.
+  useEffect(() => {
+    if (!open || !reward || phase !== "burst") return;
+    const t = window.setTimeout(() => { setPhase("reveal"); playSfx(RARITY[reward.rarity]?.sound ?? "reveal"); }, reduce ? 50 : 380);
+    return () => window.clearTimeout(t);
+  }, [open, reward, phase, reduce]);
+
+  // Safety nets: never trap the screen. Escape closes once revealed, and if the server never
+  // answers the overlay gives up after 15 s.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape" && (phase === "reveal" || !reward)) onClose(); };
+    window.addEventListener("keydown", onKey);
+    const giveUp = reward ? 0 : window.setTimeout(onClose, 15000);
+    return () => { window.removeEventListener("keydown", onKey); window.clearTimeout(giveUp); };
+  }, [open, phase, reward, onClose]);
 
   const rarity = RARITY[reward?.rarity ?? "common"] ?? RARITY.common;
   const isDestellos = reward?.type === "destellos" || reward?.icon === "destellos";

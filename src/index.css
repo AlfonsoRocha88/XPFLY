@@ -743,3 +743,11 @@ button:not(:disabled):active, [role="button"]:active {
 .liquid-glass .task-card-game:hover, .liquid-glass .daily-quest-item:hover {
   background: linear-gradient(hsl(0 0% 100% / 0.07), hsl(0 0% 100% / 0.07)), hsl(230 30% 9% / var(--lg-fill-a, 0.09)) !important;
 }
+
+/* QR scanner viewfinder line */
+@keyframes qr-sweep { 0% { top: 4%; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { top: 96%; opacity: 0; } }
+.qr-sweep { animation: qr-sweep 1.8s ease-in-out infinite; }
+/* Community: the friends constellation drifts slowly */
+@keyframes friend-float { from { transform: translateY(-3px); } to { transform: translateY(3px); } }
+.friend-float { animation: friend-float 3.2s ease-in-out infinite alternate; }
+@media (prefers-reduced-motion: reduce) { .qr-sweep, .friend-float { animation: none; } }

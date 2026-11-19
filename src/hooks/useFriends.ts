@@ -112,6 +112,37 @@ export const useFriends = () => {
     (f) => f.status === "pending" && f.user_id === user?.id,
   );
 
+  /** My private invite key, for the QR / WhatsApp link. */
+  const inviteKeyQuery = useQuery({
+    queryKey: ["friend-invite", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_my_friend_invite");
+      if (error) throw error;
+      return data as string;
+    },
+    enabled: !!user,
+    staleTime: Infinity,
+  });
+
+  const resetInviteKey = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.rpc("reset_my_friend_invite");
+      if (error) throw error;
+      return data as string;
+    },
+    onSuccess: (key) => queryClient.setQueryData(["friend-invite", user?.id], key),
+  });
+
+  /** Open someone's invite: instant friendship, no request to accept. */
+  const acceptInvite = useMutation({
+    mutationFn: async ({ code, key }: { code: string; key: string }) => {
+      const { data, error } = await supabase.rpc("accept_friend_invite", { _code: code, _key: key });
+      if (error) throw error;
+      return data as { status: "added" | "already" | "self" | "invalid"; name?: string };
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["friends", user?.id] }),
+  });
+
   /** Search by code or exact username — returns the matched profile (excluding self) or null. */
   const searchUser = async (query: string) =>
     searchUserByCodeOrUsername(query, user?.id);
@@ -222,5 +253,8 @@ export const useFriends = () => {
     addFriend,
     respondRequest,
     removeFriend,
+    inviteKey: inviteKeyQuery.data ?? null,
+    resetInviteKey,
+    acceptInvite,
   };
 };
