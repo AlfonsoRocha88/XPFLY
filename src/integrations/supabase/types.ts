@@ -416,6 +416,8 @@ export type Database = {
         Row: {
           avatar_config: Json
           avatar_url: string | null
+          bio: string | null
+          unlock_all: boolean
           bg_animations: boolean
           coins: number
           created_at: string
@@ -470,6 +472,8 @@ export type Database = {
         Insert: {
           avatar_config?: Json
           avatar_url?: string | null
+          bio?: string | null
+          unlock_all?: boolean
           bg_animations?: boolean
           coins?: number
           created_at?: string
@@ -524,6 +528,8 @@ export type Database = {
         Update: {
           avatar_config?: Json
           avatar_url?: string | null
+          bio?: string | null
+          unlock_all?: boolean
           bg_animations?: boolean
           coins?: number
           created_at?: string
@@ -608,6 +614,42 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
+        Relationships: []
+      }
+      posts: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          image_path: string
+          task_id: string | null
+          task_title: string | null
+          user_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_path: string
+          task_id?: string | null
+          task_title?: string | null
+          user_id?: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_path?: string
+          task_id?: string | null
+          task_title?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      post_reactions: {
+        Row: { created_at: string; post_id: string; user_id: string }
+        Insert: { created_at?: string; post_id: string; user_id?: string }
+        Update: { created_at?: string; post_id?: string; user_id?: string }
         Relationships: []
       }
       push_subscriptions: {
@@ -814,6 +856,24 @@ export type Database = {
           trophies: number
           user_id: string
           username: string
+          xp: number
+        }[]
+      }
+      get_public_profile: {
+        Args: { _user_id: string }
+        Returns: {
+          avatar_url: string | null
+          bio: string | null
+          current_league_id: string
+          daily_streak: number
+          display_name: string | null
+          equipped_frame: string | null
+          friendship: string
+          friendship_id: string | null
+          level: number
+          trophies: number
+          user_id: string
+          username: string | null
           xp: number
         }[]
       }

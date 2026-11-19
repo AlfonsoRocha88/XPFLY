@@ -32,7 +32,7 @@ const Shop = () => {
   const owned = new Set(profile?.owned_items ?? []);
   const freezes = profile?.streak_freezes ?? 0;
   const freezeMax = profile?.streak_freeze_max ?? 3;
-  const isOwned = (i: ShopItem) => (i.kind === "consumable" ? freezes >= freezeMax : owned.has(i.id));
+  const isOwned = (i: ShopItem) => (i.kind === "consumable" ? freezes >= freezeMax : !!profile?.unlock_all || owned.has(i.id));
 
   const openOrb = async () => {
     if (chests <= 0) return;

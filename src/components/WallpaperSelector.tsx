@@ -118,7 +118,7 @@ const WallpaperSelector = () => {
           {WALLPAPERS.map((wp) => {
             const active = currentWallpaper === wp.id;
             // Living backgrounds are bought in the shop; locked ones say where to get them.
-            const locked = !!wp.living && !wp.free && !(profile?.owned_items ?? []).includes(wp.id);
+            const locked = !!wp.living && !wp.free && !profile?.unlock_all && !(profile?.owned_items ?? []).includes(wp.id);
             return (
               <button
                 key={wp.id}

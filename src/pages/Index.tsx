@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CalendarClock, Plus, Search, Sparkles, Swords } from "lucide-react";
+import { CalendarClock, Camera, Plus, Search, Sparkles, Swords } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useProfile } from "@/hooks/useProfile";
@@ -22,6 +22,7 @@ import LeagueUpCelebration from "@/components/leagues/LeagueUpCelebration";
 import LevelUpToast from "@/components/LevelUpToast";
 import OrbOpenOverlay from "@/components/orb/OrbOpenOverlay";
 import { takePendingInvite } from "@/lib/friendInvite";
+import { BioEditor, ProfileSheetProvider } from "@/components/social/ProfileSheet";
 import { DEFAULT_WALLPAPER, WALLPAPERS } from "@/lib/wallpapers";
 import type { Task } from "@/lib/types";
 import { playSfx } from "@/lib/sfx";
@@ -38,9 +39,9 @@ const CalendarView = lazy(() => import("@/components/CalendarView"));
 const AchievementsView = lazy(() => import("@/components/achievements/AchievementsView"));
 const StatsView = lazy(() => import("@/components/stats/StatsView"));
 const Leagues = lazy(() => import("@/pages/Leagues"));
-const SocialPanel = lazy(() => import("@/components/SocialPanel"));
-const ClansPanel = lazy(() => import("@/components/ClansPanel"));
 const FriendsPanel = lazy(() => import("@/components/social/FriendsPanel"));
+const FeedPanel = lazy(() => import("@/components/social/FeedPanel"));
+const PostComposer = lazy(() => import("@/components/social/PostComposer").then((mod) => ({ default: mod.PostComposer })));
 const Shop = lazy(() => import("@/pages/Shop"));
 const WallpaperSelector = lazy(() => import("@/components/WallpaperSelector"));
 // The editor (date picker, selects, popovers) is only needed once a task is opened.
@@ -52,7 +53,7 @@ const SignOutLink = lazy(() => import("@/components/ProfileOverview").then((m) =
 const ScheduleBlockDialog = lazy(() => import("@/components/ScheduleBlockDialog"));
 
 type ProgressTab = "stats" | "achievements";
-type CommunityTab = "friends" | "party" | "clans";
+type CommunityTab = "friends" | "feed";
 type ProfileTab = "shop" | "style";
 
 const ONE_HOUR = 60 * 60 * 1000;
@@ -75,12 +76,13 @@ const Index = () => {
   const { profile, addXp, claimDailyBonus } = useProfile();
   const { chests: unopenedChests, openChest } = useChests();
   const { projects } = useProjects();
-  const { party, partyInvites } = useParty();
+  const { party } = useParty();
   const { pendingRequests, acceptInvite } = useFriends();
   const { tasks, dailyTasks, subtasks, allTasks, blocks, createTask, updateTask, deleteTask } = useTasks();
   const queryClient = useQueryClient();
 
   const [section, setSection] = useState<SectionId>("tasks");
+  const [composerTask, setComposerTask] = useState<{ id: string; title: string } | null>(null);
   const [progressTab, setProgressTab] = useState<ProgressTab>("stats");
   const [communityTab, setCommunityTab] = useState<CommunityTab>("friends");
   const [profileTab, setProfileTab] = useState<ProfileTab>("shop");
@@ -88,7 +90,7 @@ const Index = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const sectionDir = useDirection(section, SECTIONS.map((s) => s.id));
   const progressDir = useDirection<ProgressTab>(progressTab, ["stats", "achievements"]);
-  const communityDir = useDirection<CommunityTab>(communityTab, ["friends", "party", "clans"]);
+  const communityDir = useDirection<CommunityTab>(communityTab, ["friends", "feed"]);
   const profileDir = useDirection<ProfileTab>(profileTab, ["shop", "style"]);
   // Logros is a full-screen scene behind the page: the page lets touches through to it.
   const galaxyMode = section === "progress" && progressTab === "achievements";
@@ -122,8 +124,7 @@ const Index = () => {
 
   const hasPartyBonus = !!party && party.members.some((m) => m.status === "accepted");
   const friendRequests = pendingRequests?.length ?? 0;
-  const partyRequests = partyInvites?.length ?? 0;
-  const socialBadge = friendRequests + partyRequests;
+  const socialBadge = friendRequests;
   const { claimableCount } = useAchievements();
 
   // ---------------- Derived task lists ----------------
@@ -214,6 +215,13 @@ const Index = () => {
         status: completing ? "done" : "todo",
         completed_at: completing ? new Date().toISOString() : null,
       });
+      if (completing) {
+        toast(task.title, {
+          duration: 6000,
+          icon: <Camera className="h-4 w-4" />,
+          action: { label: "Agregar foto", onClick: () => setComposerTask({ id: task.id, title: task.title }) },
+        });
+      }
       if (!completing || task.xp_awarded) return;
 
       const result = await addXp.mutateAsync({
@@ -495,14 +503,13 @@ const Index = () => {
           title="Comunidad"
           tabs={[
             { id: "friends", label: friendRequests ? `Amigos (${friendRequests})` : "Amigos" },
-            { id: "party", label: partyRequests ? `Party (${partyRequests})` : "Party" },
-            { id: "clans", label: "Clanes" },
+            { id: "feed", label: "Comunidad" },
           ]}
           activeTab={communityTab}
           onTabChange={setCommunityTab}
         />
         <TabTransition id={communityTab} dir={communityDir} className="mx-auto w-full max-w-3xl px-4 md:px-8">
-          {communityTab === "clans" ? <ClansPanel /> : communityTab === "friends" ? <FriendsPanel /> : <SocialPanel view="party" />}
+          {communityTab === "feed" ? <FeedPanel /> : <FriendsPanel />}
         </TabTransition>
       </>
     );
@@ -529,7 +536,7 @@ const Index = () => {
             ))}
           </div>
           <TabTransition id={profileTab} dir={profileDir}>
-            {profileTab === "shop" ? <Shop /> : <><WallpaperSelector /><SignOutLink /></>}
+            {profileTab === "shop" ? <Shop /> : <><div className="mb-4"><p className="mb-1.5 text-sm font-medium">Bio</p><BioEditor /></div><WallpaperSelector /><SignOutLink /></>}
           </TabTransition>
         </div>
       </>
@@ -537,6 +544,7 @@ const Index = () => {
   }
 
   return (
+    <ProfileSheetProvider>
     <div
       className={cn("flex h-full overflow-hidden", wallpaperAnimated && !wallpaper?.living && "wp-animated", !wallpaper?.background && "ambient-bg", wallpaper?.living && wallpaper.id)}
       style={wallpaper?.background ? { background: wallpaper.background } : undefined}
@@ -650,7 +658,13 @@ const Index = () => {
         opening={chestOverlay.opening}
         onClose={() => setChestOverlay({ open: false, reward: null, opening: false })}
       />
+      {composerTask && (
+        <Suspense fallback={null}>
+          <PostComposer open={!!composerTask} onOpenChange={(v) => { if (!v) setComposerTask(null); }} task={composerTask} />
+        </Suspense>
+      )}
     </div>
+    </ProfileSheetProvider>
   );
 };
 

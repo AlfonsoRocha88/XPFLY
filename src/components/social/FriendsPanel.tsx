@@ -1,9 +1,12 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
-import { Check, Copy, MoreHorizontal, QrCode as QrIcon, RefreshCw, ScanLine, Search, Share2, UserMinus, UserPlus, X } from "lucide-react";
+import { Check, Copy, MoreHorizontal, QrCode as QrIcon, RefreshCw, ScanLine, Search, Share2, UserMinus, X } from "lucide-react";
 import { toast } from "sonner";
 import { useFriends, type FriendProfilePreview, type Friendship } from "@/hooks/useFriends";
 import { useProfile } from "@/hooks/useProfile";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useOpenProfile } from "./ProfileSheet";
 import { getCurrentLeague, leagueLabel } from "@/lib/leagues";
 import { avatarSrc } from "@/lib/avatars";
 import { inviteLink, parseInvite, whatsappLink } from "@/lib/friendInvite";
@@ -51,14 +54,30 @@ function Avatar({ p, size, ring = true }: { p?: FriendProfilePreview | null; siz
 
 export default function FriendsPanel() {
   const { profile } = useProfile();
-  const { friends, pendingRequests, searchUser, sendRequest, respondRequest, removeFriend, inviteKey, resetInviteKey, acceptInvite } = useFriends();
+  const { user } = useAuth();
+  const { friends, pendingRequests, respondRequest, removeFriend, inviteKey, resetInviteKey, acceptInvite } = useFriends();
   const reduce = useReducedMotion();
   const [qrOpen, setQrOpen] = useState(false);
   const [scanOpen, setScanOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [found, setFound] = useState<FriendProfilePreview | null>(null);
-  const [searchError, setSearchError] = useState<string | null>(null);
+  const [results, setResults] = useState<FriendProfilePreview[]>([]);
+  const [searching, setSearching] = useState(false);
+  const openProfile = useOpenProfile();
+
+  // Live search, 300 ms after the last keystroke. Prefix match on username or friend code.
+  useEffect(() => {
+    const q = query.trim().replace(/^@/, "").replace(/[,()%_]/g, "");
+    if (q.length < 2) { setResults([]); return; }
+    setSearching(true);
+    let alive = true;
+    const t = window.setTimeout(async () => {
+      const { data } = await supabase.rpc("find_profile_preview", { _query: `${q}%` });
+      if (!alive) return;
+      setResults(((data ?? []) as unknown as FriendProfilePreview[]).filter((r) => r.user_id !== user?.id));
+      setSearching(false);
+    }, 300);
+    return () => { alive = false; window.clearTimeout(t); };
+  }, [query, user?.id]);
   const [copied, setCopied] = useState(false);
 
   const code = profile?.friend_code ?? "";
@@ -96,24 +115,6 @@ export default function FriendsPanel() {
     } catch { toast.error("No se pudo agregar"); }
   }, [acceptInvite]);
 
-  const search = async () => {
-    const q = query.trim();
-    if (!q) return;
-    setSearchError(null); setFound(null);
-    try {
-      const r = await searchUser(q);
-      if (r) setFound(r); else setSearchError("No encontré a nadie con ese código o usuario.");
-    } catch (e) { setSearchError((e as Error).message || "Error en la búsqueda"); }
-  };
-  const request = async () => {
-    if (!found) return;
-    try {
-      await sendRequest.mutateAsync(found.user_id);
-      toast.success("Solicitud enviada");
-      setFound(null); setQuery("");
-    } catch (e) { toast.error((e as Error).message || "No se pudo enviar"); }
-  };
-
   const remove = (p: FriendProfilePreview) => {
     const f = byUser.get(p.user_id);
     if (f) removeFriend.mutate(f.id, { onSuccess: () => toast(`${nameOf(p)} ya no está en tu lista`) });
@@ -123,54 +124,66 @@ export default function FriendsPanel() {
 
   return (
     <div className="space-y-4 pb-6">
-      {/* Invite hero: the fastest way in is a link, sent or scanned */}
-      <section className="surface relative overflow-hidden p-4">
-        <div className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-primary/25 blur-3xl" aria-hidden />
-        <div className="pointer-events-none absolute -bottom-14 -left-10 h-36 w-36 rounded-full bg-sky-400/20 blur-3xl" aria-hidden />
-        <p className="relative font-serif text-xl">Suma estrellas a tu constelación</p>
-        <p className="relative mt-0.5 text-sm text-muted-foreground">Con el link o el QR se agregan al instante, sin solicitudes.</p>
-        <div className="relative mt-4 grid grid-cols-3 gap-2">
-          <a
-            href={link ? whatsappLink(link, profile?.display_name) : undefined}
-            target="_blank"
-            rel="noreferrer"
-            aria-disabled={!link}
-            className="flex flex-col items-center gap-1.5 rounded-2xl bg-[#25D366] px-2 py-3 text-xs font-semibold text-white shadow-[0_6px_20px_-8px_#25D366] transition-transform active:scale-95 aria-disabled:opacity-50"
+      {/* Search: always there, results as you type */}
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Buscar usuario o código"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="h-11 rounded-full pl-10 pr-10 text-sm"
+          aria-label="Buscar usuario o código"
+        />
+        {query && (
+          <button onClick={() => setQuery("")} aria-label="Borrar búsqueda" className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:text-foreground">
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+      <AnimatePresence initial={false}>
+        {query.trim().length >= 2 && (
+          <m.ul
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.18, ease: EASE_OUT }}
+            className="surface divide-y divide-border/60 overflow-hidden p-0"
           >
-            <WhatsAppGlyph className="h-6 w-6" /> WhatsApp
-          </a>
-          <button onClick={() => setQrOpen(true)} className="flex flex-col items-center gap-1.5 rounded-2xl bg-primary px-2 py-3 text-xs font-semibold text-primary-foreground shadow-[0_6px_20px_-8px_hsl(var(--primary))] transition-transform active:scale-95">
-            <QrIcon className="h-6 w-6" /> Mi QR
-          </button>
-          <button onClick={() => setScanOpen(true)} className="flex flex-col items-center gap-1.5 rounded-2xl border border-border bg-card/60 px-2 py-3 text-xs font-semibold transition-transform active:scale-95">
-            <ScanLine className="h-6 w-6" /> Escanear
-          </button>
-        </div>
-        <button onClick={() => setSearchOpen((v) => !v)} className="relative mt-3 flex w-full items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
-          <Search className="h-3.5 w-3.5" /> Buscar por código o usuario
+            {results.length === 0 ? (
+              <li className="px-4 py-3 text-sm text-muted-foreground">{searching ? "Buscando…" : "Sin resultados"}</li>
+            ) : results.map((r) => (
+              <li key={r.user_id}>
+                <button onClick={() => openProfile(r.user_id)} className="flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-muted/40">
+                  <Avatar p={r} size={40} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-medium">{nameOf(r)}</span>
+                    <span className="block truncate text-xs text-muted-foreground">@{r.username || "—"} · Nv.{r.level}</span>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </m.ul>
+        )}
+      </AnimatePresence>
+
+      {/* Invite: compact row */}
+      <div className="grid grid-cols-3 gap-2">
+        <a
+          href={link ? whatsappLink(link, profile?.display_name) : undefined}
+          target="_blank"
+          rel="noreferrer"
+          aria-disabled={!link}
+          className="flex h-10 items-center justify-center gap-1.5 rounded-full bg-[#25D366] text-xs font-semibold text-white transition-transform active:scale-95 aria-disabled:opacity-50"
+        >
+          <WhatsAppGlyph className="h-4 w-4" /> WhatsApp
+        </a>
+        <button onClick={() => setQrOpen(true)} className="flex h-10 items-center justify-center gap-1.5 rounded-full bg-primary text-xs font-semibold text-primary-foreground transition-transform active:scale-95">
+          <QrIcon className="h-4 w-4" /> Mi QR
         </button>
-        <AnimatePresence initial={false}>
-          {searchOpen && (
-            <m.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.25, ease: EASE_OUT }} className="relative overflow-hidden">
-              <div className="flex gap-2 pt-3">
-                <Input placeholder="ABCD1234 o @usuario" value={query} onChange={(e) => { setQuery(e.target.value); setFound(null); setSearchError(null); }} onKeyDown={(e) => e.key === "Enter" && search()} className="text-sm" />
-                <Button size="sm" onClick={search} disabled={!query.trim()}><Search className="h-4 w-4" /></Button>
-              </div>
-              {searchError && <p className="pt-2 text-xs text-destructive">{searchError}</p>}
-              {found && (
-                <div className="mt-2 flex items-center gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-2.5">
-                  <Avatar p={found} size={40} />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">{nameOf(found)}</p>
-                    <p className="truncate text-xs text-muted-foreground">@{found.username || "—"} · Nv.{found.level}</p>
-                  </div>
-                  <Button size="sm" onClick={request} disabled={sendRequest.isPending}><UserPlus className="mr-1 h-4 w-4" />Agregar</Button>
-                </div>
-              )}
-            </m.div>
-          )}
-        </AnimatePresence>
-      </section>
+        <button onClick={() => setScanOpen(true)} className="flex h-10 items-center justify-center gap-1.5 rounded-full border border-border bg-card/60 text-xs font-semibold transition-transform active:scale-95">
+          <ScanLine className="h-4 w-4" /> Escanear
+        </button>
+      </div>
 
       {/* Requests that came by code/username */}
       <AnimatePresence initial={false}>
@@ -186,7 +199,7 @@ export default function FriendsPanel() {
             <Avatar p={req.friend_profile} size={42} />
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">{nameOf(req.friend_profile)}</p>
-              <p className="text-xs text-muted-foreground">Quiere ser tu amigo · Nv.{req.friend_profile?.level || 1}</p>
+              <p className="text-xs text-muted-foreground">Solicitud · Nv.{req.friend_profile?.level || 1}</p>
             </div>
             <Button size="icon" className="h-9 w-9 rounded-full" aria-label="Aceptar" onClick={() => { playSfx("complete"); respondRequest.mutate({ friendshipId: req.id, accept: true }); }}><Check className="h-4 w-4" /></Button>
             <Button size="icon" variant="ghost" className="h-9 w-9 rounded-full text-muted-foreground" aria-label="Rechazar" onClick={() => respondRequest.mutate({ friendshipId: req.id, accept: false })}><X className="h-4 w-4" /></Button>
@@ -205,8 +218,7 @@ export default function FriendsPanel() {
               </g>
             ))}
           </svg>
-          <p className="mt-3 font-medium">Tu constelación está esperando</p>
-          <p className="mt-1 text-sm text-muted-foreground">Invita a alguien por WhatsApp: con un toque ya son amigos.</p>
+          <p className="mt-3 text-sm text-muted-foreground">Sin amigos aún</p>
         </section>
       ) : (
         <>
@@ -225,8 +237,10 @@ export default function FriendsPanel() {
                     animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                     transition={{ duration: 0.5, ease: EASE_OUT, delay: first ? 0.05 : 0.18 }}
                   >
-                    <div className={first ? "friend-float" : undefined}><Avatar p={p} size={first ? 72 : 56} /></div>
-                    <p className="mt-2 w-full truncate text-sm font-medium">{nameOf(p)}</p>
+                    <button onClick={() => openProfile(p.user_id)} className="flex w-full flex-col items-center" aria-label={`Perfil de ${nameOf(p)}`}>
+                      <span className={first ? "friend-float" : undefined}><Avatar p={p} size={first ? 72 : 56} /></span>
+                      <span className="mt-2 w-full truncate text-sm font-medium">{nameOf(p)}</span>
+                    </button>
                     <p className="flex items-center gap-1 text-xs text-muted-foreground"><StreakComet streak={p.daily_streak || 0} size={16} />{p.daily_streak || 0}</p>
                     <div className={`mt-2 grid w-full place-items-center rounded-t-xl bg-gradient-to-b ${first ? "h-14 from-amber-300/40" : slot === 0 ? "h-10 from-slate-300/30" : "h-8 from-orange-400/25"} to-transparent font-serif text-lg`}>
                       {first ? 1 : slot === 0 ? 2 : 3}
@@ -248,11 +262,13 @@ export default function FriendsPanel() {
                 className="surface flex items-center gap-3 p-3"
               >
                 <span className="w-5 text-center text-xs tabular-nums text-muted-foreground">{i + 1}</span>
-                <Avatar p={p} size={44} />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{nameOf(p)}</p>
-                  <p className="truncate text-xs text-muted-foreground">Nv.{p.level || 1} · {leagueLabel(getCurrentLeague(p.trophies || 0))}</p>
-                </div>
+                <button onClick={() => openProfile(p.user_id)} className="flex min-w-0 flex-1 items-center gap-3 text-left">
+                  <Avatar p={p} size={44} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-medium">{nameOf(p)}</span>
+                    <span className="block truncate text-xs text-muted-foreground">Nv.{p.level || 1} · {leagueLabel(getCurrentLeague(p.trophies || 0))}</span>
+                  </span>
+                </button>
                 <span className="flex items-center gap-1 text-sm font-medium tabular-nums"><StreakComet streak={p.daily_streak || 0} size={20} />{p.daily_streak || 0}</span>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -265,9 +281,6 @@ export default function FriendsPanel() {
               </m.li>
             ))}
           </ul>
-          {ranked.length < 3 && (
-            <p className="text-center text-xs text-muted-foreground">Invita a más amigos para completar el podio.</p>
-          )}
         </>
       )}
 
@@ -275,7 +288,7 @@ export default function FriendsPanel() {
       <Dialog open={qrOpen} onOpenChange={setQrOpen}>
         <DialogContent className="max-w-sm text-center">
           <DialogTitle>Tu QR de amigo</DialogTitle>
-          <DialogDescription>Que lo escaneen con Constela o con la cámara del celular.</DialogDescription>
+          <DialogDescription className="sr-only">Código QR para agregarte</DialogDescription>
           <div className="mx-auto mt-2 rounded-3xl bg-white p-3 shadow-[0_10px_40px_-12px_hsl(var(--primary))]">
             {link ? <QrCode value={link} size={220} /> : <div className="h-[220px] w-[220px] animate-pulse rounded-2xl bg-muted" />}
           </div>
@@ -286,7 +299,7 @@ export default function FriendsPanel() {
           </div>
           <button
             className="mx-auto mt-1 flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-            onClick={() => resetInviteKey.mutate(undefined, { onSuccess: () => toast("Nuevo QR: los links anteriores ya no sirven") })}
+            onClick={() => resetInviteKey.mutate(undefined, { onSuccess: () => toast("QR nuevo") })}
           >
             <RefreshCw className="h-3 w-3" /> Generar uno nuevo
           </button>

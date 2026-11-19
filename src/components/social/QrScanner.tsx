@@ -68,7 +68,7 @@ export function QrScanner({ open, onOpenChange, onResult }: { open: boolean; onO
       <DialogContent className="max-w-sm overflow-hidden p-0">
         <div className="px-5 pt-5">
           <DialogTitle>Escanear QR</DialogTitle>
-          <DialogDescription>Apunta al código de tu amigo.</DialogDescription>
+          <DialogDescription className="sr-only">Escanea el QR de tu amigo</DialogDescription>
         </div>
         <div className="relative mx-5 mb-5 aspect-square overflow-hidden rounded-2xl bg-black">
           <video ref={videoRef} className="h-full w-full object-cover" playsInline muted />

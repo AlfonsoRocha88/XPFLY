@@ -41,7 +41,7 @@ const FramePicker = () => {
           Sin marco
         </button>
         {[...CONSTELLATIONS.map((c) => c.id as string), ...Object.keys(SHOP_FRAMES)].map((id) => {
-          const has = unlocked.has(id);
+          const has = !!profile?.unlock_all || unlocked.has(id);
           const on = equipped === id;
           return (
             <button

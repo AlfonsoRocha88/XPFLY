@@ -99,7 +99,7 @@ const StatsView = ({ habits }: { habits: Task[] }) => {
       <Dialog open={logOpen} onOpenChange={setLogOpen}>
         <DialogContent className="max-w-sm">
           <DialogTitle className="font-serif text-lg font-medium">¿Cuánto dormiste anoche?</DialogTitle>
-          <DialogDescription className="text-xs">Se guarda para hoy. Puedes cambiarlo cuando quieras.</DialogDescription>
+          <DialogDescription className="sr-only">Horas de sueño de hoy</DialogDescription>
           <SleepLogger day={today} initialMinutes={todaySleep} onDone={() => setLogOpen(false)} />
         </DialogContent>
       </Dialog>

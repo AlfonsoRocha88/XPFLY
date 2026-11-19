@@ -24,6 +24,7 @@ import {
 import { cn } from "@/lib/utils";
 import { avatarSrc } from "@/lib/avatars";
 import { StreakComet } from "@/components/icons/StreakComet";
+import { useOpenProfile } from "@/components/social/ProfileSheet";
 
 const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 
@@ -44,8 +45,13 @@ const FAMILIES: LeagueDivision[] = LEAGUES.filter((d) => d.divisionNumber === 3 
 
 const Row = ({ row, rank }: { row: LbRow; rank: number }) => {
   const league = leagueById(row.leagueId);
+  const openProfile = useOpenProfile();
   return (
-    <div className={cn("flex items-center gap-3 rounded-2xl px-3 py-2.5", row.isUser && "bg-primary/10 ring-1 ring-primary/35")}>
+    <button
+      type="button"
+      onClick={() => openProfile(row.user_id)}
+      className={cn("flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-colors hover:bg-muted/40 active:scale-[0.99]", row.isUser && "bg-primary/10 ring-1 ring-primary/35")}
+    >
       <span className={cn("w-6 shrink-0 text-center text-sm font-semibold tabular-nums", rank <= 3 ? "text-foreground" : "text-muted-foreground")}>{rank}</span>
       <img src={avatarSrc(row.avatar_url, row.user_id)} alt="" className="h-9 w-9 shrink-0 rounded-full object-cover" />
       <span className="min-w-0 flex-1">
@@ -61,7 +67,7 @@ const Row = ({ row, rank }: { row: LbRow; rank: number }) => {
       <span className="flex shrink-0 items-center gap-1 text-sm font-semibold tabular-nums">
         <TrophyIcon size={16} /> {row.trophies}
       </span>
-    </div>
+    </button>
   );
 };
 

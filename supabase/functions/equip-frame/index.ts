@@ -31,8 +31,8 @@ Deno.serve(async (req) => {
 
     const admin = createClient(SUPABASE_URL, SERVICE);
     if (frameId) {
-      const { data: profile } = await admin.from("profiles").select("unlocked_frames").eq("user_id", userId).maybeSingle();
-      if (!(profile?.unlocked_frames ?? []).includes(frameId)) return j({ error: "frame_not_unlocked" }, 403);
+      const { data: profile } = await admin.from("profiles").select("unlocked_frames, unlock_all").eq("user_id", userId).maybeSingle();
+      if (!profile?.unlock_all && !(profile?.unlocked_frames ?? []).includes(frameId)) return j({ error: "frame_not_unlocked" }, 403);
     }
 
     const { data: updated, error } = await admin.from("profiles").update({ equipped_frame: frameId }).eq("user_id", userId).select().single();

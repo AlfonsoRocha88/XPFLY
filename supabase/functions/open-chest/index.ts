@@ -17,7 +17,8 @@ function rollReward(owned: string[], canFreeze: boolean): Reward {
     const id = missing[Math.floor(Math.random() * missing.length)];
     return { type: "cosmetic", amount: 1, itemId: id, label: shopItem(id)!.name, icon: id.startsWith("frame") ? "frame" : "planet", rarity: "legendary" };
   }
-  if (r < 0.1 && canFreeze) return { type: "freeze", amount: 1, label: "Protector de racha", icon: "frost", rarity: "epic" };
+  // Its own 5% band, so owning every cosmetic never makes protectors more common.
+  if (r >= 0.06 && r < 0.11 && canFreeze) return { type: "freeze", amount: 1, label: "Protector de racha", icon: "frost", rarity: "epic" };
   if (r < 0.3) {
     const amount = 50 + Math.floor(Math.random() * 51);
     return { type: "destellos", amount, label: `${amount} destellos`, icon: "destellos", rarity: "rare" };

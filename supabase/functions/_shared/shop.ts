@@ -17,7 +17,7 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: "frame-halo", kind: "frame", name: "Halo", price: 300, description: "Un anillo de luz suave que gira lento alrededor de tu foto." },
   { id: "frame-cristal", kind: "frame", name: "Cristal", price: 400, description: "Facetas de cristal con destellos en las orillas." },
   { id: "frame-orbita", kind: "frame", name: "Órbita", price: 450, description: "Dos lunas pequeñas orbitan tu avatar." },
-  { id: "freeze", kind: "consumable", name: "Protector de racha", price: 150, description: "Salva tu racha un día que no puedas completar tus diarias." },
+  { id: "freeze", kind: "consumable", name: "Protector de racha", price: 250, description: "Salva tu racha un día que no puedas completar tus diarias." },
 ];
 
 export const shopItem = (id: string) => SHOP_ITEMS.find((i) => i.id === id);
