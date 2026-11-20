@@ -1,4 +1,4 @@
-import { memo, useRef, useState } from "react";
+import { memo, useCallback, useRef, useState } from "react";
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { MoreHorizontal, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -167,13 +167,14 @@ export default function FeedPanel() {
   const openProfile = useOpenProfile();
   const { posts, isLoading, isError, refetch, hasNextPage, fetchNextPage, isFetchingNextPage, toggleReaction, deletePost } = useFeed();
 
-  const onReact = (id: string, force?: boolean) => toggleReaction(id, { force });
-  const onDelete = (post: FeedPost) => {
+  // Stable handlers, so the memoized PostCards only re-render when their own post changes.
+  const onReact = useCallback((id: string, force?: boolean) => toggleReaction(id, { force }), [toggleReaction]);
+  const onDelete = useCallback((post: FeedPost) => {
     deletePost(post).then(
       () => toast.success("Publicación eliminada"),
       () => toast.error("No se pudo eliminar"),
     );
-  };
+  }, [deletePost]);
 
   if (isLoading) {
     return (

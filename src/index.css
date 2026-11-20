@@ -202,11 +202,6 @@ button, a, [role="button"], [role="tab"] {
   font-weight: 600;
   letter-spacing: 0;
 }
-.font-display {
-  font-family: 'Fraunces Variable', 'Fraunces', Georgia, serif;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-}
 
 /* =========== Liquid Glass =========== */
 :root {
@@ -307,10 +302,6 @@ button:not(:disabled):active, [role="button"]:active {
   .section-title {
     @apply font-serif text-xl font-medium tracking-tight text-foreground;
   }
-
-  .eyebrow {
-    @apply text-xs font-medium text-muted-foreground;
-  }
 }
 
 /* =========== XP Bar =========== */
@@ -322,27 +313,6 @@ button:not(:disabled):active, [role="button"]:active {
 .xp-bar-fill {
   @apply h-full rounded-full transition-[width] duration-700 ease-out;
   background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary-glow)));
-}
-
-/* =========== XP Popup / Level up =========== */
-.xp-popup {
-  animation: xp-float 1.4s ease-out forwards;
-}
-
-@keyframes xp-float {
-  0%   { opacity: 0; transform: translateY(8px) scale(0.9); }
-  20%  { opacity: 1; transform: translateY(0) scale(1.05); }
-  70%  { opacity: 1; transform: translateY(-16px) scale(1); }
-  100% { opacity: 0; transform: translateY(-32px) scale(0.95); }
-}
-
-.level-up-container {
-  animation: level-up-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@keyframes level-up-pop {
-  0%   { transform: scale(0.6); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
 }
 
 /* =========== Task card =========== */
@@ -419,26 +389,8 @@ button:not(:disabled):active, [role="button"]:active {
 }
 
 /* =========== Generic panels reused by social / clans / character =========== */
-.party-header-card,
-.social-panel-dialog {
+.party-header-card {
   @apply surface;
-}
-
-.status-window {
-  @apply surface overflow-hidden;
-}
-
-.status-window-header {
-  @apply flex items-center justify-between border-b border-border px-4 py-3;
-}
-
-.stat-bar-bg {
-  @apply h-2 w-full overflow-hidden rounded-full;
-  background: hsl(var(--muted));
-}
-
-.stat-bar-fill {
-  @apply h-full rounded-full transition-[width] duration-500 ease-out;
 }
 
 .character-showcase {
@@ -455,11 +407,6 @@ button:not(:disabled):active, [role="button"]:active {
   mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
   -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
   pointer-events: none;
-}
-
-@keyframes wiggle {
-  0%, 100% { transform: rotate(-4deg); }
-  50% { transform: rotate(4deg); }
 }
 
 /* =====================================================
@@ -492,36 +439,6 @@ button:not(:disabled):active, [role="button"]:active {
   pointer-events: none;
   overflow: hidden;
 }
-
-/* Section change fade — opacity only: a transform here would trap the fixed FAB */
-@keyframes section-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-.section-enter {
-  animation: section-in 0.2s ease-out;
-}
-
-/* =====================================================
-   League shield effects
-   ===================================================== */
-@keyframes singularity-shimmer {
-  0%   { transform: translateX(-120%) skewX(-20deg); opacity: 0; }
-  20%  { opacity: 0.55; }
-  60%  { opacity: 0.55; }
-  100% { transform: translateX(220%) skewX(-20deg); opacity: 0; }
-}
-@keyframes singularity-orbit {
-  0%   { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-@keyframes singularity-twinkle {
-  0%, 100% { opacity: 0.25; transform: scale(0.8); }
-  50%      { opacity: 1;   transform: scale(1.15); }
-}
-.sing-shimmer { animation: singularity-shimmer 3.6s ease-in-out infinite; }
-.sing-orbit { animation: singularity-orbit 9s linear infinite; transform-origin: 50% 52%; }
-.sing-twinkle { animation: singularity-twinkle 2.4s ease-in-out infinite; }
 
 /* =====================================================
    Trophy bonus toast
@@ -561,8 +478,6 @@ button:not(:disabled):active, [role="button"]:active {
 /* ---------- Achievements ---------- */
 @keyframes emblem-shine { 0%, 55% { transform: translateX(0) skewX(-20deg); } 100% { transform: translateX(220px) skewX(-20deg); } }
 .emblem-shine { animation: emblem-shine 3.6s cubic-bezier(0.45, 0, 0.2, 1) infinite; }
-@keyframes twinkle-star { 0%, 100% { opacity: .25; } 50% { opacity: .9; } }
-.sky-star { animation: twinkle-star var(--tw, 4s) ease-in-out infinite; animation-delay: var(--td, 0s); }
 @keyframes claim-halo { 0% { transform: scale(.9); opacity: .7; } 100% { transform: scale(1.6); opacity: 0; } }
 .claim-halo { animation: claim-halo 1.8s cubic-bezier(0.16, 1, 0.3, 1) infinite; }
 

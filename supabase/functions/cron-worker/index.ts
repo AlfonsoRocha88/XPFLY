@@ -4,7 +4,8 @@
 //   - "trophy-decay" (daily): competitive leagues lose trophies after inactivity or overdue urgent tasks.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
-import { DECAY_FROM_FAMILY, leagueFamilyIndex } from "../_shared/leagues.ts";
+import { DECAY_FROM_FAMILY, currentLeague, leagueFamilyIndex } from "../_shared/leagues.ts";
+import { mutateProfile } from "../_shared/profileUpdate.ts";
 import { isServiceCaller } from "../_shared/serviceAuth.ts";
 
 const supabase = createClient(
@@ -84,51 +85,55 @@ async function trophyDecay() {
   const { data: profiles, error } = await supabase
     .from("profiles")
     .select("user_id, trophies, current_league_id, last_mission_completed_at, pyro_last_decay_date, daily_trophy_loss, daily_trophy_loss_date")
-    .gte("trophies", 3500); // Rey III lower bound — pre-filter; double-check by id below
+    .gte("trophies", 3500); // Neptuno III lower bound (DECAY_FROM_FAMILY) — pre-filter; double-check by id below
   if (error) { console.error("trophyDecay profiles err", error); return { processed: 0 }; }
 
   let processed = 0;
-  for (const p of profiles || []) {
-    if (!isCompetitive(p.current_league_id)) continue;
+  for (const candidate of profiles || []) {
+    if (!isCompetitive(candidate.current_league_id)) continue;
+    if (candidate.daily_trophy_loss_date === today && Number(candidate.daily_trophy_loss ?? 0) >= MAX_DAILY_TROPHY_LOSS) continue;
 
-    const dailyLossUsed = p.daily_trophy_loss_date === today ? Number(p.daily_trophy_loss ?? 0) : 0;
-    let remainingCap = Math.max(0, MAX_DAILY_TROPHY_LOSS - dailyLossUsed);
-    if (remainingCap <= 0) continue;
+    const cutoff = new Date(now - 24 * 60 * 60 * 1000).toISOString();
+    const { count: urgentCount, error: urgErr } = await supabase
+      .from("tasks")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", candidate.user_id)
+      .eq("priority", "urgent")
+      .neq("status", "done")
+      .lt("created_at", cutoff);
+    if (urgErr) { console.error("trophyDecay urgents err", urgErr); continue; }
 
-    let trophies = Number(p.trophies ?? 0);
-    let loss = 0;
-    let newDecayDate = p.pyro_last_decay_date as string | null;
+    // Computed from a fresh read inside a guarded update, so a task completed during the run
+    // (award-xp adding trophies) is not overwritten by "trophies read - loss".
+    const outcome = await mutateProfile(supabase, candidate.user_id, (p) => {
+      if (!isCompetitive(p.current_league_id)) return { error: "skip", status: 200 };
+      const dailyLossUsed = p.daily_trophy_loss_date === today ? Number(p.daily_trophy_loss ?? 0) : 0;
+      let remainingCap = Math.max(0, MAX_DAILY_TROPHY_LOSS - dailyLossUsed);
+      if (remainingCap <= 0) return { error: "skip", status: 200 };
 
-    // 1) Inactivity decay (once per day)
-    const lastTs = p.last_mission_completed_at ? new Date(p.last_mission_completed_at).getTime() : null;
-    if (lastTs != null && p.pyro_last_decay_date !== today) {
-      const hoursSince = (now - lastTs) / 36e5;
-      if (hoursSince >= 24) {
-        const ticks = Math.min(MAX_INACTIVITY_TROPHY_LOSS_PER_DAY, Math.floor((hoursSince - 24) / 5) + 1);
-        const apply = Math.min(ticks, remainingCap, trophies);
-        if (apply > 0) {
-          trophies -= apply;
-          loss += apply;
-          remainingCap -= apply;
+      let trophies = Number(p.trophies ?? 0);
+      let loss = 0;
+      let newDecayDate = p.pyro_last_decay_date as string | null;
+
+      // 1) Inactivity decay (once per day)
+      const lastTs = p.last_mission_completed_at ? new Date(p.last_mission_completed_at).getTime() : null;
+      if (lastTs != null && p.pyro_last_decay_date !== today) {
+        const hoursSince = (now - lastTs) / 36e5;
+        if (hoursSince >= 24) {
+          const ticks = Math.min(MAX_INACTIVITY_TROPHY_LOSS_PER_DAY, Math.floor((hoursSince - 24) / 5) + 1);
+          const apply = Math.min(ticks, remainingCap, trophies);
+          if (apply > 0) {
+            trophies -= apply;
+            loss += apply;
+            remainingCap -= apply;
+          }
+          newDecayDate = today;
         }
-        newDecayDate = today;
       }
-    }
 
-    // 2) Urgent mission decay — oldest first, capped at 10/day, 2 per mission
-    if (remainingCap > 0) {
-      const cutoff = new Date(now - 24 * 60 * 60 * 1000).toISOString();
-      const { data: urgents } = await supabase
-        .from("tasks")
-        .select("id, created_at")
-        .eq("user_id", p.user_id)
-        .eq("priority", "urgent")
-        .neq("status", "done")
-        .lt("created_at", cutoff)
-        .order("created_at", { ascending: true });
-
+      // 2) Urgent mission decay — oldest first, capped at 10/day, 2 per mission
       let urgentLossToday = 0;
-      for (const _t of urgents || []) {
+      for (let i = 0; i < (urgentCount ?? 0) && remainingCap > 0; i++) {
         if (urgentLossToday >= MAX_URGENT_TROPHY_LOSS_PER_DAY) break;
         const apply = Math.min(PER_URGENT_TROPHY_LOSS, remainingCap, trophies, MAX_URGENT_TROPHY_LOSS_PER_DAY - urgentLossToday);
         if (apply <= 0) break;
@@ -137,21 +142,22 @@ async function trophyDecay() {
         remainingCap -= apply;
         urgentLossToday += apply;
       }
-    }
 
-    if (loss > 0) {
-      const { error: uErr } = await supabase
-        .from("profiles")
-        .update({
+      if (loss <= 0) return { error: "skip", status: 200 };
+      return {
+        updates: {
           trophies,
+          // Keep the league in step with the trophies (log_league_change records the demotion).
+          current_league_id: currentLeague(trophies),
           pyro_last_decay_date: newDecayDate,
           daily_trophy_loss: dailyLossUsed + loss,
           daily_trophy_loss_date: today,
-        })
-        .eq("user_id", p.user_id);
-      if (uErr) console.error("trophyDecay update err", uErr);
-      else processed++;
-    }
+        },
+        result: loss,
+      };
+    });
+    if (outcome.ok) processed++;
+    else if (outcome.error !== "skip") console.error("trophyDecay update err", candidate.user_id, outcome.error);
   }
   return { processed };
 }
@@ -163,7 +169,7 @@ Deno.serve(async (req) => {
 
   // pg_cron calls with the secret key stored in Vault (xpfly_service_key). It may be a different
   // valid secret than this function's SUPABASE_SERVICE_ROLE_KEY, so verify it rather than compare.
-  if (!(await isServiceCaller(req))) return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401, headers: corsHeaders });
+  if (!(await isServiceCaller(req))) return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
   try {
     let result: any;

@@ -69,7 +69,9 @@ Deno.serve(async (req) => {
     const { data: profile, error: pErr } = await admin
       .from("profiles")
       .select("user_id")
-      .ilike("username", username)
+      // "_" is a LIKE wildcard: escape it so "a_b" can't match "axb" (and two matches can't
+      // make maybeSingle fail for the real "a_b").
+      .ilike("username", username.replace(/_/g, "\\_"))
       .maybeSingle();
 
     if (pErr || !profile) {

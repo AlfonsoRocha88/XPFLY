@@ -174,7 +174,7 @@ export function useFeed() {
     },
   });
 
-  const posts = query.data?.pages.flatMap((pg) => pg.posts) ?? [];
+  const posts = useMemo(() => query.data?.pages.flatMap((pg) => pg.posts) ?? [], [query.data]);
 
   return {
     ...query,

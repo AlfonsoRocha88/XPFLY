@@ -1,5 +1,6 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 interface AuthContextType {
@@ -20,22 +21,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  // Most query keys ("profile", "all-tasks", ...) are not per user: drop the cache whenever the
+  // signed-in account changes, so the next account never sees the previous one's data.
+  const lastUserId = useRef<string | null | undefined>(undefined);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const apply = (session: Session | null) => {
+      const id = session?.user?.id ?? null;
+      if (lastUserId.current !== undefined && lastUserId.current !== id) queryClient.clear();
+      lastUserId.current = id;
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
-    });
+    };
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => apply(session));
+
+    supabase.auth.getSession().then(({ data: { session } }) => apply(session));
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [queryClient]);
 
   const signOut = async () => {
     await supabase.auth.signOut();

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { DndContext, closestCenter, type DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
@@ -15,11 +15,15 @@ interface ListViewProps {
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
   onToggleSubtask: (task: Task) => void;
-  onReorder: (taskId: string, newPosition: number) => void;
+  /** The dragged task was dropped on `overId`'s slot. */
+  onReorder: (taskId: string, overId: string) => void;
   emptyMessage?: string;
 }
 
-const SortableTask = ({ task, isNew, ...props }: { task: Task; isNew: boolean } & Omit<React.ComponentProps<typeof TaskCard>, "task">) => {
+const NO_SUBTASKS: Task[] = [];
+
+// Memoized: typing in search or any parent state change no longer re-renders every card.
+const SortableTask = memo(({ task, isNew, ...props }: { task: Task; isNew: boolean } & Omit<React.ComponentProps<typeof TaskCard>, "task">) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id });
   const style = { transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 10 : undefined };
 
@@ -28,7 +32,8 @@ const SortableTask = ({ task, isNew, ...props }: { task: Task; isNew: boolean } 
       <TaskCard task={task} {...props} />
     </div>
   );
-};
+});
+SortableTask.displayName = "SortableTask";
 
 const ListView = ({ tasks, subtasks, projects, onToggleComplete, onEdit, onDelete, onToggleSubtask, onReorder, emptyMessage }: ListViewProps) => {
   // Mouse drags after a few px; touch needs a short press so scrolling stays smooth.
@@ -59,13 +64,17 @@ const ListView = ({ tasks, subtasks, projects, onToggleComplete, onEdit, onDelet
 
   const handleDelete = useCallback((id: string) => {
     setExitingIds((prev) => new Set(prev).add(id));
-    setTimeout(() => onDelete(id), 280);
+    setTimeout(() => {
+      onDelete(id);
+      // Forget it once handed off: if the delete is undone (or fails) the card must come back visible.
+      setExitingIds((prev) => { const next = new Set(prev); next.delete(id); return next; });
+    }, 280);
   }, [onDelete]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    onReorder(active.id as string, tasks.findIndex((t) => t.id === over.id));
+    onReorder(active.id as string, over.id as string);
   };
 
   if (tasks.length === 0) {
@@ -86,7 +95,7 @@ const ListView = ({ tasks, subtasks, projects, onToggleComplete, onEdit, onDelet
               key={task.id}
               task={task}
               isNew={newIds.has(task.id)}
-              subtasks={subtasksByParent.get(task.id) ?? []}
+              subtasks={subtasksByParent.get(task.id) ?? NO_SUBTASKS}
               onToggleComplete={onToggleComplete}
               onEdit={onEdit}
               onDelete={handleDelete}

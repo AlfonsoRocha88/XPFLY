@@ -50,6 +50,9 @@ export function useEdgeGlow() {
       lift = window.setTimeout(() => { x = y = -1e4; schedule(); }, 350);
     };
     const onLeave = () => { x = y = -1e4; schedule(); };
+    // With the pointer parked (touch screens, most of the time) and nothing lit, a scroll has
+    // nothing to move: skip the per-frame measuring of every glowing element.
+    const onScroll = () => { if (x > -1e4 || lit.size > 0) schedule(); };
 
     window.addEventListener("pointermove", onMove, { passive: true });
     window.addEventListener("pointerdown", onDown, { passive: true });
@@ -57,7 +60,7 @@ export function useEdgeGlow() {
     window.addEventListener("pointercancel", onUp, { passive: true });
     document.documentElement.addEventListener("pointerleave", onLeave);
     // Content moving under a still pointer (scroll) should move the light with it.
-    window.addEventListener("scroll", schedule, { passive: true, capture: true });
+    window.addEventListener("scroll", onScroll, { passive: true, capture: true });
     return () => {
       cancelAnimationFrame(frame);
       window.clearTimeout(lift);
@@ -66,7 +69,7 @@ export function useEdgeGlow() {
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("pointercancel", onUp);
       document.documentElement.removeEventListener("pointerleave", onLeave);
-      window.removeEventListener("scroll", schedule, { capture: true });
+      window.removeEventListener("scroll", onScroll, { capture: true });
     };
   }, []);
 }

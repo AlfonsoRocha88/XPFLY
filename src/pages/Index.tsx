@@ -1,6 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CalendarClock, Camera, Plus, Search, Sparkles, Swords } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { arrayMove } from "@dnd-kit/sortable";
 import { toast } from "sonner";
 import { useProfile } from "@/hooks/useProfile";
 import { useProjects } from "@/hooks/useProjects";
@@ -78,7 +79,14 @@ const Index = () => {
   const { projects } = useProjects();
   const { party } = useParty();
   const { pendingRequests, acceptInvite } = useFriends();
-  const { tasks, dailyTasks, subtasks, allTasks, blocks, createTask, updateTask, deleteTask } = useTasks();
+  const { tasks, dailyTasks, subtasks, allTasks, blocks, createTask, updateTask, reorderTasks, deleteTask } = useTasks();
+  // mutateAsync is stable across renders (the mutation objects are not): callbacks built on it
+  // stay the same, so the memoized task cards don't all re-render on every state change.
+  const { mutateAsync: updateTaskAsync } = updateTask;
+  const { mutateAsync: deleteTaskAsync } = deleteTask;
+  const { mutateAsync: reorderTasksAsync } = reorderTasks;
+  const { mutateAsync: addXpAsync } = addXp;
+  const { mutateAsync: openChestAsync } = openChest;
   const queryClient = useQueryClient();
 
   const [section, setSection] = useState<SectionId>("tasks");
@@ -134,8 +142,9 @@ const Index = () => {
     [dailyTasks, todayDow, pendingDelete],
   );
   const allDailyCompleted = dailyMissions.length > 0 && dailyMissions.every((t) => t.status === "done");
-  const today = new Date().toISOString().split("T")[0];
-  const dailyBonusClaimed = profile?.daily_completed_at === today;
+  // Local calendar day (en-CA formats as YYYY-MM-DD), matching the server's localDay(timezone).
+  const today = new Intl.DateTimeFormat("en-CA").format(new Date());
+  const dailyBonusClaimed = !!profile?.daily_completed_at && profile.daily_completed_at >= today;
 
   const visibleTasks = useMemo(() => {
     const pending = tasks.filter((t) => t.status !== "done" && !pendingDelete.has(t.id));
@@ -189,12 +198,12 @@ const Index = () => {
     setChestOverlay({ open: true, reward: null, opening: true });
     await new Promise((r) => setTimeout(r, 1100)); // let the shake animation play
     try {
-      const reward = await openChest.mutateAsync();
+      const reward = await openChestAsync();
       setChestOverlay({ open: true, reward, opening: false });
     } catch {
       setChestOverlay({ open: false, reward: null, opening: false });
     }
-  }, [openChest]);
+  }, [openChestAsync]);
 
   const handleToggleComplete = useCallback(async (task: Task) => {
     const completing = task.status !== "done";
@@ -210,7 +219,7 @@ const Index = () => {
     playSfx(completing ? "complete" : "toggle");
     if (completing) celebrateBackground();
     try {
-      await updateTask.mutateAsync({
+      await updateTaskAsync({
         id: task.id,
         status: completing ? "done" : "todo",
         completed_at: completing ? new Date().toISOString() : null,
@@ -224,7 +233,7 @@ const Index = () => {
       }
       if (!completing || task.xp_awarded) return;
 
-      const result = await addXp.mutateAsync({
+      const result = await addXpAsync({
         taskId: task.id,
         priority: task.is_daily ? "urgent" : task.priority,
         partyBonus: hasPartyBonus,
@@ -246,7 +255,7 @@ const Index = () => {
     } catch {
       toast.error("No se pudo actualizar la tarea");
     }
-  }, [updateTask, addXp, hasPartyBonus]);
+  }, [updateTaskAsync, addXpAsync, hasPartyBonus]);
 
   const handleClaimDailyBonus = async () => {
     try {
@@ -287,7 +296,7 @@ const Index = () => {
     const commit = async () => {
       deleteTimers.current.delete(id);
       try {
-        await deleteTask.mutateAsync(id);
+        await deleteTaskAsync(id);
       } catch {
         restore();
         toast.error("No se pudo eliminar la tarea");
@@ -307,7 +316,7 @@ const Index = () => {
         },
       },
     });
-  }, [deleteTask]);
+  }, [deleteTaskAsync]);
 
   // Leaving the app inside the undo window still deletes what was swiped away.
   useEffect(() => {
@@ -318,13 +327,21 @@ const Index = () => {
     return () => { window.removeEventListener("pagehide", flush); flush(); };
   }, []);
 
-  const handleReorder = useCallback(async (taskId: string, newPosition: number) => {
+  // Moves the dragged task to the drop target's slot and renumbers the list, so positions stay
+  // unique. (Writing only the dropped index collided with existing positions and could snap back.)
+  const handleReorder = useCallback(async (taskId: string, overId: string) => {
+    const from = tasks.findIndex((t) => t.id === taskId);
+    const to = tasks.findIndex((t) => t.id === overId);
+    if (from < 0 || to < 0 || from === to) return;
+    const ordered = arrayMove(tasks, from, to);
+    const changes = ordered.flatMap((t, position) => (t.position === position ? [] : [{ id: t.id, position }]));
+    if (!changes.length) return;
     try {
-      await updateTask.mutateAsync({ id: taskId, position: newPosition });
+      await reorderTasksAsync(changes);
     } catch {
       toast.error("No se pudo reordenar");
     }
-  }, [updateTask]);
+  }, [tasks, reorderTasksAsync]);
 
   const handleAddSubtask = async (title: string) => {
     if (!editingTask) return;

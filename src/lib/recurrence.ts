@@ -10,6 +10,17 @@ export interface TaskOccurrence {
   occurrenceKey: string; // unique id for this instance: `${task.id}_${isoStart}`
 }
 
+/**
+ * Longest real length of one unit (a DST day can last 25 h), used to skip ahead without ever
+ * passing the visible range. Months are left out: stepping month by month (Jan 31 â†’ Feb 28 â†’
+ * Mar 28) differs from jumping, and 5000 months never run out anyway.
+ */
+const MAX_UNIT_MS: Partial<Record<RecurrenceUnit, number>> = {
+  hour: 3_600_000,
+  day: 25 * 3_600_000,
+  week: 7 * 25 * 3_600_000,
+};
+
 const addByUnit = (date: Date, amount: number, unit: RecurrenceUnit): Date => {
   switch (unit) {
     case "hour": return addHours(date, amount);
@@ -57,7 +68,11 @@ export const expandTask = (task: Task, rangeStart: Date, rangeEnd: Date): TaskOc
 
   // Recurring: iterate from baseStart, advancing by interval+unit until we pass min(recurrenceEnd, rangeEnd)
   const hardStop = recurrenceEnd && recurrenceEnd < rangeEnd ? recurrenceEnd : rangeEnd;
-  let cur = new Date(baseStart);
+  // Jump close to the visible range instead of stepping through every past occurrence: an hourly
+  // task would otherwise use up the 5000-step budget after ~7 months and vanish from the calendar.
+  const unitMs = MAX_UNIT_MS[unit];
+  const skip = unitMs ? Math.floor((rangeStart.getTime() - baseStart.getTime()) / (unitMs * interval)) - 1 : 0;
+  let cur = skip > 0 ? addByUnit(baseStart, skip * interval, unit) : new Date(baseStart);
   let safety = 0;
   while (cur <= hardStop && safety < 5000) {
     if (cur >= rangeStart) {

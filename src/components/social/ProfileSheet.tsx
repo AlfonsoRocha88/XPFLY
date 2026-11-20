@@ -1,10 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Clock, UserPlus } from "lucide-react";
+import { Check, Clock, Heart, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useFriends } from "@/hooks/useFriends";
+import { useFriendFavorites } from "@/hooks/useFriendFavorites";
 import { useProfile } from "@/hooks/useProfile";
 import { getCurrentLeague, leagueLabel } from "@/lib/leagues";
 import { playSfx } from "@/lib/sfx";
@@ -115,6 +116,8 @@ function ProfileBody({ userId }: { userId: string }) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const { sendRequest, respondRequest } = useFriends();
+  const { favorites, toggleFavorite } = useFriendFavorites();
+  const fav = favorites.has(userId);
   const { data: p, isLoading } = usePublicProfile(userId);
   const isSelf = p?.friendship === "self" || userId === user?.id;
   const photos = useRecentPhotos(userId, !!p && (p.friendship === "accepted" || isSelf));
@@ -172,7 +175,18 @@ function ProfileBody({ userId }: { userId: string }) {
             <Button className="h-11 w-full rounded-full" onClick={accept}><Check className="mr-2 h-4 w-4" />Aceptar solicitud</Button>
           )}
           {p.friendship === "accepted" && (
-            <p className="flex items-center justify-center gap-1.5 text-sm font-medium text-primary"><Check className="h-4 w-4" />Amigos</p>
+            <div className="flex items-center justify-center gap-3">
+              <span className="flex items-center gap-1.5 text-sm font-medium text-primary"><Check className="h-4 w-4" />Amigos</span>
+              <button
+                type="button"
+                onClick={() => { if (!fav) playSfx("toggle"); toggleFavorite({ friendId: userId, on: !fav }); }}
+                aria-pressed={fav}
+                aria-label={fav ? "Quitar de favoritos" : "Agregar a favoritos"}
+                className={`grid h-10 w-10 place-items-center rounded-full border transition-[transform,background-color,border-color] duration-150 active:scale-90 ${fav ? "border-rose-400/50 bg-rose-500/15" : "border-border bg-card/60"}`}
+              >
+                <Heart className={`h-5 w-5 transition-transform duration-200 ${fav ? "scale-110 fill-rose-500 text-rose-500" : "text-muted-foreground"}`} />
+              </button>
+            </div>
           )}
         </div>
       )}

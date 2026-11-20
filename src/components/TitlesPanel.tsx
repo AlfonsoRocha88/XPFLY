@@ -21,7 +21,7 @@ const TitlesPanel = ({ unlocked, equipped, progress, streak, onEquip, isPending 
       const value =
         t.progressKey === "streak"
           ? streak
-          : (progress as any)[t.progressKey] ?? 0;
+          : (progress as Record<string, number | undefined>)[t.progressKey] ?? 0;
       const isUnlocked = unlocked.includes(t.id);
       const isEquipped = equipped === t.id;
       const pct = Math.min((value / t.goal) * 100, 100);

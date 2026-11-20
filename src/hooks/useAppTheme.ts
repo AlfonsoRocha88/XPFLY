@@ -32,7 +32,7 @@ export function useColorMode() {
     readMode,
   );
   const setMode = useCallback((m: ColorMode) => {
-    try { localStorage.setItem(MODE_KEY, m); } catch {}
+    try { localStorage.setItem(MODE_KEY, m); } catch { /* storage unavailable: mode lasts this session */ }
     applyMode(m);
     listeners.forEach((l) => l());
   }, []);
@@ -48,7 +48,7 @@ export function useAppTheme() {
     const root = document.documentElement;
     THEME_CLASS_NAMES.forEach((c) => root.classList.remove(c));
     root.classList.add(getThemeClass(theme));
-    try { if (theme) localStorage.setItem("lastTheme", theme); } catch {}
+    try { if (theme) localStorage.setItem("lastTheme", theme); } catch { /* storage unavailable */ }
   }, [theme]);
 
   useEffect(() => { applyMode(readMode()); }, []);

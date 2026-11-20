@@ -20,17 +20,24 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) return json({ error: "Unauthorized" }, 401);
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const authed = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
+    const authed = createClient(supabaseUrl, (Deno.env.get("SUPABASE_ANON_KEY") ?? Deno.env.get("SUPABASE_PUBLISHABLE_KEY"))!, {
       global: { headers: { Authorization: authHeader } },
     });
     const { data: userData, error: userErr } = await authed.auth.getUser(authHeader.replace("Bearer ", ""));
     const userId = userData?.user?.id;
     if (userErr || !userId) return json({ error: "Unauthorized" }, 401);
 
-    const { image } = await req.json();
+    const { image } = await req.json().catch(() => ({}));
     const match = typeof image === "string" ? image.match(/^data:image\/(webp|jpeg|png);base64,(.+)$/) : null;
     if (!match) return json({ error: "Imagen inválida" }, 400);
-    const bytes = Uint8Array.from(atob(match[2]), (c) => c.charCodeAt(0));
+    // Check the size before decoding, and treat bad base64 as a client error (atob throws).
+    if (match[2].length > Math.ceil((MAX_BYTES * 4) / 3) + 4) return json({ error: "La imagen es demasiado grande" }, 413);
+    let bytes: Uint8Array;
+    try {
+      bytes = Uint8Array.from(atob(match[2]), (c) => c.charCodeAt(0));
+    } catch {
+      return json({ error: "Imagen inválida" }, 400);
+    }
     if (bytes.length > MAX_BYTES) return json({ error: "La imagen es demasiado grande" }, 413);
 
     // Publish with the service role (clients can't write to the avatars bucket).

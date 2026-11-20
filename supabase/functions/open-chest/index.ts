@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { ORB_COSMETICS, shopItem } from "../_shared/shop.ts";
+import { mutateProfile } from "../_shared/profileUpdate.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -46,28 +47,30 @@ Deno.serve(async (req) => {
     if (!userId) return j({ error: "unauthorized" }, 401);
 
     const admin = createClient(SUPABASE_URL, SERVICE);
-    const { data: profile, error } = await admin.from("profiles").select("*").eq("user_id", userId).maybeSingle();
-    if (error || !profile) return j({ error: "profile_not_found" }, 404);
+    // Guarded update: two taps on the last orb used to both see unopened_chests = 1 and both
+    // pay a reward (and coins from a concurrent award could be overwritten).
+    const outcome = await mutateProfile<Reward>(admin, userId, (profile) => {
+      const chests = profile.unopened_chests ?? 0;
+      if (chests <= 0) return { error: "no_chests", status: 409 };
 
-    const chests = profile.unopened_chests ?? 0;
-    if (chests <= 0) return j({ error: "no_chests" }, 409);
+      const owned: string[] = profile.owned_items ?? [];
+      const canFreeze = (profile.streak_freezes ?? 0) < (profile.streak_freeze_max ?? 3);
+      const reward = rollReward(owned, canFreeze);
+      const updates: Record<string, unknown> = { unopened_chests: chests - 1 };
 
-    const owned: string[] = profile.owned_items ?? [];
-    const canFreeze = (profile.streak_freezes ?? 0) < (profile.streak_freeze_max ?? 3);
-    const reward = rollReward(owned, canFreeze);
-    const updates: Record<string, unknown> = { unopened_chests: chests - 1 };
-
-    if (reward.type === "destellos") {
-      updates.coins = (profile.coins ?? 0) + reward.amount;
-    } else if (reward.type === "freeze") {
-      updates.streak_freezes = (profile.streak_freezes ?? 0) + 1;
-    } else if (reward.itemId) {
-      updates.owned_items = [...owned, reward.itemId];
-      if (reward.itemId.startsWith("frame-")) updates.unlocked_frames = [...new Set([...(profile.unlocked_frames ?? []), reward.itemId])];
-    }
-
-    const { data: updated, error: uErr } = await admin.from("profiles").update(updates).eq("user_id", userId).select().single();
-    if (uErr) return j({ error: uErr.message }, 500);
+      if (reward.type === "destellos") {
+        updates.coins = (profile.coins ?? 0) + reward.amount;
+      } else if (reward.type === "freeze") {
+        updates.streak_freezes = (profile.streak_freezes ?? 0) + 1;
+      } else if (reward.itemId) {
+        updates.owned_items = [...owned, reward.itemId];
+        if (reward.itemId.startsWith("frame-")) updates.unlocked_frames = [...new Set([...(profile.unlocked_frames ?? []), reward.itemId])];
+      }
+      return { updates, result: reward };
+    });
+    if (!outcome.ok) return j({ error: outcome.error }, outcome.status);
+    const updated = outcome.profile;
+    const reward = outcome.result;
 
     return j({ profile: updated, reward });
   } catch (e) {

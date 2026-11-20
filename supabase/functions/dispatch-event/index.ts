@@ -30,7 +30,11 @@ async function send(targetUserId: string, title: string, body: string, tag: stri
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
-    const { event, user_id, payload = {}, row_id } = await req.json();
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body.event !== "string") {
+      return new Response(JSON.stringify({ error: "invalid_body" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const { event, user_id, payload = {}, row_id } = body;
 
     // Events that accept a free-form user_id (and possibly free-form text) must
     // only be callable by trusted internal callers (cron, edge functions) using
@@ -61,7 +65,7 @@ Deno.serve(async (req) => {
       }
       case "friend_request": {
         // Re-fetch friendship row to validate
-        if (!row_id) return new Response(JSON.stringify({ error: "row_id required" }), { status: 200, headers: corsHeaders });
+        if (!row_id) return new Response(JSON.stringify({ error: "row_id required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         const { data: f } = await supabase.from("friendships").select("user_id, friend_id, status").eq("id", row_id).maybeSingle();
         if (!f || f.status !== "pending") return new Response(JSON.stringify({ skipped: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
         const fromId = f.user_id;
@@ -73,7 +77,7 @@ Deno.serve(async (req) => {
         break;
       }
       case "clan_join_request": {
-        if (!row_id) return new Response(JSON.stringify({ error: "row_id required" }), { status: 200, headers: corsHeaders });
+        if (!row_id) return new Response(JSON.stringify({ error: "row_id required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         const { data: r } = await supabase.from("clan_join_requests").select("clan_id, status").eq("id", row_id).maybeSingle();
         if (!r || r.status !== "pending") return new Response(JSON.stringify({ skipped: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
         const { data: c } = await supabase.from("clans").select("leader_id").eq("id", r.clan_id).maybeSingle();
@@ -81,24 +85,24 @@ Deno.serve(async (req) => {
         break;
       }
       case "league_promotion": {
-        if (!row_id) return new Response(JSON.stringify({ error: "row_id required" }), { status: 200, headers: corsHeaders });
+        if (!row_id) return new Response(JSON.stringify({ error: "row_id required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         const { data: lc } = await supabase.from("league_changes").select("user_id, direction, to_league_id").eq("id", row_id).maybeSingle();
         if (!lc || lc.direction !== "promotion") return new Response(JSON.stringify({ skipped: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
         await send(lc.user_id, "Constela", `Subiste a ${leagueName(lc.to_league_id)}. Buen trabajo.`, "league-up", { url: "/leagues" });
         break;
       }
       case "mission_reminder": {
-        if (!user_id) return new Response(JSON.stringify({ error: "user_id required" }), { status: 200, headers: corsHeaders });
+        if (!user_id) return new Response(JSON.stringify({ error: "user_id required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         await send(user_id, "Constela", `Recordatorio: ${payload.title || "tienes una tarea pendiente"}`, `mission-${payload.task_id || ""}`, { url: "/" });
         break;
       }
       default:
-        return new Response(JSON.stringify({ error: "unknown_event" }), { status: 200, headers: corsHeaders });
+        return new Response(JSON.stringify({ error: "unknown_event" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     return new Response(JSON.stringify({ ok: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e: any) {
     console.error(e);
-    return new Response(JSON.stringify({ error: String(e?.message || e) }), { status: 200, headers: corsHeaders });
+    return new Response(JSON.stringify({ error: String(e?.message || e) }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });

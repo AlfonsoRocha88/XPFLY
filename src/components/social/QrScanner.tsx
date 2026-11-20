@@ -21,8 +21,11 @@ export function QrScanner({ open, onOpenChange, onResult }: { open: boolean; onO
 
     (async () => {
       try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
-        if (stopped) return;
+        const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+        // Closed while the permission prompt / camera start was pending: cleanup already ran
+        // with no stream, so stop it here or the camera stays on.
+        if (stopped) { s.getTracks().forEach((t) => t.stop()); return; }
+        stream = s;
         const video = videoRef.current!;
         video.srcObject = stream;
         await video.play();

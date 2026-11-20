@@ -1,6 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { STREAK_BONUS_FROM, TASKS_PER_TROPHY, currentLeague } from "../_shared/leagues.ts";
-import { localDay } from "../_shared/day.ts";
+import { localDay, localHour } from "../_shared/day.ts";
+import { mutateProfile } from "../_shared/profileUpdate.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -32,8 +33,8 @@ const TITLES = [
   { id: "speedster", applies: "urgent", progressKey: "urgent_missions", goal: 20, bonus: 1.15 },
 ] as const;
 
-function classify(date: Date, priority: Priority) {
-  const h = date.getHours();
+// Morning/night use the user's own clock (profiles.timezone), not the server's UTC hour.
+function classify(h: number, priority: Priority) {
   return { morning: h < 12, night: h >= 20, urgent: priority === "urgent" };
 }
 
@@ -103,10 +104,10 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (error || !profile) return j({ error: "profile_not_found" }, 404);
 
-    const ctx = classify(new Date(), priority);
+    const ctx = classify(localHour(profile.timezone), priority);
     const equipped = profile.equipped_title as string | null;
     const titleMult = getXpBonus(equipped, ctx);
-    let reward = XP_REWARDS[priority];
+    let reward: number = XP_REWARDS[priority];
     if (partyBonus) reward = Math.floor(reward * 1.1);
     reward = Math.floor(reward * titleMult);
 
@@ -140,69 +141,75 @@ Deno.serve(async (req) => {
       : null;
     if (flagged) reward = 0;
 
-    const { error: ledgerErr } = await admin
+    const { data: ledgerRow, error: ledgerErr } = await admin
       .from("xp_awards")
-      .insert({ user_id: userId, task_id: taskId, day, xp: reward, flagged });
+      .insert({ user_id: userId, task_id: taskId, day, xp: reward, flagged })
+      .select("id")
+      .single();
     if (ledgerErr) {
       // 23505 = unique violation: this task (or this habit today) was already paid.
       if (ledgerErr.code === "23505") return j({ error: "already_awarded" }, 409);
       return j({ error: ledgerErr.message }, 500);
     }
-    await admin.from("tasks").update({ xp_awarded: true }).eq("id", taskId);
+    // Apply to the profile with optimistic concurrency (see _shared/profileUpdate.ts): two
+    // tasks completed at once, or award-xp racing open-chest/claim-daily-bonus, used to
+    // overwrite each other's xp/trophies because every write was "value read + delta".
+    const outcome = await mutateProfile(admin, userId, (p) => {
+      const oldLevel = p.level ?? 1;
+      const newXp = (p.xp ?? 0) + reward;
+      const newLevel = calculateLevel(newXp);
 
-    const currentXp = profile.xp ?? 0;
-    const newXp = currentXp + reward;
-    const oldLevel = profile.level ?? 1;
-    const newLevel = calculateLevel(newXp);
-    const levelsGained = Math.max(0, newLevel - oldLevel);
+      // Title progress (missing keys in older rows would turn into NaN).
+      const progress = p.title_progress ?? {};
+      const nextProgress = {
+        morning_missions: (progress.morning_missions ?? 0) + (ctx.morning ? 1 : 0),
+        night_missions: (progress.night_missions ?? 0) + (ctx.night ? 1 : 0),
+        urgent_missions: (progress.urgent_missions ?? 0) + (ctx.urgent ? 1 : 0),
+      };
+      const unlocked: string[] = p.unlocked_titles ?? [];
+      const streak = p.daily_streak ?? 0;
+      const newlyUnlocked: string[] = [];
+      for (const t of TITLES) {
+        if (unlocked.includes(t.id)) continue;
+        const value = t.progressKey === "streak" ? streak : (nextProgress as any)[t.progressKey];
+        if (value >= t.goal) newlyUnlocked.push(t.id);
+      }
 
-    // Title progress
-    const progress = profile.title_progress ?? { morning_missions: 0, night_missions: 0, urgent_missions: 0 };
-    const nextProgress = {
-      morning_missions: progress.morning_missions + (ctx.morning ? 1 : 0),
-      night_missions: progress.night_missions + (ctx.night ? 1 : 0),
-      urgent_missions: progress.urgent_missions + (ctx.urgent ? 1 : 0),
-    };
-    const unlocked: string[] = profile.unlocked_titles ?? [];
-    const streak = profile.daily_streak ?? 0;
-    const newlyUnlocked: string[] = [];
-    for (const t of TITLES) {
-      if (unlocked.includes(t.id)) continue;
-      const value = t.progressKey === "streak" ? streak : (nextProgress as any)[t.progressKey];
-      if (value >= t.goal) newlyUnlocked.push(t.id);
+      // Trophies: 1 every TASKS_PER_TROPHY completed tasks; with a 7+ day streak that trophy comes with +1 extra.
+      const newMissions = (p.missions_completed_total ?? 0) + 1;
+      const bonusTrophy = !flagged && newMissions % TASKS_PER_TROPHY === 0;
+      const trophyStreakBonus = bonusTrophy && streak >= STREAK_BONUS_FROM ? 1 : 0;
+      const trophyDelta = (bonusTrophy ? 1 : 0) + trophyStreakBonus;
+      const newTrophies = (p.trophies ?? 0) + trophyDelta;
+
+      return {
+        updates: {
+          xp: newXp,
+          level: newLevel,
+          title_progress: nextProgress,
+          unlocked_titles: [...unlocked, ...newlyUnlocked],
+          trophies: newTrophies,
+          highest_trophies: Math.max(p.highest_trophies ?? 0, newTrophies),
+          current_league_id: currentLeague(newTrophies),
+          missions_completed_total: newMissions,
+          last_mission_completed_at: new Date().toISOString(),
+        },
+        result: { leveledUp: newLevel > oldLevel, bonusTrophy, trophyDelta, trophyStreakBonus, newMissions, newlyUnlocked },
+      };
+    });
+    if (!outcome.ok) {
+      // Nothing was paid: drop the ledger row so the task can be awarded again on retry.
+      await admin.from("xp_awards").delete().eq("id", ledgerRow.id);
+      return j({ error: outcome.error }, outcome.status);
     }
-    const allUnlocked = [...unlocked, ...newlyUnlocked];
-
-    // Trophies: 1 every TASKS_PER_TROPHY completed tasks; with a 7+ day streak that trophy comes with +1 extra.
-    const prevMissions = profile.missions_completed_total ?? 0;
-    const newMissions = prevMissions + 1;
-    const bonusTrophy = !flagged && newMissions % TASKS_PER_TROPHY === 0;
-    const trophyStreakBonus = bonusTrophy && (profile.daily_streak ?? 0) >= STREAK_BONUS_FROM ? 1 : 0;
-    const trophyDelta = (bonusTrophy ? 1 : 0) + trophyStreakBonus;
-    const newTrophies = (profile.trophies ?? 0) + trophyDelta;
-
-    const { data: updated, error: uErr } = await admin
-      .from("profiles")
-      .update({
-        xp: newXp,
-        level: newLevel,
-        title_progress: nextProgress,
-        unlocked_titles: allUnlocked,
-        trophies: newTrophies,
-        highest_trophies: Math.max(profile.highest_trophies ?? 0, newTrophies),
-        current_league_id: currentLeague(newTrophies),
-        missions_completed_total: newMissions,
-        last_mission_completed_at: new Date().toISOString(),
-      })
-      .eq("user_id", userId)
-      .select()
-      .single();
-    if (uErr) return j({ error: uErr.message }, 500);
+    await admin.from("tasks").update({ xp_awarded: true }).eq("id", taskId);
+    const updated = outcome.profile;
+    const { leveledUp, bonusTrophy, trophyDelta, trophyStreakBonus, newMissions, newlyUnlocked } = outcome.result;
 
     return j({
       profile: updated,
       xpGained: reward,
-      leveledUp: newLevel > oldLevel,
+      leveledUp,
       bonusTrophyAwarded: bonusTrophy,
       trophyDelta,
       streakBonus: trophyStreakBonus,

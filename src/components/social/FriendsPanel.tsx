@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
-import { Check, Copy, MoreHorizontal, QrCode as QrIcon, RefreshCw, ScanLine, Search, Share2, UserMinus, X } from "lucide-react";
+import { Check, Copy, MoreHorizontal, QrCode as QrIcon, RefreshCw, ScanLine, Search, Share2, UserMinus, X, Heart } from "lucide-react";
 import { toast } from "sonner";
 import { useFriends, type FriendProfilePreview, type Friendship } from "@/hooks/useFriends";
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useOpenProfile } from "./ProfileSheet";
+import { useFriendFavorites } from "@/hooks/useFriendFavorites";
 import { getCurrentLeague, leagueLabel } from "@/lib/leagues";
 import { avatarSrc } from "@/lib/avatars";
 import { inviteLink, parseInvite, whatsappLink } from "@/lib/friendInvite";
@@ -28,13 +29,10 @@ const WhatsAppGlyph = ({ className }: { className?: string }) => (
   </svg>
 );
 
-/**
- * Who goes on the podium, in what order. Receives your accepted friends' profiles and returns them
- * best first; the top three get the podium, the rest the list below.
- */
-export function rankFriends(list: FriendProfilePreview[]): FriendProfilePreview[] {
-  // TODO(human): choose what "best" means for the friends podium.
-  return [...list].sort((a, b) => (b.xp ?? 0) - (a.xp ?? 0));
+/** Favorites (heart in their profile) first, then by XP. */
+export function rankFriends(list: FriendProfilePreview[], favorites: ReadonlySet<string>): FriendProfilePreview[] {
+  return [...list].sort((a, b) =>
+    Number(favorites.has(b.user_id)) - Number(favorites.has(a.user_id)) || (b.xp ?? 0) - (a.xp ?? 0));
 }
 
 const nameOf = (p?: FriendProfilePreview | null) => p?.display_name || p?.username || "Usuario";
@@ -63,15 +61,16 @@ export default function FriendsPanel() {
   const [results, setResults] = useState<FriendProfilePreview[]>([]);
   const [searching, setSearching] = useState(false);
   const openProfile = useOpenProfile();
+  const { favorites } = useFriendFavorites();
 
   // Live search, 300 ms after the last keystroke. Prefix match on username or friend code.
   useEffect(() => {
-    const q = query.trim().replace(/^@/, "").replace(/[,()%_]/g, "");
-    if (q.length < 2) { setResults([]); return; }
+    const q = query.trim().replace(/^@/, "");
+    if (q.length < 2) { setResults([]); setSearching(false); return; }
     setSearching(true);
     let alive = true;
     const t = window.setTimeout(async () => {
-      const { data } = await supabase.rpc("find_profile_preview", { _query: `${q}%` });
+      const { data } = await supabase.rpc("find_profile_preview", { _query: q });
       if (!alive) return;
       setResults(((data ?? []) as unknown as FriendProfilePreview[]).filter((r) => r.user_id !== user?.id));
       setSearching(false);
@@ -85,8 +84,8 @@ export default function FriendsPanel() {
 
   const ranked = useMemo(() => {
     const profiles = friends.map((f) => f.friend_profile).filter((p): p is FriendProfilePreview => !!p);
-    return rankFriends(profiles);
-  }, [friends]);
+    return rankFriends(profiles, favorites);
+  }, [friends, favorites]);
   const byUser = useMemo(() => new Map(friends.map((f) => [f.friend_profile?.user_id, f])), [friends]);
 
   const copyLink = async () => {
@@ -102,18 +101,21 @@ export default function FriendsPanel() {
     else copyLink();
   };
 
+  // mutateAsync is stable; the mutation object is new on every render, which restarted the
+  // camera (QrScanner's effect depends on onResult) whenever this panel re-rendered.
+  const { mutateAsync: acceptInviteAsync } = acceptInvite;
   const onScan = useCallback(async (text: string) => {
     setScanOpen(false);
     const inv = parseInvite(text);
     if (!inv) { toast.error("Ese QR no es una invitación de Constela"); return; }
     try {
-      const r = await acceptInvite.mutateAsync(inv);
+      const r = await acceptInviteAsync(inv);
       if (r.status === "added") { playSfx("achievement"); toast.success(`¡Ahora eres amigo de ${r.name}!`); }
       else if (r.status === "already") toast(`Ya eres amigo de ${r.name}`);
       else if (r.status === "self") toast("Ese es tu propio QR 🙂");
       else toast.error("Invitación vencida. Pídele un QR nuevo.");
     } catch { toast.error("No se pudo agregar"); }
-  }, [acceptInvite]);
+  }, [acceptInviteAsync]);
 
   const remove = (p: FriendProfilePreview) => {
     const f = byUser.get(p.user_id);
@@ -265,7 +267,7 @@ export default function FriendsPanel() {
                 <button onClick={() => openProfile(p.user_id)} className="flex min-w-0 flex-1 items-center gap-3 text-left">
                   <Avatar p={p} size={44} />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-medium">{nameOf(p)}</span>
+                    <span className="flex items-center gap-1 truncate text-sm font-medium">{nameOf(p)}{favorites.has(p.user_id) && <Heart className="h-3.5 w-3.5 shrink-0 fill-rose-500 text-rose-500" aria-label="Favorito" />}</span>
                     <span className="block truncate text-xs text-muted-foreground">Nv.{p.level || 1} · {leagueLabel(getCurrentLeague(p.trophies || 0))}</span>
                   </span>
                 </button>

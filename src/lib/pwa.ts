@@ -3,14 +3,14 @@
 export function isStandalone(): boolean {
   if (typeof window === "undefined") return false;
   // iOS-specific
-  if ((window.navigator as any).standalone === true) return true;
+  if ((window.navigator as Navigator & { standalone?: boolean }).standalone === true) return true;
   return window.matchMedia?.("(display-mode: standalone)").matches ?? false;
 }
 
 export function isIos(): boolean {
   if (typeof window === "undefined") return false;
   const ua = window.navigator.userAgent;
-  return /iPhone|iPad|iPod/.test(ua) && !(window as any).MSStream;
+  return /iPhone|iPad|iPod/.test(ua) && !(window as Window & { MSStream?: unknown }).MSStream;
 }
 
 function isPreviewOrIframe(): boolean {
@@ -26,7 +26,7 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
     try {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.unregister()));
-    } catch {}
+    } catch { /* nothing registered, or not allowed here */ }
     return null;
   }
   try {

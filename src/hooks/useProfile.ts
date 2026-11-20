@@ -19,8 +19,10 @@ function subscribeProfileChanges(userId: string, onRow: (row: unknown) => void) 
     realtime = null;
   }
   if (!realtime) {
+    // Unique topic: supabase.channel() hands back an existing channel with the same name, and a
+    // just-removed one may still be leaving (async), which would leave this subscription dead.
     const channel = supabase
-      .channel(`profile:${userId}`)
+      .channel(`profile:${userId}:${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "profiles", filter: `user_id=eq.${userId}` },
@@ -102,7 +104,7 @@ export const useProfile = () => {
             set.add(d.toISOString().slice(0, 10));
           }
           localStorage.setItem("streakFreezeUsedDates", JSON.stringify(Array.from(set)));
-        } catch {}
+        } catch { /* storage unavailable: the calendar just won't mark the frozen days */ }
       } else if (data?.action === "reset" && data?.previousStreak) {
         toast.error(`Perdiste tu racha de ${data.previousStreak} días`, {
           icon: createElement(HeartCrack, { size: 18 }),
@@ -126,10 +128,11 @@ export const useProfile = () => {
   }, [profileUserId]);
 
   // Realtime sync — one shared channel, ref-counted across hook instances.
+  const userId = user?.id;
   useEffect(() => {
-    if (!user) return;
-    return subscribeProfileChanges(user.id, (row) => queryClient.setQueryData(["profile"], row));
-  }, [user?.id, queryClient]);
+    if (!userId) return;
+    return subscribeProfileChanges(userId, (row) => queryClient.setQueryData(["profile"], row));
+  }, [userId, queryClient]);
 
   const updateProfile = useMutation({
     mutationFn: async (updates: { display_name?: string; avatar_url?: string; wallpaper?: string; theme?: string; bg_animations?: boolean; bio?: string | null }) => {
@@ -151,15 +154,11 @@ export const useProfile = () => {
 
   const addXp = useMutation({
     mutationFn: async ({ taskId, priority, partyBonus = false }: { taskId: string; priority?: keyof typeof XP_REWARDS; partyBonus?: boolean }) => {
-      const previous = queryClient.getQueryData<Profile>(["profile"]);
-      const oldLevel = previous?.level ?? 1;
-
       const { data, error } = await supabase.functions.invoke("award-xp", { body: { task_id: taskId, priority, partyBonus } });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
       const updated = data.profile;
-      const newLevel = updated.level ?? oldLevel;
       const newlyUnlocked: string[] = data.newlyUnlockedTitles ?? [];
 
       newlyUnlocked.forEach((id: string) => {
@@ -170,10 +169,6 @@ export const useProfile = () => {
       });
 
       // League-ups are celebrated by <LeagueUpCelebration /> (it watches current_league_id).
-      if (newLevel > oldLevel) {
-        
-      }
-
       return {
         ...updated,
         xpGained: data.xpGained,
@@ -189,9 +184,6 @@ export const useProfile = () => {
 
   const claimDailyBonus = useMutation({
     mutationFn: async () => {
-      const previous = queryClient.getQueryData<Profile>(["profile"]);
-      const oldLevel = previous?.level ?? 1;
-
       const { data, error } = await supabase.functions.invoke("claim-daily-bonus", { body: {} });
       if (error) throw error;
       if (data?.error === "already_claimed") throw new Error("Already claimed today");
@@ -248,7 +240,6 @@ export const useProfile = () => {
     addXp,
     claimDailyBonus,
     equipTitle,
-    
     reconcileStreak,
     XP_REWARDS,
   };

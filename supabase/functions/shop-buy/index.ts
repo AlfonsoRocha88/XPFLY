@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { shopItem } from "../_shared/shop.ts";
+import { mutateProfile } from "../_shared/profileUpdate.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -31,35 +32,25 @@ Deno.serve(async (req) => {
     if (!item) return j({ error: "unknown_item" }, 400);
 
     const admin = createClient(SUPABASE_URL, SERVICE);
-    const { data: p, error } = await admin
-      .from("profiles")
-      .select("coins, owned_items, unlocked_frames, streak_freezes, streak_freeze_max")
-      .eq("user_id", userId)
-      .maybeSingle();
-    if (error || !p) return j({ error: "profile_not_found" }, 404);
+    // Guarded on updated_at (not only coins): an orb that dropped a cosmetic or a protector
+    // at the same moment changes owned_items/streak_freezes without touching coins, and the
+    // old coins-only check let this purchase overwrite it.
+    const outcome = await mutateProfile(admin, userId, (p) => {
+      const owned: string[] = p.owned_items ?? [];
+      if (item.kind !== "consumable" && owned.includes(item.id)) return { error: "already_owned", status: 409 };
+      if (item.id === "freeze" && (p.streak_freezes ?? 0) >= (p.streak_freeze_max ?? 3)) {
+        return { error: "max_reached", status: 409, extra: { max: p.streak_freeze_max ?? 3 } };
+      }
+      if ((p.coins ?? 0) < item.price) return { error: "insufficient", status: 409, extra: { price: item.price } };
 
-    const owned: string[] = p.owned_items ?? [];
-    if (item.kind !== "consumable" && owned.includes(item.id)) return j({ error: "already_owned" }, 409);
-    if (item.id === "freeze" && (p.streak_freezes ?? 0) >= (p.streak_freeze_max ?? 3)) {
-      return j({ error: "max_reached", max: p.streak_freeze_max ?? 3 }, 409);
-    }
-    if ((p.coins ?? 0) < item.price) return j({ error: "insufficient", price: item.price }, 409);
-
-    const updates: Record<string, unknown> = { coins: (p.coins ?? 0) - item.price };
-    if (item.kind === "consumable") updates.streak_freezes = (p.streak_freezes ?? 0) + 1;
-    else updates.owned_items = [...owned, item.id];
-    if (item.kind === "frame") updates.unlocked_frames = [...new Set([...(p.unlocked_frames ?? []), item.id])];
-
-    // Optimistic concurrency: only apply if the balance didn't change since we read it.
-    const { data: updated, error: uErr } = await admin
-      .from("profiles")
-      .update(updates)
-      .eq("user_id", userId)
-      .eq("coins", p.coins ?? 0)
-      .select()
-      .maybeSingle();
-    if (uErr) return j({ error: uErr.message }, 500);
-    if (!updated) return j({ error: "retry" }, 409);
+      const updates: Record<string, unknown> = { coins: (p.coins ?? 0) - item.price };
+      if (item.kind === "consumable") updates.streak_freezes = (p.streak_freezes ?? 0) + 1;
+      else updates.owned_items = [...owned, item.id];
+      if (item.kind === "frame") updates.unlocked_frames = [...new Set([...(p.unlocked_frames ?? []), item.id])];
+      return { updates, result: null };
+    });
+    if (!outcome.ok) return j({ error: outcome.error, ...outcome.extra }, outcome.status);
+    const updated = outcome.profile;
 
     return j({ profile: updated, item: item.id });
   } catch (e) {

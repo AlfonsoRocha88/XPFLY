@@ -49,7 +49,8 @@ export const useTasks = () => {
     // Schedule blocks ("tipo:horario") live in the same table but only belong on the calendar:
     // keep them out of every task list (and so out of stats and XP).
     const isBlock = (t: Task) => !!t.tags?.includes("tipo:horario");
-    const all = (allQuery.data ?? []).filter((t) => !isBlock(t));
+    // The server already sorts by position; re-sorting (stable) keeps optimistic reorders in place.
+    const all = (allQuery.data ?? []).filter((t) => !isBlock(t)).sort((a, b) => a.position - b.position);
     const blocks = (allQuery.data ?? []).filter(isBlock);
     return {
       blocks,
@@ -105,9 +106,25 @@ export const useTasks = () => {
       patchCaches(id, (t) => ({ ...t, ...updates } as Task));
     },
     onError: () => invalidateAll(),
-    onSuccess: (data, vars) => {
+    onSuccess: () => {
       invalidateAll();
     },
+  });
+
+  /** Saves a new order: the new position of every task whose position changed, in one go. */
+  const reorderTasks = useMutation({
+    mutationFn: async (changes: { id: string; position: number }[]) => {
+      const results = await Promise.all(
+        changes.map(({ id, position }) => supabase.from("tasks").update({ position }).eq("id", id)),
+      );
+      const failed = results.find((r) => r.error);
+      if (failed?.error) throw failed.error;
+    },
+    onMutate: async (changes) => {
+      await Promise.all(TASK_KEYS.map((queryKey) => queryClient.cancelQueries({ queryKey })));
+      changes.forEach(({ id, position }) => patchCaches(id, (t) => ({ ...t, position })));
+    },
+    onSettled: () => invalidateAll(),
   });
 
   const deleteTask = useMutation({
@@ -129,6 +146,7 @@ export const useTasks = () => {
     isLoading: allQuery.isLoading,
     createTask,
     updateTask,
+    reorderTasks,
     deleteTask,
   };
 };

@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { ACHIEVEMENTS, ACHIEVEMENT_BY_ID, CONSTELLATIONS, TIER_COINS, frameFor, tierReached, type Metrics } from "../_shared/achievements.ts";
+import { mutateProfile } from "../_shared/profileUpdate.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -65,21 +66,27 @@ Deno.serve(async (req) => {
       ...(existing ?? []).filter((r) => r.tier === 3).map((r) => r.achievement_id),
       ...claimed.filter((r) => r.tier === 3).map((r) => r.achievement_id),
     ]);
-    const { data: profile } = await admin.from("profiles").select("coins, unlocked_frames").eq("user_id", userId).single();
-    const frames = new Set<string>(profile?.unlocked_frames ?? []);
-    const newFrames = CONSTELLATIONS.map((c) => c.id)
+    const goldConstellations = CONSTELLATIONS.map((c) => c.id)
       .filter((c) => ACHIEVEMENTS.filter((a) => a.constellation === c).every((a) => goldNow.has(a.id)))
-      .map(frameFor)
-      .filter((f) => !frames.has(f));
-    newFrames.forEach((f) => frames.add(f));
+      .map(frameFor);
 
-    const { data: updated, error: uErr } = await admin
-      .from("profiles")
-      .update({ coins: (profile?.coins ?? 0) + coins, unlocked_frames: [...frames] })
-      .eq("user_id", userId)
-      .select()
-      .single();
-    if (uErr) return j({ error: uErr.message }, 500);
+    // Guarded update: "coins read + reward" used to overwrite coins spent or won concurrently
+    // (shop-buy, open-chest) and vice versa.
+    const outcome = await mutateProfile(admin, userId, (p) => {
+      const frames = new Set<string>(p.unlocked_frames ?? []);
+      const newFrames = goldConstellations.filter((f) => !frames.has(f));
+      newFrames.forEach((f) => frames.add(f));
+      return { updates: { coins: (p.coins ?? 0) + coins, unlocked_frames: [...frames] }, result: newFrames };
+    });
+    if (!outcome.ok) {
+      // Nothing was paid: release the tiers so the next claim pays them.
+      for (const r of claimed) {
+        await admin.from("achievement_unlocks").delete().eq("user_id", userId).eq("achievement_id", r.achievement_id).eq("tier", r.tier);
+      }
+      return j({ error: outcome.error }, outcome.status);
+    }
+    const updated = outcome.profile;
+    const newFrames = outcome.result;
 
     return j({ claimed, coins, frames: newFrames, profile: updated });
   } catch (e) {

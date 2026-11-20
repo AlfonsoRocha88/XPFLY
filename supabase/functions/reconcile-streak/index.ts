@@ -1,4 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { mutateProfile } from "../_shared/profileUpdate.ts";
+import { addDays, localDay } from "../_shared/day.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,7 +8,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-function dateOnly(d: Date) { return d.toISOString().split("T")[0]; }
 function daysBetween(a: string, b: string) {
   const t1 = new Date(a + "T00:00:00Z").getTime();
   const t2 = new Date(b + "T00:00:00Z").getTime();
@@ -32,32 +33,38 @@ Deno.serve(async (req) => {
     if (!userId) return j({ error: "unauthorized" }, 401);
 
     const admin = createClient(SUPABASE_URL, SERVICE);
-    const { data: profile, error } = await admin.from("profiles").select("*").eq("user_id", userId).maybeSingle();
-    if (error || !profile) return j({ error: "profile_not_found" }, 404);
 
-    const streak = profile.daily_streak ?? 0;
-    if (streak <= 0) return j({ profile, action: "none" });
-    const today = dateOnly(new Date());
-    const yesterday = dateOnly(new Date(Date.now() - 86400000));
-    const last = profile.daily_completed_at as string | null;
+    // Guarded update: this runs on app start, and a claim-daily-bonus landing between the read
+    // and the write used to have its new streak overwritten with 0.
+    type Info = { action: string; gap?: number; remainingFreezes?: number; previousStreak?: number };
+    const NONE = "none";
+    const outcome = await mutateProfile<Info>(admin, userId, (profile) => {
+      // The user's local day, like the habits and claim-daily-bonus. `>=` keeps dates saved as
+      // UTC before this change (which can look like "tomorrow") from breaking a streak.
+      const today = localDay(profile.timezone);
+      const yesterday = addDays(today, -1);
+      const streak = profile.daily_streak ?? 0;
+      const last = profile.daily_completed_at as string | null;
+      if (streak <= 0 || (last && last >= yesterday)) return { error: NONE, status: 200 };
+      if (!last) return { updates: { daily_streak: 0 }, result: { action: "reset" } };
 
-    if (!last) {
-      const { data } = await admin.from("profiles").update({ daily_streak: 0 }).eq("user_id", userId).select().single();
-      return j({ profile: data, action: "reset" });
+      const gap = daysBetween(last, yesterday);
+      const freezes = profile.streak_freezes ?? 0;
+      if (freezes >= gap) {
+        return {
+          updates: { streak_freezes: freezes - gap, daily_completed_at: yesterday },
+          result: { action: "freeze_used", gap, remainingFreezes: freezes - gap, previousStreak: streak },
+        };
+      }
+      return { updates: { daily_streak: 0, daily_completed_at: null }, result: { action: "reset", previousStreak: streak } };
+    });
+
+    if (!outcome.ok) {
+      if (outcome.error !== NONE) return j({ error: outcome.error }, outcome.status);
+      const { data: profile } = await admin.from("profiles").select("*").eq("user_id", userId).maybeSingle();
+      return j({ profile, action: "none" });
     }
-    if (last === today || last === yesterday) return j({ profile, action: "none" });
-
-    const gap = daysBetween(last, yesterday);
-    const freezes = profile.streak_freezes ?? 0;
-    if (freezes >= gap) {
-      const { data } = await admin.from("profiles").update({
-        streak_freezes: freezes - gap,
-        daily_completed_at: yesterday,
-      }).eq("user_id", userId).select().single();
-      return j({ profile: data, action: "freeze_used", gap, remainingFreezes: freezes - gap, previousStreak: streak });
-    }
-    const { data } = await admin.from("profiles").update({ daily_streak: 0, daily_completed_at: null }).eq("user_id", userId).select().single();
-    return j({ profile: data, action: "reset", previousStreak: streak });
+    return j({ profile: outcome.profile, ...outcome.result });
   } catch (e) {
     console.error("reconcile-streak", e);
     return j({ error: "internal_error" }, 500);

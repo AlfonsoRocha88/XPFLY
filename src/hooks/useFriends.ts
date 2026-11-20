@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
@@ -38,10 +38,9 @@ export async function searchUserByCodeOrUsername(
   const { data, error } = await supabase.rpc("find_profile_preview", { _query: safe });
   if (error) throw error;
   if (!data || data.length === 0) return null;
-  const filtered = excludeUserId
-    ? (data as any[]).filter((p) => p.user_id !== excludeUserId)
-    : (data as any[]);
-  return (filtered[0] as FriendProfilePreview) ?? null;
+  // The RPC returns a narrower preview row; callers only read the shared fields.
+  const filtered = excludeUserId ? data.filter((p) => p.user_id !== excludeUserId) : data;
+  return (filtered[0] as unknown as FriendProfilePreview | undefined) ?? null;
 }
 
 export const useFriends = () => {
@@ -86,31 +85,32 @@ export const useFriends = () => {
     enabled: !!user,
   });
 
-  // Realtime: refresh on any friendship change involving me
+  // Realtime: refresh on friendship changes involving me (rows I sent or received), not on every
+  // change in the table. Postgres Changes can't filter DELETE events, so those stay unfiltered.
+  const userId = user?.id;
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
+    const refresh = () => queryClient.invalidateQueries({ queryKey: ["friends", userId] });
     const channel = supabase
-      .channel(`friendships:${user.id}:${Math.random().toString(36).slice(2)}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "friendships" },
-        () => queryClient.invalidateQueries({ queryKey: ["friends", user.id] }),
-      )
+      .channel(`friendships:${userId}:${Math.random().toString(36).slice(2)}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "friendships", filter: `user_id=eq.${userId}` }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "friendships", filter: `friend_id=eq.${userId}` }, refresh)
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "friendships" }, refresh)
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, queryClient]);
+  }, [userId, queryClient]);
 
-  const acceptedFriends = (friendsQuery.data || []).filter(
-    (f) => f.status === "accepted",
-  );
-  const pendingRequests = (friendsQuery.data || []).filter(
-    (f) => f.status === "pending" && f.friend_id === user?.id,
-  );
-  const sentRequests = (friendsQuery.data || []).filter(
-    (f) => f.status === "pending" && f.user_id === user?.id,
-  );
+  // Stable lists between renders, so consumers' memos and effects don't re-run for nothing.
+  const { acceptedFriends, pendingRequests, sentRequests } = useMemo(() => {
+    const all = friendsQuery.data || [];
+    return {
+      acceptedFriends: all.filter((f) => f.status === "accepted"),
+      pendingRequests: all.filter((f) => f.status === "pending" && f.friend_id === userId),
+      sentRequests: all.filter((f) => f.status === "pending" && f.user_id === userId),
+    };
+  }, [friendsQuery.data, userId]);
 
   /** My private invite key, for the QR / WhatsApp link. */
   const inviteKeyQuery = useQuery({
@@ -178,10 +178,8 @@ export const useFriends = () => {
       }
 
       // Notify receiver (best-effort; ignore failures so the request still succeeds)
-      const senderName =
-        (user.user_metadata as any)?.display_name ||
-        (user.user_metadata as any)?.username ||
-        "Alguien";
+      const meta = user.user_metadata as { display_name?: string; username?: string } | undefined;
+      const senderName = meta?.display_name || meta?.username || "Alguien";
       await supabase
         .from("notifications")
         .insert({

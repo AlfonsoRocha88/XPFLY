@@ -1,6 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { DAILY_TROPHY_BONUS, WEEKLY_TROPHY_BONUS, currentLeague } from "../_shared/leagues.ts";
-import { localDay } from "../_shared/day.ts";
+import { addDays, localDay } from "../_shared/day.ts";
+import { mutateProfile } from "../_shared/profileUpdate.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -41,9 +42,11 @@ Deno.serve(async (req) => {
     const { data: profile, error } = await admin.from("profiles").select("*").eq("user_id", userId).maybeSingle();
     if (error || !profile) return j({ error: "profile_not_found" }, 404);
 
-    const today = new Date().toISOString().split("T")[0];
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
-    if (profile.daily_completed_at === today) return j({ error: "already_claimed" }, 409);
+    // "Today" is the user's local day, the same one their habits are checked against.
+    // `>=` also covers dates saved as UTC before this change (they can look like "tomorrow").
+    const today = localDay(profile.timezone);
+    const yesterday = addDays(today, -1);
+    if (profile.daily_completed_at && profile.daily_completed_at >= today) return j({ error: "already_claimed" }, 409);
 
     // The bonus requires today's habits to be done AND paid through award-xp,
     // so calling this function directly without doing them earns nothing.
@@ -66,49 +69,57 @@ Deno.serve(async (req) => {
       .eq("user_id", userId)
       .eq("day", day);
     if (due === 0 || pending > 0 || (paid ?? 0) < due) return j({ error: "dailies_incomplete" }, 409);
-
-    const currentStreak = profile.daily_streak ?? 0;
-    const newStreak = profile.daily_completed_at === yesterday ? currentStreak + 1 : 1;
     const bonusXp = 100;
-    const newXp = (profile.xp ?? 0) + bonusXp;
-    const oldLevel = profile.level ?? 1;
-    const newLevel = calculateLevel(newXp);
 
-    const prevFreezes = profile.streak_freezes ?? 0;
-    const freezeMax = profile.streak_freeze_max ?? 3;
-    const earnedFreeze = newStreak > currentStreak && newStreak % 7 === 0 && prevFreezes < freezeMax;
-    const newFreezes = earnedFreeze ? prevFreezes + 1 : prevFreezes;
+    // Re-checked inside the guarded update: two overlapping claims used to both pass the
+    // "already_claimed" check above and pay the XP, chest and trophies twice.
+    type Claim = { leveledUp: boolean; newStreak: number; earnedFreeze: boolean; trophyDelta: number; weeklyBonus: number; newlyUnlocked: string[] };
+    const outcome = await mutateProfile<Claim>(admin, userId, (p) => {
+      if (p.daily_completed_at && p.daily_completed_at >= today) return { error: "already_claimed", status: 409 };
+      const currentStreak = p.daily_streak ?? 0;
+      const newStreak = p.daily_completed_at === yesterday ? currentStreak + 1 : 1;
+      const newXp = (p.xp ?? 0) + bonusXp;
+      const oldLevel = p.level ?? 1;
+      const newLevel = calculateLevel(newXp);
 
-    const newChests = (profile.unopened_chests ?? 0) + 1;
-    // "Semana perfecta": every 7 consecutive days with all dailies done pays a weekly bonus.
-    const weeklyBonus = newStreak > currentStreak && newStreak % 7 === 0 ? WEEKLY_TROPHY_BONUS : 0;
-    const trophyDelta = DAILY_TROPHY_BONUS + weeklyBonus;
-    const newTrophies = (profile.trophies ?? 0) + trophyDelta;
+      const prevFreezes = p.streak_freezes ?? 0;
+      const freezeMax = p.streak_freeze_max ?? 3;
+      const earnedFreeze = newStreak > currentStreak && newStreak % 7 === 0 && prevFreezes < freezeMax;
+      const newFreezes = earnedFreeze ? prevFreezes + 1 : prevFreezes;
 
-    // Streak title ("Constante" @ 7 days)
-    const unlocked: string[] = profile.unlocked_titles ?? [];
-    const newlyUnlocked: string[] = [];
-    if (newStreak >= 7 && !unlocked.includes("unstoppable")) newlyUnlocked.push("unstoppable");
-    const allUnlocked = newlyUnlocked.length ? [...unlocked, ...newlyUnlocked] : unlocked;
+      // "Semana perfecta": every 7 consecutive days with all dailies done pays a weekly bonus.
+      const weeklyBonus = newStreak > currentStreak && newStreak % 7 === 0 ? WEEKLY_TROPHY_BONUS : 0;
+      const trophyDelta = DAILY_TROPHY_BONUS + weeklyBonus;
+      const newTrophies = (p.trophies ?? 0) + trophyDelta;
 
-    const { data: updated, error: uErr } = await admin.from("profiles").update({
-      xp: newXp,
-      level: newLevel,
-      daily_completed_at: today,
-      daily_streak: newStreak,
-      streak_freezes: newFreezes,
-      unopened_chests: newChests,
-      trophies: newTrophies,
-      highest_trophies: Math.max(profile.highest_trophies ?? 0, newTrophies),
-      current_league_id: currentLeague(newTrophies),
-      unlocked_titles: allUnlocked,
-    }).eq("user_id", userId).select().single();
-    if (uErr) return j({ error: uErr.message }, 500);
+      // Streak title ("Constante" @ 7 days)
+      const unlocked: string[] = p.unlocked_titles ?? [];
+      const newlyUnlocked: string[] = newStreak >= 7 && !unlocked.includes("unstoppable") ? ["unstoppable"] : [];
+
+      return {
+        updates: {
+          xp: newXp,
+          level: newLevel,
+          daily_completed_at: today,
+          daily_streak: newStreak,
+          streak_freezes: newFreezes,
+          unopened_chests: (p.unopened_chests ?? 0) + 1,
+          trophies: newTrophies,
+          highest_trophies: Math.max(p.highest_trophies ?? 0, newTrophies),
+          current_league_id: currentLeague(newTrophies),
+          unlocked_titles: [...unlocked, ...newlyUnlocked],
+        },
+        result: { leveledUp: newLevel > oldLevel, newStreak, earnedFreeze, trophyDelta, weeklyBonus, newlyUnlocked },
+      };
+    });
+    if (!outcome.ok) return j({ error: outcome.error }, outcome.status);
+    const updated = outcome.profile;
+    const { leveledUp, newStreak, earnedFreeze, trophyDelta, weeklyBonus, newlyUnlocked } = outcome.result;
 
     return j({
       profile: updated,
       xpGained: bonusXp,
-      leveledUp: newLevel > oldLevel,
+      leveledUp,
       streak: newStreak,
       earnedFreeze,
       trophyDelta,

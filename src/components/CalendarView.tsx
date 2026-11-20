@@ -379,11 +379,11 @@ const OccTimeBlock = ({
       onClick={(e) => { e.stopPropagation(); onEdit(occ.task); }}
       onKeyDown={(e) => { if (e.key === "Enter") onEdit(occ.task); }}
       className={cn(
-        "group/block relative flex h-full w-full cursor-pointer overflow-hidden rounded-md pl-[8px] pr-1 text-left text-[11px] leading-[1.15] text-foreground shadow-[0_0_0_1.5px_hsl(var(--card))] transition-[filter,opacity] hover:brightness-125",
+        "group/block relative flex h-full w-full cursor-pointer overflow-hidden rounded-md pl-[8px] pr-1 text-left text-[11px] leading-[1.15] text-foreground outline-none transition-[filter,opacity] hover:brightness-125 focus-visible:ring-2 focus-visible:ring-primary/60",
         compact ? "items-center gap-1" : "flex-col gap-0.5 py-1",
         past && "opacity-55",
       )}
-      style={{ background: `linear-gradient(${tint(color, 30)}, ${tint(color, 30)}), hsl(var(--card))` }}
+      style={{ background: `linear-gradient(${tint(color, 30)}, ${tint(color, 30)}), hsl(var(--card))`, boxShadow: `inset 0 0 0 1px ${tint(color, 45)}` }}
     >
       <span className="absolute inset-y-[3px] left-[3px] w-[3px] rounded-full" style={{ background: color }} aria-hidden />
       <span className={cn("flex min-w-0 gap-1", compact ? "items-center" : "items-start overflow-hidden")}>
@@ -415,7 +415,7 @@ const OccChip = ({
       tabIndex={0}
       onClick={(e) => { e.stopPropagation(); onEdit(occ.task); }}
       onKeyDown={(e) => { if (e.key === "Enter") onEdit(occ.task); }}
-      className="group/chip relative flex min-w-0 cursor-pointer items-center gap-1 overflow-hidden rounded-[5px] py-0.5 pl-[7px] pr-1 text-[10px] font-medium leading-tight text-foreground transition-[filter] hover:brightness-125 sm:text-[11px]"
+      className="group/chip relative flex min-w-0 cursor-pointer items-center gap-1 overflow-hidden rounded-[5px] outline-none focus-visible:ring-2 focus-visible:ring-primary/60 py-0.5 pl-[7px] pr-1 text-[10px] font-medium leading-tight text-foreground transition-[filter] hover:brightness-125 sm:text-[11px]"
       style={{ background: tint(color, 26) }}
     >
       <span className="absolute inset-y-[2px] left-[2px] w-[2.5px] rounded-full" style={{ background: color }} aria-hidden />

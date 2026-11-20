@@ -13,13 +13,13 @@ export default function IOSInstallBanner() {
     if (!isIos() || isStandalone()) return;
     try {
       if (localStorage.getItem(STORAGE_KEY) === "1") return;
-    } catch {}
+    } catch { /* storage unavailable: show the banner */ }
     const t = window.setTimeout(() => setVisible(true), 1500);
     return () => window.clearTimeout(t);
   }, []);
 
   const dismiss = () => {
-    try { localStorage.setItem(STORAGE_KEY, "1"); } catch {}
+    try { localStorage.setItem(STORAGE_KEY, "1"); } catch { /* storage unavailable: it may show again */ }
     setVisible(false);
   };
 
