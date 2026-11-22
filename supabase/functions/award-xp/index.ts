@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
     // Fetch the task and verify ownership + state server-side.
     const { data: task, error: tErr } = await admin
       .from("tasks")
-      .select("id, user_id, status, priority, is_daily, xp_awarded, created_at")
+      .select("id, user_id, status, priority, is_daily, xp_awarded, created_at, priority_raised_at, priority_before_raise")
       .eq("id", taskId)
       .maybeSingle();
     if (tErr || !task) return j({ error: "task_not_found" }, 404);
@@ -84,8 +84,12 @@ Deno.serve(async (req) => {
       if (ageMs < 60 * 60 * 1000) return j({ error: "task_too_new" }, 409);
     }
 
-    // Priority is taken from the task itself, never from client input.
-    const priority: Priority = (task.is_daily ? "urgent" : task.priority) as Priority;
+    // Priority is taken from the task itself, never from client input. A raise less than an hour
+    // old doesn't count yet (guard_task_priority records it): it pays the priority it had before.
+    const raisedRecently = !!task.priority_raised_at
+      && Date.now() - new Date(task.priority_raised_at).getTime() < 60 * 60 * 1000
+      && !!task.priority_before_raise && task.priority_before_raise in XP_REWARDS;
+    const priority: Priority = (task.is_daily ? "urgent" : raisedRecently ? task.priority_before_raise : task.priority) as Priority;
     if (!(priority in XP_REWARDS)) return j({ error: "invalid_priority" }, 400);
 
     // Server-side verification of party membership — never trust client flag
@@ -140,6 +144,17 @@ Deno.serve(async (req) => {
       : (await awardsSince(86_400_000)) >= MAX_AWARDS_PER_DAY ? "daily_cap"
       : null;
     if (flagged) reward = 0;
+
+    // A habit pays once per local day; also keep 4 h between its payouts in real time, so hopping
+    // time zones can't turn one real day into two.
+    if (task.is_daily) {
+      const { count: recent } = await admin
+        .from("xp_awards")
+        .select("id", { count: "exact", head: true })
+        .eq("task_id", taskId)
+        .gte("created_at", new Date(Date.now() - 4 * 3_600_000).toISOString());
+      if ((recent ?? 0) > 0) return j({ error: "already_awarded" }, 409);
+    }
 
     const { data: ledgerRow, error: ledgerErr } = await admin
       .from("xp_awards")
