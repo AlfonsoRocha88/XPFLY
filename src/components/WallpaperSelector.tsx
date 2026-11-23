@@ -8,9 +8,11 @@ import { DEFAULT_WALLPAPER, WALLPAPERS } from "@/lib/wallpapers";
 import { APP_THEMES } from "@/lib/themes";
 import { Switch } from "@/components/ui/switch";
 import NotificationSettings from "@/components/NotificationSettings";
+import CalendarFeedsSettings from "@/components/calendar/CalendarFeedsSettings";
 import FramePicker from "@/components/FramePicker";
 import { cn } from "@/lib/utils";
 import { InfoTip } from "@/components/ui/info-tip";
+import { LivingPreview } from "@/components/living/LivingPreview";
 
 /** Appearance and device settings: color mode, accent, background and notifications. */
 const WallpaperSelector = () => {
@@ -80,6 +82,8 @@ const WallpaperSelector = () => {
 
       <NotificationSettings />
 
+      <CalendarFeedsSettings />
+
       <section className="surface p-4">
         <h2 className="section-title mb-3 flex items-center gap-2">
           Color
@@ -112,8 +116,7 @@ const WallpaperSelector = () => {
       </section>
 
       <section className="surface p-4">
-        <h2 className="section-title">Fondo</h2>
-        <p className="mb-3 text-sm text-muted-foreground">Fondos suaves que combinan con tu color.</p>
+        <h2 className="section-title mb-3">Fondo</h2>
         <div className="grid grid-cols-3 gap-2">
           {WALLPAPERS.map((wp) => {
             const active = currentWallpaper === wp.id;
@@ -128,7 +131,9 @@ const WallpaperSelector = () => {
                   active ? "border-primary" : "border-border hover:border-primary/40",
                 )}
               >
-                <div className={cn("h-full w-full", locked && "opacity-60")} style={{ background: wp.preview || wp.background || "hsl(var(--background))" }} />
+                {wp.living
+                  ? <LivingPreview id={wp.id} className={cn("block h-full w-full", locked && "opacity-60")} />
+                  : <div className={cn("h-full w-full", locked && "opacity-60")} style={{ background: wp.preview || wp.background || "hsl(var(--background))" }} />}
                 {wp.living && (
                   <span className="absolute left-1.5 top-1.5 flex items-center gap-1 rounded-full bg-black/35 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
                     {locked ? <Lock className="h-2.5 w-2.5" /> : <Sparkles className="h-2.5 w-2.5" />} Vivo

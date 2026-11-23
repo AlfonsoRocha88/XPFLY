@@ -1,5 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { ORB_COSMETICS, shopItem } from "../_shared/shop.ts";
+import { ORB_COSMETICS, pickOrbCosmetic } from "../_shared/shop.ts";
 import { mutateProfile } from "../_shared/profileUpdate.ts";
 
 const corsHeaders = {
@@ -14,9 +14,11 @@ type Reward = { type: "destellos" | "cosmetic" | "freeze"; amount: number; label
 function rollReward(owned: string[], canFreeze: boolean): Reward {
   const r = Math.random();
   const missing = ORB_COSMETICS.filter((id) => !owned.includes(id));
-  if (r < 0.06 && missing.length) {
-    const id = missing[Math.floor(Math.random() * missing.length)];
-    return { type: "cosmetic", amount: 1, itemId: id, label: shopItem(id)!.name, icon: id.startsWith("frame") ? "frame" : "planet", rarity: "legendary" };
+  // Cosmetic: a rarity first (60/28/10/2 over what's still missing), then an item of it.
+  // The reveal shows the item's own rarity.
+  const item = r < 0.06 ? pickOrbCosmetic(missing, Math.random(), Math.random()) : undefined;
+  if (item) {
+    return { type: "cosmetic", amount: 1, itemId: item.id, label: item.name, icon: item.kind === "frame" ? "frame" : "planet", rarity: item.rarity ?? "rare" };
   }
   // Its own 5% band, so owning every cosmetic never makes protectors more common.
   if (r >= 0.06 && r < 0.11 && canFreeze) return { type: "freeze", amount: 1, label: "Protector de racha", icon: "frost", rarity: "epic" };

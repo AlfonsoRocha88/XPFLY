@@ -12,9 +12,14 @@ export interface WallpaperOption {
   living?: boolean;
   /** Living scene everyone has (the default): never locked. */
   free?: boolean;
-  /** Small static preview for the picker. */
+  /** Small static preview for the picker (CSS background). Living scenes also have a drawn
+   *  thumbnail: <LivingPreview id={…} /> from "@/components/living/LivingPreview". */
   preview?: string;
+  /** Shop rarity of a premium living scene. */
+  rarity?: WallpaperRarity;
 }
+
+export type WallpaperRarity = "common" | "rare" | "epic" | "legendary";
 
 const P = "var(--primary)";
 const A = "var(--accent)";
@@ -71,6 +76,7 @@ export const WALLPAPERS: WallpaperOption[] = [
     name: "Jardín",
     background: "transparent",
     living: true,
+    rarity: "epic",
     preview: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 90'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23f1fbef'/%3E%3Cstop offset='1' stop-color='%23d5efd1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='120' height='90' fill='url%28%23g%29'/%3E%3Cg fill='none' stroke='%235f9e62' stroke-width='1.6' stroke-linecap='round'%3E%3Cpath d='M14 0 C12 14 20 24 16 40'/%3E%3Cpath d='M48 0 C52 10 44 20 50 30'/%3E%3Cpath d='M92 0 C88 16 98 28 92 50'/%3E%3C/g%3E%3Cg fill='%237cbf73'%3E%3Cellipse cx='18' cy='12' rx='5' ry='2.4' transform='rotate%2830 18 12%29'/%3E%3Cellipse cx='12' cy='26' rx='5' ry='2.4' transform='rotate%28-30 12 26%29'/%3E%3Cellipse cx='48' cy='14' rx='4.5' ry='2.2' transform='rotate%28-25 48 14%29'/%3E%3Cellipse cx='96' cy='18' rx='5' ry='2.4' transform='rotate%2830 96 18%29'/%3E%3Cellipse cx='89' cy='34' rx='5' ry='2.4' transform='rotate%28-30 89 34%29'/%3E%3C/g%3E%3Cg fill='%23f48fb8'%3E%3Ccircle cx='16' cy='40' r='3.4'/%3E%3Ccircle cx='50' cy='30' r='2.8'/%3E%3Ccircle cx='92' cy='50' r='3.6'/%3E%3C/g%3E%3Cg fill='%23f9c6d8' opacity='.9'%3E%3Cellipse cx='34' cy='58' rx='2.6' ry='1.4' transform='rotate%2830 34 58%29'/%3E%3Cellipse cx='70' cy='70' rx='2.6' ry='1.4' transform='rotate%28-20 70 70%29'/%3E%3Cellipse cx='104' cy='76' rx='2.4' ry='1.3'/%3E%3Cellipse cx='24' cy='80' rx='2.2' ry='1.2' transform='rotate%2850 24 80%29'/%3E%3C/g%3E%3Crect x='18' y='62' width='84' height='18' rx='5' fill='%23fff' opacity='.7'/%3E%3C/svg%3E") center / cover no-repeat`,
   },
   {
@@ -86,9 +92,29 @@ export const WALLPAPERS: WallpaperOption[] = [
     name: "Océano",
     background: "transparent",
     living: true,
+    rarity: "epic",
     preview: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 90'%3E%3Cdefs%3E%3ClinearGradient id='w' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23cdeffd'/%3E%3Cstop offset='1' stop-color='%233e9fcb'/%3E%3C/linearGradient%3E%3ClinearGradient id='r' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23fff' stop-opacity='.55'/%3E%3Cstop offset='1' stop-color='%23fff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='120' height='90' fill='url%28%23w%29'/%3E%3Cg fill='url%28%23r%29'%3E%3Cpath d='M14 0 L24 0 L46 90 L32 90 Z'/%3E%3Cpath d='M54 0 L60 0 L78 90 L68 90 Z'/%3E%3Cpath d='M88 0 L98 0 L118 90 L104 90 Z'/%3E%3C/g%3E%3Cg fill='%23fff' fill-opacity='.2' stroke='%23fff' stroke-opacity='.85' stroke-width='.8'%3E%3Ccircle cx='30' cy='70' r='3.5'/%3E%3Ccircle cx='36' cy='56' r='2'/%3E%3Ccircle cx='33' cy='44' r='1.4'/%3E%3Ccircle cx='84' cy='76' r='4.5'/%3E%3Ccircle cx='80' cy='60' r='2.4'/%3E%3Ccircle cx='86' cy='48' r='1.6'/%3E%3Ccircle cx='60' cy='30' r='1.2'/%3E%3C/g%3E%3C/svg%3E") center / cover no-repeat`,
   },
+  ...living("living-lluvia", "Lluvia suave", "common", "linear-gradient(180deg, #3b3a66 0%, #8a6f9e 55%, #e3a98b 80%, #2a2b45 100%)"),
+  ...living("living-aurora", "Aurora", "common", "radial-gradient(120% 60% at 40% 30%, rgba(80,255,190,.55) 0%, transparent 55%), radial-gradient(90% 50% at 70% 25%, rgba(160,110,255,.45) 0%, transparent 60%), linear-gradient(180deg, #06142a 0%, #0c2740 62%, #0a1a2c 100%)"),
+  ...living("living-luciernagas", "Luciérnagas", "rare", "radial-gradient(circle at 30% 60%, rgba(255,230,120,.9) 0 2px, transparent 4px), radial-gradient(circle at 65% 45%, rgba(255,230,120,.9) 0 2px, transparent 4px), radial-gradient(circle at 80% 70%, rgba(255,230,120,.8) 0 1.5px, transparent 4px), linear-gradient(180deg, #1c2550 0%, #3f4f78 50%, #1a2a24 78%, #0f1a16 100%)"),
+  ...living("living-nieve", "Nieve", "rare", "linear-gradient(180deg, #c9d9ee 0%, #e9f0f8 55%, #7f9ab5 75%, #4d6782 100%)"),
+  ...living("living-sakura", "Sakura", "epic", "radial-gradient(70% 50% at 15% 20%, rgba(255,170,200,.9) 0%, transparent 60%), linear-gradient(180deg, #ffd9e4 0%, #fbe7e1 55%, #b6a6c9 78%, #7b6a93 100%)"),
+  ...living("living-gatitos", "Gatitos", "epic", "radial-gradient(circle at 70% 25%, #fff6d8 0 8%, rgba(255,240,200,.35) 14%, transparent 30%), linear-gradient(180deg, #1b2347 0%, #2c3766 70%, #6b4a3a 72%, #4a3328 100%)"),
+  ...living("living-retro", "Retro 8-bit", "epic", "linear-gradient(180deg, #2b1b54 0%, #7a2f7a 40%, #f07a5a 62%, #3a2350 64%, #1d1433 100%)"),
+  ...living("living-ciudad", "Ciudad flotante", "legendary", "radial-gradient(40% 18% at 25% 45%, #6fa86b 0 40%, transparent 42%), radial-gradient(30% 14% at 78% 30%, #6fa86b 0 40%, transparent 42%), linear-gradient(180deg, #8fc6f2 0%, #cfe6f7 60%, #f7efe2 100%)"),
+  ...living("living-bosque", "Bosque encantado", "legendary", "linear-gradient(115deg, transparent 40%, rgba(255,240,190,.35) 50%, transparent 60%), linear-gradient(180deg, #16352c 0%, #2c5a48 55%, #10241d 100%)"),
+  ...living("living-synthwave", "Synthwave", "legendary", "linear-gradient(180deg, #1a0b3d 0%, #5a1a78 38%, #ff5fa2 54%, #2a0f4a 56%, #12062a 100%)"),
 ];
+
+function living(id: string, name: string, rarity: WallpaperRarity, preview: string): WallpaperOption[] {
+  return [{ id, name, background: "transparent", living: true, rarity, preview: `${preview} center / cover no-repeat` }];
+}
+
+/** Rarity of every premium living wallpaper (the free default has none). */
+export const LIVING_RARITY: Record<string, WallpaperRarity> = Object.fromEntries(
+  WALLPAPERS.filter((w) => w.living && w.rarity).map((w) => [w.id, w.rarity as WallpaperRarity]),
+);
 
 /** What everyone starts with (and what signed-out screens show). */
 export const DEFAULT_WALLPAPER = "living-nebulosa";

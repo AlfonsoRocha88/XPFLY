@@ -616,6 +616,18 @@ export type Database = {
         }
         Relationships: []
       }
+      calendar_feeds: {
+        Row: { color: string; created_at: string; google_calendar_id: string | null; id: string; kind: string; last_error: string | null; last_synced_at: string | null; name: string; url: string | null; user_id: string }
+        Insert: { color?: string; created_at?: string; google_calendar_id?: string | null; id?: string; kind?: string; last_error?: string | null; last_synced_at?: string | null; name?: string; url?: string | null; user_id?: string }
+        Update: { color?: string; created_at?: string; google_calendar_id?: string | null; id?: string; kind?: string; last_error?: string | null; last_synced_at?: string | null; name?: string; url?: string | null; user_id?: string }
+        Relationships: []
+      }
+      calendar_events: {
+        Row: { all_day: boolean; end_time: string; feed_id: string; id: string; location: string | null; start_time: string; title: string; uid: string; user_id: string }
+        Insert: { all_day?: boolean; end_time: string; feed_id: string; id?: string; location?: string | null; start_time: string; title: string; uid: string; user_id: string }
+        Update: { all_day?: boolean; end_time?: string; feed_id?: string; id?: string; location?: string | null; start_time?: string; title?: string; uid?: string; user_id?: string }
+        Relationships: []
+      }
       friend_favorites: {
         Row: { created_at: string; friend_id: string; user_id: string }
         Insert: { created_at?: string; friend_id: string; user_id?: string }

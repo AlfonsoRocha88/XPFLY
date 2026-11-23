@@ -666,3 +666,15 @@ button:not(:disabled):active, [role="button"]:active {
 @keyframes friend-float { from { transform: translateY(-3px); } to { transform: translateY(3px); } }
 .friend-float { animation: friend-float 3.2s ease-in-out infinite alternate; }
 @media (prefers-reduced-motion: reduce) { .qr-sweep, .friend-float { animation: none; } }
+
+/* Shop rarity frames: epic = soft violet shimmer, legendary = gold light sweep. Transform/opacity only. */
+.rarity-epic, .rarity-legendary { position: relative; overflow: hidden; isolation: isolate; }
+.rarity-epic::after, .rarity-legendary::after {
+  content: ""; position: absolute; inset: -40% -60%; pointer-events: none; z-index: 1;
+  background: linear-gradient(105deg, transparent 40%, var(--rarity-shine) 50%, transparent 60%);
+  transform: translateX(-60%); animation: rarity-sweep var(--rarity-speed) ease-in-out infinite;
+}
+.rarity-epic { --rarity-shine: rgba(167, 139, 250, 0.18); --rarity-speed: 4.5s; }
+.rarity-legendary { --rarity-shine: rgba(251, 191, 36, 0.28); --rarity-speed: 3.2s; box-shadow: 0 0 24px -8px rgba(251, 191, 36, 0.45); }
+@keyframes rarity-sweep { 0%, 35% { transform: translateX(-60%); } 75%, 100% { transform: translateX(60%); } }
+@media (prefers-reduced-motion: reduce) { .rarity-epic::after, .rarity-legendary::after { animation: none; opacity: 0; } }

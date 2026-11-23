@@ -29,6 +29,7 @@ import type { Task } from "@/lib/types";
 import { playSfx } from "@/lib/sfx";
 import { cn } from "@/lib/utils";
 import { useAchievements } from "@/hooks/useAchievements";
+import { useCalendarReturn } from "@/hooks/useCalendarReturn";
 import { m } from "motion/react";
 import { PageTransition, TabTransition, useDirection } from "@/components/layout/Transitions";
 import type { LivingScene } from "@/components/living/LivingBackground";
@@ -88,6 +89,7 @@ const Index = () => {
   const { mutateAsync: addXpAsync } = addXp;
   const { mutateAsync: openChestAsync } = openChest;
   const queryClient = useQueryClient();
+  useCalendarReturn();
 
   const [section, setSection] = useState<SectionId>("tasks");
   const [composerTask, setComposerTask] = useState<{ id: string; title: string } | null>(null);

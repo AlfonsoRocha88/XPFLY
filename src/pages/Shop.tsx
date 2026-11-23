@@ -7,7 +7,8 @@ import { useProfile } from "@/hooks/useProfile";
 import { useChests, type ChestReward } from "@/hooks/useChests";
 import { useShop } from "@/hooks/useShop";
 import { SHOP_ITEMS, type ShopItem } from "@shared/shop";
-import { WALLPAPERS } from "@/lib/wallpapers";
+import { RARITY_META, RARITY_ORDER, RarityBadge, rarityCardClass, type Rarity } from "@/lib/rarity";
+import { LivingPreview } from "@/components/living/LivingPreview";
 import { Destello, DestellosAmount } from "@/components/currency/Destello";
 import { Orb } from "@/components/orb/Orb";
 import OrbOpenOverlay from "@/components/orb/OrbOpenOverlay";
@@ -27,6 +28,12 @@ const Shop = () => {
   const { coins, chests, openChest } = useChests();
   const { buy } = useShop();
   const [selected, setSelected] = useState<ShopItem | null>(null);
+  const [filter, setFilter] = useState<Rarity | "all">("all");
+  // Legendary first, then epic, rare, common; filtered by the chip row.
+  const listFor = (kind: ShopItem["kind"]) =>
+    SHOP_ITEMS
+      .filter((i) => i.kind === kind && (kind === "consumable" || filter === "all" || i.rarity === filter))
+      .sort((a, b) => RARITY_ORDER.indexOf(a.rarity ?? "common") - RARITY_ORDER.indexOf(b.rarity ?? "common"));
   const [orb, setOrb] = useState<{ open: boolean; reward: ChestReward | null }>({ open: false, reward: null });
 
   const owned = new Set(profile?.owned_items ?? []);
@@ -84,6 +91,25 @@ const Shop = () => {
         </button>
       </section>
 
+      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]" role="tablist" aria-label="Rareza">
+        {(["all", ...RARITY_ORDER] as const).map((r) => (
+          <button
+            key={r}
+            type="button"
+            role="tab"
+            aria-selected={filter === r}
+            onClick={() => setFilter(r)}
+            className={cn(
+              "shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors",
+              filter === r ? "border-transparent bg-foreground text-background" : "border-border bg-card/60",
+              filter !== r && r !== "all" && RARITY_META[r].text,
+            )}
+          >
+            {r === "all" ? "Todas" : RARITY_META[r].label}
+          </button>
+        ))}
+      </div>
+
       {SECTIONS.map((sec) => (
         <section key={sec.kind}>
           <div className="mb-3">
@@ -93,9 +119,8 @@ const Shop = () => {
             </h2>
           </div>
           <div className={cn("grid gap-3", sec.kind === "consumable" ? "grid-cols-1" : "grid-cols-2 sm:grid-cols-3")}>
-            {SHOP_ITEMS.filter((i) => i.kind === sec.kind).map((item, idx) => {
+            {listFor(sec.kind).map((item, idx) => {
               const have = isOwned(item);
-              const wp = WALLPAPERS.find((w) => w.id === item.id);
               return (
                 <m.button
                   key={item.id}
@@ -104,10 +129,10 @@ const Shop = () => {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1], delay: idx * 0.05 }}
-                  className={cn("surface flex text-left", sec.kind === "consumable" ? "items-center gap-3 p-3" : "flex-col")}
+                  className={cn("surface flex text-left", sec.kind === "consumable" ? "items-center gap-3 p-3" : "flex-col", rarityCardClass(item.rarity))}
                 >
                   {item.kind === "background" && (
-                    <span className="block aspect-[4/3] w-full rounded-t-2xl" style={{ background: wp?.preview }} aria-hidden />
+                    <LivingPreview id={item.id} className="block aspect-[4/3] w-full overflow-hidden rounded-t-2xl" />
                   )}
                   {item.kind === "frame" && (
                     <span className="flex aspect-[4/3] w-full items-center justify-center rounded-t-2xl bg-foreground/[0.03]">
@@ -120,6 +145,7 @@ const Shop = () => {
                   <span className={cn("flex min-w-0 flex-1 items-center justify-between gap-2", sec.kind === "consumable" ? "" : "p-3")}>
                     <span className="min-w-0">
                       <span className="block truncate text-sm font-semibold">{item.name}</span>
+                      {item.rarity && <RarityBadge rarity={item.rarity} className="mt-1" />}
                       {item.kind === "consumable" && <span className="block text-xs text-muted-foreground">{freezes} de {freezeMax}</span>}
                     </span>
                     {have && item.kind !== "consumable" ? (
@@ -141,16 +167,15 @@ const Shop = () => {
           {selected && (() => {
             const have = isOwned(selected);
             const missing = selected.price - coins;
-            const wp = WALLPAPERS.find((w) => w.id === selected.id);
             return (
               <>
                 <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-muted" aria-hidden />
-                {selected.kind === "background" && <div className="mb-4 aspect-[16/9] w-full rounded-2xl" style={{ background: wp?.preview }} />}
+                {selected.kind === "background" && <LivingPreview id={selected.id} live className="mb-4 block aspect-[16/9] w-full overflow-hidden rounded-2xl" />}
                 {selected.kind === "frame" && (
-                  <div className="mb-4 flex justify-center"><CharacterPortrait url={profile?.avatar_url} seed={profile?.user_id} size={96} frame={selected.id} /></div>
+                  <div className="mb-4 flex justify-center"><CharacterPortrait url={profile?.avatar_url} seed={profile?.user_id} size={128} frame={selected.id} /></div>
                 )}
                 <SheetHeader className="text-left">
-                  <SheetTitle className="font-serif text-2xl font-medium">{selected.name}</SheetTitle>
+                  <SheetTitle className="flex items-center gap-2 font-serif text-2xl font-medium">{selected.name}{selected.rarity && <RarityBadge rarity={selected.rarity} />}</SheetTitle>
                   <SheetDescription>{selected.description}</SheetDescription>
                 </SheetHeader>
                 <div className="mt-6">

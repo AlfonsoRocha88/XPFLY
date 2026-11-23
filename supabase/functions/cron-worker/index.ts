@@ -7,6 +7,7 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { DECAY_FROM_FAMILY, currentLeague, leagueFamilyIndex } from "../_shared/leagues.ts";
 import { mutateProfile } from "../_shared/profileUpdate.ts";
 import { isServiceCaller } from "../_shared/serviceAuth.ts";
+import { type Feed, syncFeed } from "../_shared/calendarSync.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -162,6 +163,23 @@ async function trophyDecay() {
   return { processed };
 }
 
+/** Re-sync external calendars not refreshed in the last 15 minutes (oldest first, 50 per run). */
+async function calendarSync() {
+  const cutoff = new Date(Date.now() - 14 * 60 * 1000).toISOString();
+  const { data: feeds, error } = await supabase
+    .from("calendar_feeds")
+    .select("*")
+    .or(`last_synced_at.is.null,last_synced_at.lt.${cutoff}`)
+    .order("last_synced_at", { ascending: true, nullsFirst: true })
+    .limit(50);
+  if (error) { console.error("calendarSync", error); return { synced: 0 }; }
+  let synced = 0, failed = 0;
+  for (const f of feeds ?? []) {
+    try { await syncFeed(supabase, f as Feed); synced++; } catch { failed++; }
+  }
+  return { synced, failed };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   const url = new URL(req.url);
@@ -174,6 +192,7 @@ Deno.serve(async (req) => {
   try {
     let result: any;
     if (mode === "trophy-decay") result = await trophyDecay();
+    else if (mode === "calendar-sync") result = await calendarSync();
     else result = await missionReminders();
     return new Response(JSON.stringify({ mode, ...result }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e: any) {
